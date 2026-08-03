@@ -6,7 +6,7 @@
 
 ### Information Systems Student | Backend Enthusiast
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=24&duration=3000&pause=1000&color=58A6FF&center=true&vCenter=true&width=600&lines=Welcome+to+my+GitHub+Profile;Backend+Developer;Information+Systems+Student;Always+Learning+New+Things" />
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=24&duration=3000&pause=1000&color=58A6FF&center=true&vCenter=true&width=600&lines=Welcome+to+my+GitHub+Profile;Backend+Developer;Information+Systems+Student;Always+Learning+New+Things;BACOT+BERISIK;" />
 
 </div>
 
