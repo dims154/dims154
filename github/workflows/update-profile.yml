@@ -1,0 +1,306 @@
+name: Update GitHub Profile Stats
+
+on:
+  schedule:
+    # 08:00 WIB = 01:00 UTC
+    - cron: "0 1 * * *"
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-profile:
+    name: Update Profile Statistics
+    runs-on: ubuntu-latest
+
+    steps:
+      # ==========================================
+      # 1. Checkout repository
+      # ==========================================
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ==========================================
+      # 2. Get GitHub statistics
+      # ==========================================
+      - name: Fetch GitHub statistics
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api graphql \
+            -f query='
+            query($login: String!) {
+              user(login: $login) {
+
+                name
+                login
+
+                repositories(
+                  ownerAffiliations: OWNER
+                  first: 100
+                ) {
+                  totalCount
+                }
+
+                followers {
+                  totalCount
+                }
+
+                contributionsCollection {
+
+                  totalCommitContributions
+
+                  restrictedContributionsCount
+
+                  contributionCalendar {
+
+                    totalContributions
+
+                    weeks {
+                      contributionDays {
+                        date
+                        contributionCount
+                      }
+                    }
+
+                  }
+                }
+
+              }
+            }' \
+            -f login="dims154" \
+            > github-stats.json
+
+      # ==========================================
+      # 3. Calculate statistics
+      # ==========================================
+      - name: Calculate statistics
+        run: |
+          python3 <<'PY'
+          import json
+          from pathlib import Path
+
+          with open("github-stats.json", "r") as file:
+              data = json.load(file)
+
+          user = data["data"]["user"]
+
+          calendar = (
+              user["contributionsCollection"]
+              ["contributionCalendar"]
+          )
+
+          total_contributions = calendar["totalContributions"]
+
+          total_repositories = (
+              user["repositories"]["totalCount"]
+          )
+
+          total_followers = (
+              user["followers"]["totalCount"]
+          )
+
+          days = []
+
+          for week in calendar["weeks"]:
+              for day in week["contributionDays"]:
+                  days.append({
+                      "date": day["date"],
+                      "count": day["contributionCount"]
+                  })
+
+          days.sort(key=lambda x: x["date"])
+
+          # ======================================
+          # Current streak
+          # ======================================
+
+          current_streak = 0
+
+          for day in reversed(days):
+
+              if day["count"] > 0:
+                  current_streak += 1
+
+              else:
+                  break
+
+          # ======================================
+          # Longest streak
+          # ======================================
+
+          longest_streak = 0
+          streak = 0
+
+          for day in days:
+
+              if day["count"] > 0:
+
+                  streak += 1
+
+                  if streak > longest_streak:
+                      longest_streak = streak
+
+              else:
+
+                  streak = 0
+
+          # ======================================
+          # Save statistics
+          # ======================================
+
+          stats = {
+              "contributions": total_contributions,
+              "repositories": total_repositories,
+              "followers": total_followers,
+              "current_streak": current_streak,
+              "longest_streak": longest_streak
+          }
+
+          with open("profile-stats.json", "w") as file:
+              json.dump(
+                  stats,
+                  file,
+                  indent=2
+              )
+
+          print("================================")
+          print("GitHub Profile Statistics")
+          print("================================")
+          print(f"Contributions : {total_contributions}")
+          print(f"Repositories  : {total_repositories}")
+          print(f"Followers     : {total_followers}")
+          print(f"Current Streak: {current_streak}")
+          print(f"Longest Streak: {longest_streak}")
+          print("================================")
+          PY
+
+      # ==========================================
+      # 4. Update README
+      # ==========================================
+      - name: Update README statistics
+        run: |
+          python3 <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          readme_path = Path("README.md")
+
+          content = readme_path.read_text(
+              encoding="utf-8"
+          )
+
+          with open("profile-stats.json", "r") as file:
+              stats = json.load(file)
+
+          contributions = stats["contributions"]
+          repositories = stats["repositories"]
+          followers = stats["followers"]
+          current_streak = stats["current_streak"]
+          longest_streak = stats["longest_streak"]
+
+          start_marker = "<!-- GITHUB_STATS_START -->"
+          end_marker = "<!-- GITHUB_STATS_END -->"
+
+          stats_section = f"""
+          {start_marker}
+
+          <div align="center">
+
+          ## 📊 GitHub Statistics
+
+          <table>
+          <tr>
+          <td align="center">
+          <strong>📈</strong><br>
+          <strong>{contributions}</strong><br>
+          Contributions
+          </td>
+
+          <td align="center">
+          <strong>📦</strong><br>
+          <strong>{repositories}</strong><br>
+          Repositories
+          </td>
+
+          <td align="center">
+          <strong>👥</strong><br>
+          <strong>{followers}</strong><br>
+          Followers
+          </td>
+
+          <td align="center">
+          <strong>🔥</strong><br>
+          <strong>{current_streak}</strong><br>
+          Current Streak
+          </td>
+
+          <td align="center">
+          <strong>🏆</strong><br>
+          <strong>{longest_streak}</strong><br>
+          Longest Streak
+          </td>
+          </tr>
+          </table>
+
+          </div>
+
+          {end_marker}
+          """
+
+          pattern = (
+              re.escape(start_marker)
+              + r".*?"
+              + re.escape(end_marker)
+          )
+
+          if not re.search(
+              pattern,
+              content,
+              flags=re.DOTALL
+          ):
+              raise SystemExit(
+                  "ERROR: GitHub statistics markers "
+                  "were not found in README.md"
+              )
+
+          content = re.sub(
+              pattern,
+              stats_section.strip(),
+              content,
+              flags=re.DOTALL
+          )
+
+          readme_path.write_text(
+              content,
+              encoding="utf-8"
+          )
+
+          print(
+              "README statistics updated successfully."
+          )
+          PY
+
+      # ==========================================
+      # 5. Commit changes
+      # ==========================================
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add README.md profile-stats.json
+
+          if git diff --cached --quiet; then
+            echo "No changes detected."
+          else
+            git commit \
+              -m "chore: update GitHub profile stats"
+
+            git push
+          fi
