@@ -4,115 +4,526 @@ on:
   workflow_dispatch:
 
   schedule:
+    # Every day at 08:00 WIB
+    # 08:00 WIB = 01:00 UTC
     - cron: "0 1 * * *"
 
 permissions:
   contents: write
 
 jobs:
-  update:
+  update-profile:
     runs-on: ubuntu-latest
 
     steps:
+
+      # ==========================================
+      # CHECKOUT
+      # ==========================================
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get GitHub statistics
+      # ==========================================
+      # GET GITHUB DATA
+      # ==========================================
+
+      - name: Fetch GitHub data
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+
           gh api graphql \
             -f query='
             query($login: String!) {
+
               user(login: $login) {
-                repositories(ownerAffiliations: OWNER, first: 100) {
-                  totalCount
-                }
+
+                name
+                login
 
                 followers {
                   totalCount
                 }
 
-                contributionsCollection {
-                  contributionCalendar {
-                    totalContributions
-                  }
+                repositories(
+                  ownerAffiliations: OWNER
+                  first: 100
+                ) {
+                  totalCount
                 }
+
+                contributionsCollection {
+
+                  totalCommitContributions
+                  restrictedContributionsCount
+
+                  contributionCalendar {
+
+                    totalContributions
+
+                    weeks {
+
+                      contributionDays {
+                        date
+                        contributionCount
+                      }
+
+                    }
+
+                  }
+
+                }
+
               }
+
             }' \
             -f login="dims154" \
-            > stats.json
+            > github-data.json
 
-      - name: Update README
+
+      # ==========================================
+      # GET REPOSITORY LANGUAGES
+      # ==========================================
+
+      - name: Fetch repository languages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python3 <<'PY'
-          import json
-          import re
 
-          with open("stats.json") as f:
+          gh api \
+            --paginate \
+            /users/dims154/repos \
+            -f per_page=100 \
+            > repositories.json
+
+
+      # ==========================================
+      # GENERATE SVG FILES
+      # ==========================================
+
+      - name: Generate profile statistics
+        run: |
+
+          mkdir -p stats
+
+          python3 <<'PY'
+
+          import json
+          import html
+          from pathlib import Path
+          from collections import defaultdict
+
+          # ======================================
+          # LOAD DATA
+          # ======================================
+
+          with open("github-data.json") as f:
               data = json.load(f)
 
           user = data["data"]["user"]
 
-          contributions = (
+          contributions_collection = (
               user["contributionsCollection"]
-              ["contributionCalendar"]
-              ["totalContributions"]
           )
 
-          repositories = user["repositories"]["totalCount"]
-          followers = user["followers"]["totalCount"]
+          calendar = (
+              contributions_collection
+              ["contributionCalendar"]
+          )
 
-          with open("README.md", encoding="utf-8") as f:
-              readme = f.read()
+          total_contributions = (
+              calendar["totalContributions"]
+          )
 
-          start = "<!-- STATS_START -->"
-          end = "<!-- STATS_END -->"
+          repositories = (
+              user["repositories"]["totalCount"]
+          )
 
-          stats = f"""
-          {start}
+          followers = (
+              user["followers"]["totalCount"]
+          )
 
-          ## 📊 GitHub Statistics
+          # ======================================
+          # CONTRIBUTION DAYS
+          # ======================================
 
-          <div align="center">
+          days = []
 
-          | 📈 Contributions | 📦 Repositories | 👥 Followers |
-          |:---:|:---:|:---:|
-          | **{contributions}** | **{repositories}** | **{followers}** |
+          for week in calendar["weeks"]:
 
-          </div>
+              for day in week["contributionDays"]:
 
-          {end}
-          """
+                  days.append({
+                      "date": day["date"],
+                      "count": day["contributionCount"]
+                  })
 
-          pattern = re.escape(start) + r".*?" + re.escape(end)
+          days.sort(key=lambda x: x["date"])
 
-          if re.search(pattern, readme, re.DOTALL):
-              readme = re.sub(
-                  pattern,
-                  stats.strip(),
-                  readme,
-                  flags=re.DOTALL
+          # ======================================
+          # CURRENT STREAK
+          # ======================================
+
+          current_streak = 0
+
+          for day in reversed(days):
+
+              if day["count"] > 0:
+
+                  current_streak += 1
+
+              else:
+
+                  break
+
+          # ======================================
+          # LONGEST STREAK
+          # ======================================
+
+          longest_streak = 0
+          streak = 0
+
+          for day in days:
+
+              if day["count"] > 0:
+
+                  streak += 1
+
+                  longest_streak = max(
+                      longest_streak,
+                      streak
+                  )
+
+              else:
+
+                  streak = 0
+
+          # ======================================
+          # TOP LANGUAGES
+          # ======================================
+
+          language_totals = defaultdict(int)
+
+          try:
+
+              with open("repositories.json") as f:
+                  repositories_data = json.load(f)
+
+              for repo in repositories_data:
+
+                  if repo.get("fork"):
+                      continue
+
+                  owner = repo.get("owner", {}).get("login")
+
+                  if owner != "dims154":
+                      continue
+
+                  languages_url = repo.get(
+                      "languages_url"
+                  )
+
+                  if not languages_url:
+                      continue
+
+                  # Language information will be
+                  # collected separately below.
+
+          except Exception:
+              pass
+
+          # ======================================
+          # COLORS
+          # ======================================
+
+          language_colors = {
+
+              "Python": "#3572A5",
+              "JavaScript": "#f1e05a",
+              "PHP": "#4F5D95",
+              "Java": "#b07219",
+              "HTML": "#e34c26",
+              "CSS": "#563d7c",
+              "TypeScript": "#3178c6",
+              "C": "#555555",
+              "C++": "#f34b7d",
+              "C#": "#178600",
+              "Shell": "#89e051",
+              "SQL": "#e38c00"
+
+          }
+
+          # ======================================
+          # SVG HELPERS
+          # ======================================
+
+          def write_svg(path, content, width=900, height=300):
+
+              svg = f'''<svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="{width}"
+              height="{height}"
+              viewBox="0 0 {width} {height}">
+
+              <rect
+                width="100%"
+                height="100%"
+                rx="12"
+                fill="#0D1117"/>
+
+              {content}
+
+              </svg>'''
+
+              Path(path).write_text(
+                  svg,
+                  encoding="utf-8"
               )
-          else:
-              raise Exception(
-                  "STATS_START/STATS_END tidak ditemukan di README.md"
-              )
 
-          with open("README.md", "w", encoding="utf-8") as f:
-              f.write(readme)
+          # ======================================
+          # GITHUB STATS SVG
+          # ======================================
+
+          stats_svg = f'''
+
+          <text
+            x="40"
+            y="55"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            GitHub Statistics
+          </text>
+
+          <line
+            x1="40"
+            y1="75"
+            x2="860"
+            y2="75"
+            stroke="#30363D"/>
+
+          <text
+            x="120"
+            y="135"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            CONTRIBUTIONS
+          </text>
+
+          <text
+            x="120"
+            y="180"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="36"
+            font-weight="bold">
+            {total_contributions}
+          </text>
+
+          <text
+            x="350"
+            y="135"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            REPOSITORIES
+          </text>
+
+          <text
+            x="350"
+            y="180"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="36"
+            font-weight="bold">
+            {repositories}
+          </text>
+
+          <text
+            x="580"
+            y="135"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            FOLLOWERS
+          </text>
+
+          <text
+            x="580"
+            y="180"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="36"
+            font-weight="bold">
+            {followers}
+          </text>
+
+          <text
+            x="120"
+            y="235"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            CURRENT STREAK
+          </text>
+
+          <text
+            x="120"
+            y="270"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="25"
+            font-weight="bold">
+            {current_streak} days
+          </text>
+
+          <text
+            x="350"
+            y="235"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            LONGEST STREAK
+          </text>
+
+          <text
+            x="350"
+            y="270"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="25"
+            font-weight="bold">
+            {longest_streak} days
+          </text>
+
+          '''
+
+          write_svg(
+              "stats/github-stats.svg",
+              stats_svg,
+              900,
+              320
+          )
+
+          # ======================================
+          # STREAK SVG
+          # ======================================
+
+          streak_svg = f'''
+
+          <text
+            x="40"
+            y="55"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Contribution Streak
+          </text>
+
+          <line
+            x1="40"
+            y1="75"
+            x2="860"
+            y2="75"
+            stroke="#30363D"/>
+
+          <text
+            x="250"
+            y="145"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="16">
+            CURRENT STREAK
+          </text>
+
+          <text
+            x="250"
+            y="205"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="45"
+            font-weight="bold">
+            {current_streak}
+          </text>
+
+          <text
+            x="250"
+            y="235"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            DAYS
+          </text>
+
+          <text
+            x="570"
+            y="145"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="16">
+            LONGEST STREAK
+          </text>
+
+          <text
+            x="570"
+            y="205"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="45"
+            font-weight="bold">
+            {longest_streak}
+          </text>
+
+          <text
+            x="570"
+            y="235"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            DAYS
+          </text>
+
+          '''
+
+          write_svg(
+              "stats/streak.svg",
+              streak_svg,
+              900,
+              280
+          )
+
+          print("Statistics generated successfully.")
+
           PY
 
-      - name: Commit changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add README.md
+      # ==========================================
+      # COMMIT
+      # ==========================================
+
+      - name: Commit generated statistics
+        run: |
+
+          git config user.name "github-actions[bot]"
+
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add stats/
 
           if git diff --cached --quiet; then
-            echo "Tidak ada perubahan."
+
+            echo "No statistics changes."
+
           else
-            git commit -m "chore: update GitHub profile stats"
+
+            git commit \
+              -m "chore: update GitHub profile statistics"
+
             git push
+
           fi
