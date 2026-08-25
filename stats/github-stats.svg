@@ -1,0 +1,134 @@
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="900"
+    height="300"
+    viewBox="0 0 900 300">
+
+    <rect
+      width="100%"
+      height="100%"
+      rx="12"
+      fill="#0D1117"/>
+
+    
+
+<text
+  x="40"
+  y="50"
+  fill="#58A6FF"
+  font-family="Arial"
+  font-size="28"
+  font-weight="bold">
+  GitHub Statistics
+</text>
+
+<line
+  x1="40"
+  y1="70"
+  x2="860"
+  y2="70"
+  stroke="#30363D"/>
+
+
+<text
+  x="80"
+  y="120"
+  fill="#8B949E"
+  font-family="Arial"
+  font-size="14">
+  CONTRIBUTIONS
+</text>
+
+<text
+  x="80"
+  y="160"
+  fill="#58A6FF"
+  font-family="Arial"
+  font-size="32"
+  font-weight="bold">
+  73
+</text>
+
+
+<text
+  x="300"
+  y="120"
+  fill="#8B949E"
+  font-family="Arial"
+  font-size="14">
+  REPOSITORIES
+</text>
+
+<text
+  x="300"
+  y="160"
+  fill="#58A6FF"
+  font-family="Arial"
+  font-size="32"
+  font-weight="bold">
+  8
+</text>
+
+
+<text
+  x="500"
+  y="120"
+  fill="#8B949E"
+  font-family="Arial"
+  font-size="14">
+  FOLLOWERS
+</text>
+
+<text
+  x="500"
+  y="160"
+  fill="#58A6FF"
+  font-family="Arial"
+  font-size="32"
+  font-weight="bold">
+  2
+</text>
+
+
+<text
+  x="700"
+  y="120"
+  fill="#8B949E"
+  font-family="Arial"
+  font-size="14">
+  CURRENT STREAK
+</text>
+
+<text
+  x="700"
+  y="160"
+  fill="#58A6FF"
+  font-family="Arial"
+  font-size="32"
+  font-weight="bold">
+  2
+</text>
+
+
+<text
+  x="80"
+  y="225"
+  fill="#8B949E"
+  font-family="Arial"
+  font-size="14">
+  LONGEST STREAK
+</text>
+
+<text
+  x="80"
+  y="265"
+  fill="#58A6FF"
+  font-family="Arial"
+  font-size="30"
+  font-weight="bold">
+  4 days
+</text>
+
+
+
+    </svg>

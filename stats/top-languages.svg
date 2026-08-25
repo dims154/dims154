@@ -1,0 +1,286 @@
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="900"
+    height="405"
+    viewBox="0 0 900 405">
+
+    <rect
+      width="100%"
+      height="100%"
+      rx="12"
+      fill="#0D1117"/>
+
+    
+
+<text
+  x="40"
+  y="50"
+  fill="#58A6FF"
+  font-family="Arial"
+  font-size="28"
+  font-weight="bold">
+  Top Languages
+</text>
+
+<line
+  x1="40"
+  y1="70"
+  x2="860"
+  y2="70"
+  stroke="#30363D"/>
+
+
+
+    <circle
+      cx="60"
+      cy="110"
+      r="7"
+      fill="#3178c6"/>
+
+    <text
+      x="80"
+      y="115"
+      fill="#F0F6FC"
+      font-family="Arial"
+      font-size="16">
+      TypeScript
+    </text>
+
+    <rect
+      x="250"
+      y="101"
+      width="420"
+      height="12"
+      rx="6"
+      fill="#21262D"/>
+
+    <rect
+      x="250"
+      y="101"
+      width="94.17638303995923"
+      height="12"
+      rx="6"
+      fill="#3178c6"/>
+
+    <text
+      x="700"
+      y="115"
+      fill="#8B949E"
+      font-family="Arial"
+      font-size="14">
+      22.4%
+    </text>
+
+    
+
+    <circle
+      cx="60"
+      cy="155"
+      r="7"
+      fill="#f7523f"/>
+
+    <text
+      x="80"
+      y="160"
+      fill="#F0F6FC"
+      font-family="Arial"
+      font-size="16">
+      Blade
+    </text>
+
+    <rect
+      x="250"
+      y="146"
+      width="420"
+      height="12"
+      rx="6"
+      fill="#21262D"/>
+
+    <rect
+      x="250"
+      y="146"
+      width="85.36759004759585"
+      height="12"
+      rx="6"
+      fill="#f7523f"/>
+
+    <text
+      x="700"
+      y="160"
+      fill="#8B949E"
+      font-family="Arial"
+      font-size="14">
+      20.3%
+    </text>
+
+    
+
+    <circle
+      cx="60"
+      cy="200"
+      r="7"
+      fill="#e34c26"/>
+
+    <text
+      x="80"
+      y="205"
+      fill="#F0F6FC"
+      font-family="Arial"
+      font-size="16">
+      HTML
+    </text>
+
+    <rect
+      x="250"
+      y="191"
+      width="420"
+      height="12"
+      rx="6"
+      fill="#21262D"/>
+
+    <rect
+      x="250"
+      y="191"
+      width="80.89812997930821"
+      height="12"
+      rx="6"
+      fill="#e34c26"/>
+
+    <text
+      x="700"
+      y="205"
+      fill="#8B949E"
+      font-family="Arial"
+      font-size="14">
+      19.3%
+    </text>
+
+    
+
+    <circle
+      cx="60"
+      cy="245"
+      r="7"
+      fill="#4F5D95"/>
+
+    <text
+      x="80"
+      y="250"
+      fill="#F0F6FC"
+      font-family="Arial"
+      font-size="16">
+      PHP
+    </text>
+
+    <rect
+      x="250"
+      y="236"
+      width="420"
+      height="12"
+      rx="6"
+      fill="#21262D"/>
+
+    <rect
+      x="250"
+      y="236"
+      width="73.23626134261309"
+      height="12"
+      rx="6"
+      fill="#4F5D95"/>
+
+    <text
+      x="700"
+      y="250"
+      fill="#8B949E"
+      font-family="Arial"
+      font-size="14">
+      17.4%
+    </text>
+
+    
+
+    <circle
+      cx="60"
+      cy="290"
+      r="7"
+      fill="#663399"/>
+
+    <text
+      x="80"
+      y="295"
+      fill="#F0F6FC"
+      font-family="Arial"
+      font-size="16">
+      CSS
+    </text>
+
+    <rect
+      x="250"
+      y="281"
+      width="420"
+      height="12"
+      rx="6"
+      fill="#21262D"/>
+
+    <rect
+      x="250"
+      y="281"
+      width="52.90934454650255"
+      height="12"
+      rx="6"
+      fill="#663399"/>
+
+    <text
+      x="700"
+      y="295"
+      fill="#8B949E"
+      font-family="Arial"
+      font-size="14">
+      12.6%
+    </text>
+
+    
+
+    <circle
+      cx="60"
+      cy="335"
+      r="7"
+      fill="#f1e05a"/>
+
+    <text
+      x="80"
+      y="340"
+      fill="#F0F6FC"
+      font-family="Arial"
+      font-size="16">
+      JavaScript
+    </text>
+
+    <rect
+      x="250"
+      y="326"
+      width="420"
+      height="12"
+      rx="6"
+      fill="#21262D"/>
+
+    <rect
+      x="250"
+      y="326"
+      width="18.52539345610712"
+      height="12"
+      rx="6"
+      fill="#f1e05a"/>
+
+    <text
+      x="700"
+      y="340"
+      fill="#8B949E"
+      font-family="Arial"
+      font-size="14">
+      4.4%
+    </text>
+
+    
+
+    </svg>

@@ -1,0 +1,92 @@
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="900"
+    height="260"
+    viewBox="0 0 900 260">
+
+    <rect
+      width="100%"
+      height="100%"
+      rx="12"
+      fill="#0D1117"/>
+
+    
+
+<text
+  x="40"
+  y="50"
+  fill="#58A6FF"
+  font-family="Arial"
+  font-size="28"
+  font-weight="bold">
+  Contribution Streak
+</text>
+
+<line
+  x1="40"
+  y1="70"
+  x2="860"
+  y2="70"
+  stroke="#30363D"/>
+
+
+<text
+  x="220"
+  y="125"
+  fill="#8B949E"
+  font-family="Arial"
+  font-size="15">
+  🔥 CURRENT STREAK
+</text>
+
+<text
+  x="220"
+  y="185"
+  fill="#58A6FF"
+  font-family="Arial"
+  font-size="45"
+  font-weight="bold">
+  2
+</text>
+
+<text
+  x="220"
+  y="215"
+  fill="#8B949E"
+  font-family="Arial"
+  font-size="14">
+  DAYS
+</text>
+
+
+<text
+  x="570"
+  y="125"
+  fill="#8B949E"
+  font-family="Arial"
+  font-size="15">
+  🏆 LONGEST STREAK
+</text>
+
+<text
+  x="570"
+  y="185"
+  fill="#58A6FF"
+  font-family="Arial"
+  font-size="45"
+  font-weight="bold">
+  4
+</text>
+
+<text
+  x="570"
+  y="215"
+  fill="#8B949E"
+  font-family="Arial"
+  font-size="14">
+  DAYS
+</text>
+
+
+
+    </svg>
