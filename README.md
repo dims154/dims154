@@ -1,22 +1,17 @@
 <div align="center">
 
-<img src="./assets/cyberpunk.png" width="100%" alt="Cyberpunk Banner">
+![Cyberpunk Banner](./assets/cyberpunk.png)
 
 # 👨‍💻 Muhammad Ilham
 
 ### Information Systems Student · Backend Developer · System Enthusiast
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=22&duration=3000&pause=1000&color=58A6FF&center=true&vCenter=true&width=720&lines=Welcome+to+my+GitHub+Profile;Backend+Developer;Information+Systems+Student;Building+Real+World+Systems;Learning+System+Design;Turning+Ideas+Into+Code;Code+%E2%80%A2+Build+%E2%80%A2+Improve" alt="Typing SVG">
+![Typing SVG](https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=22&duration=3000&pause=1000&color=58A6FF&center=true&vCenter=true&width=720&lines=Welcome+to+my+GitHub+Profile;Backend+Developer;Information+Systems+Student;Building+Real+World+Systems;Learning+System+Design;Turning+Ideas+Into+Code;Code+%E2%80%A2+Build+%E2%80%A2+Improve)
 
-<br><br>
+<br>
 
-<a href="https://github.com/dims154">
-<img src="https://img.shields.io/badge/GitHub-dims154-0D1117?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
-</a>
-
-<a href="https://wa.me/6287785567289">
-<img src="https://img.shields.io/badge/WhatsApp-Contact-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp">
-</a>
+[![GitHub](https://img.shields.io/badge/GitHub-dims154-0D1117?style=for-the-badge&logo=github&logoColor=white)](https://github.com/dims154)
+[![WhatsApp](https://img.shields.io/badge/WhatsApp-Contact-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/6287785567289)
 
 </div>
 
@@ -62,23 +57,23 @@ interests:
 
 ### 💻 Programming Languages
 
-<img src="https://skillicons.dev/icons?i=python,java,php,javascript" alt="Programming Languages">
+![Programming Languages](https://skillicons.dev/icons?i=python,java,php,javascript)
 
 ### ⚙️ Backend & Framework
 
-<img src="https://skillicons.dev/icons?i=laravel,nodejs" alt="Backend Technologies">
+![Backend Technologies](https://skillicons.dev/icons?i=laravel,nodejs)
 
 ### 🗄️ Database
 
-<img src="https://skillicons.dev/icons?i=mysql,sqlite" alt="Database Technologies">
+![Database Technologies](https://skillicons.dev/icons?i=mysql,sqlite)
 
 ### 🛠️ Development Tools
 
-<img src="https://skillicons.dev/icons?i=git,github,vscode,postman" alt="Development Tools">
+![Development Tools](https://skillicons.dev/icons?i=git,github,vscode,postman)
 
 ### 🌐 Web Technologies
 
-<img src="https://skillicons.dev/icons?i=html,css" alt="Web Technologies">
+![Web Technologies](https://skillicons.dev/icons?i=html,css)
 
 </div>
 
@@ -86,31 +81,11 @@ interests:
 
 ## 📊 GitHub Statistics
 
-<div align="center">
+![GitHub Statistics](https://raw.githubusercontent.com/dims154/dims154/main/stats/github-stats.svg)
 
-<img
-src="https://raw.githubusercontent.com/dims154/dims154/main/stats/github-stats.svg"
-width="100%"
-alt="GitHub Statistics"
->
+![Top Languages](https://raw.githubusercontent.com/dims154/dims154/main/stats/top-languages.svg)
 
-<br>
-
-<img
-src="https://raw.githubusercontent.com/dims154/dims154/main/stats/top-languages.svg"
-width="100%"
-alt="Top Languages"
->
-
-<br>
-
-<img
-src="https://raw.githubusercontent.com/dims154/dims154/main/stats/streak.svg"
-width="100%"
-alt="GitHub Contribution Streak"
->
-
-</div>
+![GitHub Contribution Streak](https://raw.githubusercontent.com/dims154/dims154/main/stats/streak.svg)
 
 <p align="center">
 <sub>🔄 Automatically generated and updated with GitHub Actions</sub>
@@ -120,15 +95,7 @@ alt="GitHub Contribution Streak"
 
 ## 📈 Contribution Activity
 
-<div align="center">
-
-<img
-src="https://raw.githubusercontent.com/dims154/dims154/main/stats/contribution-activity.svg"
-width="100%"
-alt="Contribution Activity"
->
-
-</div>
+![Contribution Activity](https://raw.githubusercontent.com/dims154/dims154/main/stats/contribution-activity.svg)
 
 <p align="center">
 <sub>Last 31 days · Automatically generated with GitHub Actions</sub>
@@ -137,8 +104,6 @@ alt="Contribution Activity"
 ---
 
 ## 🎯 Current Focus
-
-<div align="center">
 
 | 🎯 Area | 🚀 Current Focus |
 | :---: | :--- |
@@ -149,8 +114,6 @@ alt="Contribution Activity"
 | 📊 **Analytics** | Exploring data analytics and business intelligence |
 | 🧠 **Problem Solving** | Improving programming and logical thinking |
 | 🌱 **Open Source** | Learning through real-world projects |
-
-</div>
 
 ---
 
@@ -235,8 +198,6 @@ Exploring applications involving:
 
 ## 📚 Currently Learning
 
-<div align="center">
-
 | Technology / Concept | Focus |
 | :--- | :--- |
 | 🐍 **Python** | Programming & automation |
@@ -247,18 +208,12 @@ Exploring applications involving:
 | 🗄️ **Database Design** | Data modeling & optimization |
 | 🤖 **GitHub Actions** | CI/CD & automation |
 
-</div>
-
 ---
 
 ## 🔥 Areas of Interest
 
-<div align="center">
-
 <table>
-
 <tr>
-
 <td width="50%" align="center">
 
 ### ⚙️ Backend Development
@@ -266,7 +221,6 @@ Exploring applications involving:
 APIs, business logic, authentication, databases, integrations, and backend architecture.
 
 </td>
-
 <td width="50%" align="center">
 
 ### 🏢 Enterprise Architecture
@@ -274,11 +228,9 @@ APIs, business logic, authentication, databases, integrations, and backend archi
 System structure, modularity, scalability, maintainability, and business processes.
 
 </td>
-
 </tr>
 
 <tr>
-
 <td width="50%" align="center">
 
 ### 🤖 Automation
@@ -286,7 +238,6 @@ System structure, modularity, scalability, maintainability, and business process
 Bots, workflows, scheduled tasks, integrations, and developer automation.
 
 </td>
-
 <td width="50%" align="center">
 
 ### 📊 Data & Analytics
@@ -294,12 +245,8 @@ Bots, workflows, scheduled tasks, integrations, and developer automation.
 Databases, reporting, analytics, and business intelligence.
 
 </td>
-
 </tr>
-
 </table>
-
-</div>
 
 ---
 
@@ -388,13 +335,8 @@ The statistics and contribution activity are generated from GitHub data and stor
 
 <div align="center">
 
-<a href="https://github.com/dims154">
-<img src="https://img.shields.io/badge/GitHub-dims154-0D1117?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
-</a>
-
-<a href="https://wa.me/6287785567289">
-<img src="https://img.shields.io/badge/WhatsApp-Contact-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp">
-</a>
+[![GitHub](https://img.shields.io/badge/GitHub-dims154-0D1117?style=for-the-badge&logo=github&logoColor=white)](https://github.com/dims154)
+[![WhatsApp](https://img.shields.io/badge/WhatsApp-Contact-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/6287785567289)
 
 </div>
 
@@ -408,10 +350,7 @@ The statistics and contribution activity are generated from GitHub data and stor
 
 <br>
 
-<img
-src="https://komarev.com/ghpvc/?username=dims154&style=for-the-badge&color=58A6FF&label=PROFILE+VIEWS"
-alt="Profile Views"
->
+![Profile Views](https://komarev.com/ghpvc/?username=dims154&style=for-the-badge&color=58A6FF&label=PROFILE+VIEWS)
 
 <br><br>
 
