@@ -929,3 +929,5589 @@ jobs:
             git push
 
           fi
+name: Update GitHub Profile Stats
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # 08:00 WIB = 01:00 UTC
+    - cron: "0 1 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-profile:
+    name: Update GitHub Profile
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ==========================================
+      # 1. CHECKOUT
+      # ==========================================
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      # ==========================================
+      # 2. FETCH ALL GITHUB DATA
+      # ==========================================
+
+      - name: Fetch GitHub data
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+
+          gh api graphql \
+            -f query='
+            query($login: String!) {
+
+              user(login: $login) {
+
+                name
+                login
+
+                followers {
+                  totalCount
+                }
+
+                repositories(
+                  ownerAffiliations: OWNER
+                  first: 100
+                  privacy: PUBLIC
+                ) {
+
+                  totalCount
+
+                  nodes {
+
+                    name
+
+                    languages(
+                      first: 20
+                      orderBy: {
+                        field: SIZE
+                        direction: DESC
+                      }
+                    ) {
+
+                      edges {
+
+                        size
+
+                        node {
+                          name
+                          color
+                        }
+
+                      }
+
+                    }
+
+                  }
+
+                }
+
+                contributionsCollection {
+
+                  totalCommitContributions
+
+                  restrictedContributionsCount
+
+                  contributionCalendar {
+
+                    totalContributions
+
+                    weeks {
+
+                      contributionDays {
+                        date
+                        contributionCount
+                      }
+
+                    }
+
+                  }
+
+                }
+
+              }
+
+            }' \
+            -f login="dims154" \
+            > github-data.json
+
+
+      # ==========================================
+      # 3. GENERATE STATISTICS
+      # ==========================================
+
+      - name: Generate profile statistics
+        run: |
+
+          mkdir -p stats
+
+          python3 <<'PY'
+
+          import json
+          from pathlib import Path
+          from collections import defaultdict
+
+
+          # ======================================
+          # LOAD DATA
+          # ======================================
+
+          with open("github-data.json", encoding="utf-8") as f:
+              data = json.load(f)
+
+
+          if "errors" in data:
+
+              print("GitHub GraphQL error:")
+
+              for error in data["errors"]:
+                  print(error)
+
+              raise SystemExit(1)
+
+
+          user = data["data"]["user"]
+
+
+          if user is None:
+              raise SystemExit(
+                  "GitHub user 'dims154' tidak ditemukan."
+              )
+
+
+          # ======================================
+          # BASIC STATISTICS
+          # ======================================
+
+          repositories_data = user["repositories"]
+
+          repositories = repositories_data["totalCount"]
+
+          followers = user["followers"]["totalCount"]
+
+
+          contributions_collection = (
+              user["contributionsCollection"]
+          )
+
+
+          calendar = (
+              contributions_collection
+              ["contributionCalendar"]
+          )
+
+
+          total_contributions = (
+              calendar["totalContributions"]
+          )
+
+
+          # ======================================
+          # CONTRIBUTION DAYS
+          # ======================================
+
+          days = []
+
+
+          for week in calendar["weeks"]:
+
+              for day in week["contributionDays"]:
+
+                  days.append({
+                      "date": day["date"],
+                      "count": day["contributionCount"]
+                  })
+
+
+          days.sort(
+              key=lambda x: x["date"]
+          )
+
+
+          # ======================================
+          # CURRENT STREAK
+          # ======================================
+
+          current_streak = 0
+
+
+          for day in reversed(days):
+
+              if day["count"] > 0:
+
+                  current_streak += 1
+
+              else:
+
+                  break
+
+
+          # ======================================
+          # LONGEST STREAK
+          # ======================================
+
+          longest_streak = 0
+
+          streak = 0
+
+
+          for day in days:
+
+              if day["count"] > 0:
+
+                  streak += 1
+
+                  longest_streak = max(
+                      longest_streak,
+                      streak
+                  )
+
+              else:
+
+                  streak = 0
+
+
+          # ======================================
+          # LANGUAGE STATISTICS
+          # ======================================
+
+          language_totals = defaultdict(int)
+
+          language_colors = {}
+
+
+          for repo in repositories_data["nodes"]:
+
+              if repo is None:
+                  continue
+
+
+              languages = repo.get("languages")
+
+
+              if not languages:
+                  continue
+
+
+              for edge in languages["edges"]:
+
+                  if edge["node"] is None:
+                      continue
+
+
+                  language = edge["node"]["name"]
+
+                  size = edge["size"]
+
+
+                  language_totals[language] += size
+
+
+                  if edge["node"].get("color"):
+
+                      language_colors[
+                          language
+                      ] = edge["node"]["color"]
+
+
+          top_languages = sorted(
+              language_totals.items(),
+              key=lambda x: x[1],
+              reverse=True
+          )[:6]
+
+
+          total_language_size = sum(
+              language_totals.values()
+          )
+
+
+          # ======================================
+          # PRINT RESULTS
+          # ======================================
+
+          print()
+          print("====================================")
+          print(" GitHub Profile Statistics")
+          print("====================================")
+          print(
+              f"Contributions : {total_contributions}"
+          )
+          print(
+              f"Repositories  : {repositories}"
+          )
+          print(
+              f"Followers     : {followers}"
+          )
+          print(
+              f"Current Streak: {current_streak} days"
+          )
+          print(
+              f"Longest Streak: {longest_streak} days"
+          )
+
+          print()
+          print("Top Languages:")
+
+          for language, size in top_languages:
+
+              percentage = (
+                  size / total_language_size * 100
+                  if total_language_size
+                  else 0
+              )
+
+              print(
+                  f"  {language}: "
+                  f"{percentage:.1f}%"
+              )
+
+          print("====================================")
+          print()
+
+
+          # ======================================
+          # SVG HELPER
+          # ======================================
+
+          def write_svg(
+              path,
+              content,
+              width,
+              height
+          ):
+
+              svg = f'''<svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="{width}"
+              height="{height}"
+              viewBox="0 0 {width} {height}">
+
+              <rect
+                width="100%"
+                height="100%"
+                rx="12"
+                fill="#0D1117"/>
+
+              {content}
+
+              </svg>'''
+
+
+              Path(path).write_text(
+                  svg,
+                  encoding="utf-8"
+              )
+
+
+          # ======================================
+          # GITHUB STATISTICS SVG
+          # ======================================
+
+          stats_svg = f'''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            GitHub Statistics
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+
+          <text
+            x="80"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            CONTRIBUTIONS
+          </text>
+
+          <text
+            x="80"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {total_contributions}
+          </text>
+
+
+          <text
+            x="300"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            REPOSITORIES
+          </text>
+
+          <text
+            x="300"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {repositories}
+          </text>
+
+
+          <text
+            x="500"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            FOLLOWERS
+          </text>
+
+          <text
+            x="500"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {followers}
+          </text>
+
+
+          <text
+            x="700"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            CURRENT STREAK
+          </text>
+
+          <text
+            x="700"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {current_streak}
+          </text>
+
+
+          <text
+            x="80"
+            y="225"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            LONGEST STREAK
+          </text>
+
+          <text
+            x="80"
+            y="265"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="30"
+            font-weight="bold">
+            {longest_streak} days
+          </text>
+
+          '''
+
+
+          write_svg(
+              "stats/github-stats.svg",
+              stats_svg,
+              900,
+              300
+          )
+
+
+          # ======================================
+          # STREAK SVG
+          # ======================================
+
+          streak_svg = f'''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Contribution Streak
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+
+          <text
+            x="220"
+            y="125"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            🔥 CURRENT STREAK
+          </text>
+
+          <text
+            x="220"
+            y="185"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="45"
+            font-weight="bold">
+            {current_streak}
+          </text>
+
+          <text
+            x="220"
+            y="215"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            DAYS
+          </text>
+
+
+          <text
+            x="570"
+            y="125"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            🏆 LONGEST STREAK
+          </text>
+
+          <text
+            x="570"
+            y="185"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="45"
+            font-weight="bold">
+            {longest_streak}
+          </text>
+
+          <text
+            x="570"
+            y="215"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            DAYS
+          </text>
+
+          '''
+
+
+          write_svg(
+              "stats/streak.svg",
+              streak_svg,
+              900,
+              260
+          )
+
+
+          # ======================================
+          # TOP LANGUAGES SVG
+          # ======================================
+
+          language_content = '''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Top Languages
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+          '''
+
+
+          y = 115
+
+
+          for language, size in top_languages:
+
+              percentage = (
+                  size / total_language_size * 100
+                  if total_language_size
+                  else 0
+              )
+
+
+              color = language_colors.get(
+                  language,
+                  "#58A6FF"
+              )
+
+
+              language_content += f'''
+
+              <circle
+                cx="60"
+                cy="{y - 5}"
+                r="7"
+                fill="{color}"/>
+
+              <text
+                x="80"
+                y="{y}"
+                fill="#F0F6FC"
+                font-family="Arial"
+                font-size="16">
+                {language}
+              </text>
+
+              <rect
+                x="250"
+                y="{y - 14}"
+                width="420"
+                height="12"
+                rx="6"
+                fill="#21262D"/>
+
+              <rect
+                x="250"
+                y="{y - 14}"
+                width="{420 * percentage / 100}"
+                height="12"
+                rx="6"
+                fill="{color}"/>
+
+              <text
+                x="700"
+                y="{y}"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="14">
+                {percentage:.1f}%
+              </text>
+
+              '''
+
+              y += 45
+
+
+          if not top_languages:
+
+              language_content += '''
+
+              <text
+                x="40"
+                y="120"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="16">
+                No language data available.
+              </text>
+
+              '''
+
+
+          write_svg(
+              "stats/top-languages.svg",
+              language_content,
+              900,
+              max(220, y + 20)
+          )
+
+
+
+          # ======================================
+          # CONTRIBUTION ACTIVITY SVG
+          # ======================================
+
+          graph_width = 900
+          graph_height = 380
+
+          graph_content = f'''
+          <text
+            x="40"
+            y="45"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Contribution Activity
+          </text>
+
+          <line
+            x1="40"
+            y1="65"
+            x2="860"
+            y2="65"
+            stroke="#30363D"/>
+          '''
+
+          # Show the most recent 31 contribution days.
+          recent_days = days[-31:]
+
+          if recent_days:
+
+              max_count = max(
+                  day["count"]
+                  for day in recent_days
+              )
+
+              max_count = max(max_count, 1)
+
+              graph_x = 65
+              graph_y = 100
+              graph_width_inner = 780
+              graph_height_inner = 210
+
+              step_x = (
+                  graph_width_inner /
+                  max(len(recent_days) - 1, 1)
+              )
+
+              points = []
+
+              # Grid lines and Y-axis labels.
+              for level in range(5):
+
+                  value = max_count * level / 4
+
+                  y = (
+                      graph_y
+                      + graph_height_inner
+                      - (
+                          value / max_count
+                          * graph_height_inner
+                      )
+                  )
+
+                  graph_content += f'''
+                  <line
+                    x1="{graph_x}"
+                    y1="{y:.2f}"
+                    x2="{graph_x + graph_width_inner}"
+                    y2="{y:.2f}"
+                    stroke="#21262D"
+                    stroke-width="1"/>
+
+                  <text
+                    x="{graph_x - 10}"
+                    y="{y + 4:.2f}"
+                    fill="#8B949E"
+                    font-family="Arial"
+                    font-size="11"
+                    text-anchor="end">
+                    {round(value)}
+                  </text>
+                  '''
+
+              for index, day in enumerate(recent_days):
+
+                  x = graph_x + index * step_x
+
+                  y = (
+                      graph_y
+                      + graph_height_inner
+                      - (
+                          day["count"] / max_count
+                          * graph_height_inner
+                      )
+                  )
+
+                  points.append(f"{x:.2f},{y:.2f}")
+
+                  graph_content += f'''
+                  <circle
+                    cx="{x:.2f}"
+                    cy="{y:.2f}"
+                    r="4"
+                    fill="#58A6FF"/>
+                  '''
+
+                  if (
+                      index % 5 == 0
+                      or index == len(recent_days) - 1
+                  ):
+
+                      graph_content += f'''
+                      <text
+                        x="{x:.2f}"
+                        y="{graph_y + graph_height_inner + 32:.2f}"
+                        fill="#8B949E"
+                        font-family="Arial"
+                        font-size="11"
+                        text-anchor="middle">
+                        {day["date"][5:]}
+                      </text>
+                      '''
+
+              graph_content += f'''
+              <polyline
+                points="{" ".join(points)}"
+                fill="none"
+                stroke="#58A6FF"
+                stroke-width="3"
+                stroke-linejoin="round"
+                stroke-linecap="round"/>
+
+              <line
+                x1="{graph_x}"
+                y1="{graph_y}"
+                x2="{graph_x}"
+                y2="{graph_y + graph_height_inner}"
+                stroke="#30363D"/>
+
+              <line
+                x1="{graph_x}"
+                y1="{graph_y + graph_height_inner}"
+                x2="{graph_x + graph_width_inner}"
+                y2="{graph_y + graph_height_inner}"
+                stroke="#30363D"/>
+              '''
+
+          else:
+
+              graph_content += '''
+              <text
+                x="40"
+                y="130"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="16">
+                No contribution data available.
+              </text>
+              '''
+
+          write_svg(
+              "stats/contribution-activity.svg",
+              graph_content,
+              graph_width,
+              graph_height
+          )
+
+          print()
+          print("SVG files generated:")
+          print(" - stats/github-stats.svg")
+          print(" - stats/streak.svg")
+          print(" - stats/top-languages.svg")
+          print(" - stats/contribution-activity.svg")
+          print()
+
+          PY
+
+
+      # ==========================================
+      # 4. COMMIT GENERATED FILES
+      # ==========================================
+
+      - name: Commit generated statistics
+        run: |
+
+          git config user.name "github-actions[bot]"
+
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add stats/
+
+          if git diff --cached --quiet; then
+
+            echo "No statistics changes."
+
+          else
+
+            git commit \
+              -m "chore: update GitHub profile statistics"
+
+            git push
+
+          fi
+name: Update GitHub Profile Stats
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # 08:00 WIB = 01:00 UTC
+    - cron: "0 1 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-profile:
+    name: Update GitHub Profile
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ==========================================
+      # 1. CHECKOUT
+      # ==========================================
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      # ==========================================
+      # 2. FETCH ALL GITHUB DATA
+      # ==========================================
+
+      - name: Fetch GitHub data
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+
+          gh api graphql \
+            -f query='
+            query($login: String!) {
+
+              user(login: $login) {
+
+                name
+                login
+
+                followers {
+                  totalCount
+                }
+
+                repositories(
+                  ownerAffiliations: OWNER
+                  first: 100
+                  privacy: PUBLIC
+                ) {
+
+                  totalCount
+
+                  nodes {
+
+                    name
+
+                    languages(
+                      first: 20
+                      orderBy: {
+                        field: SIZE
+                        direction: DESC
+                      }
+                    ) {
+
+                      edges {
+
+                        size
+
+                        node {
+                          name
+                          color
+                        }
+
+                      }
+
+                    }
+
+                  }
+
+                }
+
+                contributionsCollection {
+
+                  totalCommitContributions
+
+                  restrictedContributionsCount
+
+                  contributionCalendar {
+
+                    totalContributions
+
+                    weeks {
+
+                      contributionDays {
+                        date
+                        contributionCount
+                      }
+
+                    }
+
+                  }
+
+                }
+
+              }
+
+            }' \
+            -f login="dims154" \
+            > github-data.json
+
+
+      # ==========================================
+      # 3. GENERATE STATISTICS
+      # ==========================================
+
+      - name: Generate profile statistics
+        run: |
+
+          mkdir -p stats
+
+          python3 <<'PY'
+
+          import json
+          from pathlib import Path
+          from collections import defaultdict
+
+
+          # ======================================
+          # LOAD DATA
+          # ======================================
+
+          with open("github-data.json", encoding="utf-8") as f:
+              data = json.load(f)
+
+
+          if "errors" in data:
+
+              print("GitHub GraphQL error:")
+
+              for error in data["errors"]:
+                  print(error)
+
+              raise SystemExit(1)
+
+
+          user = data["data"]["user"]
+
+
+          if user is None:
+              raise SystemExit(
+                  "GitHub user 'dims154' tidak ditemukan."
+              )
+
+
+          # ======================================
+          # BASIC STATISTICS
+          # ======================================
+
+          repositories_data = user["repositories"]
+
+          repositories = repositories_data["totalCount"]
+
+          followers = user["followers"]["totalCount"]
+
+
+          contributions_collection = (
+              user["contributionsCollection"]
+          )
+
+
+          calendar = (
+              contributions_collection
+              ["contributionCalendar"]
+          )
+
+
+          total_contributions = (
+              calendar["totalContributions"]
+          )
+
+
+          # ======================================
+          # CONTRIBUTION DAYS
+          # ======================================
+
+          days = []
+
+
+          for week in calendar["weeks"]:
+
+              for day in week["contributionDays"]:
+
+                  days.append({
+                      "date": day["date"],
+                      "count": day["contributionCount"]
+                  })
+
+
+          days.sort(
+              key=lambda x: x["date"]
+          )
+
+
+          # ======================================
+          # CURRENT STREAK
+          # ======================================
+
+          current_streak = 0
+
+
+          for day in reversed(days):
+
+              if day["count"] > 0:
+
+                  current_streak += 1
+
+              else:
+
+                  break
+
+
+          # ======================================
+          # LONGEST STREAK
+          # ======================================
+
+          longest_streak = 0
+
+          streak = 0
+
+
+          for day in days:
+
+              if day["count"] > 0:
+
+                  streak += 1
+
+                  longest_streak = max(
+                      longest_streak,
+                      streak
+                  )
+
+              else:
+
+                  streak = 0
+
+
+          # ======================================
+          # LANGUAGE STATISTICS
+          # ======================================
+
+          language_totals = defaultdict(int)
+
+          language_colors = {}
+
+
+          for repo in repositories_data["nodes"]:
+
+              if repo is None:
+                  continue
+
+
+              languages = repo.get("languages")
+
+
+              if not languages:
+                  continue
+
+
+              for edge in languages["edges"]:
+
+                  if edge["node"] is None:
+                      continue
+
+
+                  language = edge["node"]["name"]
+
+                  size = edge["size"]
+
+
+                  language_totals[language] += size
+
+
+                  if edge["node"].get("color"):
+
+                      language_colors[
+                          language
+                      ] = edge["node"]["color"]
+
+
+          top_languages = sorted(
+              language_totals.items(),
+              key=lambda x: x[1],
+              reverse=True
+          )[:6]
+
+
+          total_language_size = sum(
+              language_totals.values()
+          )
+
+
+          # ======================================
+          # PRINT RESULTS
+          # ======================================
+
+          print()
+          print("====================================")
+          print(" GitHub Profile Statistics")
+          print("====================================")
+          print(
+              f"Contributions : {total_contributions}"
+          )
+          print(
+              f"Repositories  : {repositories}"
+          )
+          print(
+              f"Followers     : {followers}"
+          )
+          print(
+              f"Current Streak: {current_streak} days"
+          )
+          print(
+              f"Longest Streak: {longest_streak} days"
+          )
+
+          print()
+          print("Top Languages:")
+
+          for language, size in top_languages:
+
+              percentage = (
+                  size / total_language_size * 100
+                  if total_language_size
+                  else 0
+              )
+
+              print(
+                  f"  {language}: "
+                  f"{percentage:.1f}%"
+              )
+
+          print("====================================")
+          print()
+
+
+          # ======================================
+          # SVG HELPER
+          # ======================================
+
+          def write_svg(
+              path,
+              content,
+              width,
+              height
+          ):
+
+              svg = f'''<svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="{width}"
+              height="{height}"
+              viewBox="0 0 {width} {height}">
+
+              <rect
+                width="100%"
+                height="100%"
+                rx="12"
+                fill="#0D1117"/>
+
+              {content}
+
+              </svg>'''
+
+
+              Path(path).write_text(
+                  svg,
+                  encoding="utf-8"
+              )
+
+
+          # ======================================
+          # GITHUB STATISTICS SVG
+          # ======================================
+
+          stats_svg = f'''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            GitHub Statistics
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+
+          <text
+            x="80"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            CONTRIBUTIONS
+          </text>
+
+          <text
+            x="80"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {total_contributions}
+          </text>
+
+
+          <text
+            x="300"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            REPOSITORIES
+          </text>
+
+          <text
+            x="300"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {repositories}
+          </text>
+
+
+          <text
+            x="500"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            FOLLOWERS
+          </text>
+
+          <text
+            x="500"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {followers}
+          </text>
+
+
+          <text
+            x="700"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            CURRENT STREAK
+          </text>
+
+          <text
+            x="700"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {current_streak}
+          </text>
+
+
+          <text
+            x="80"
+            y="225"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            LONGEST STREAK
+          </text>
+
+          <text
+            x="80"
+            y="265"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="30"
+            font-weight="bold">
+            {longest_streak} days
+          </text>
+
+          '''
+
+
+          write_svg(
+              "stats/github-stats.svg",
+              stats_svg,
+              900,
+              300
+          )
+
+
+          # ======================================
+          # STREAK SVG
+          # ======================================
+
+          streak_svg = f'''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Contribution Streak
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+
+          <text
+            x="220"
+            y="125"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            🔥 CURRENT STREAK
+          </text>
+
+          <text
+            x="220"
+            y="185"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="45"
+            font-weight="bold">
+            {current_streak}
+          </text>
+
+          <text
+            x="220"
+            y="215"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            DAYS
+          </text>
+
+
+          <text
+            x="570"
+            y="125"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            🏆 LONGEST STREAK
+          </text>
+
+          <text
+            x="570"
+            y="185"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="45"
+            font-weight="bold">
+            {longest_streak}
+          </text>
+
+          <text
+            x="570"
+            y="215"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            DAYS
+          </text>
+
+          '''
+
+
+          write_svg(
+              "stats/streak.svg",
+              streak_svg,
+              900,
+              260
+          )
+
+
+          # ======================================
+          # TOP LANGUAGES SVG
+          # ======================================
+
+          language_content = '''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Top Languages
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+          '''
+
+
+          y = 115
+
+
+          for language, size in top_languages:
+
+              percentage = (
+                  size / total_language_size * 100
+                  if total_language_size
+                  else 0
+              )
+
+
+              color = language_colors.get(
+                  language,
+                  "#58A6FF"
+              )
+
+
+              language_content += f'''
+
+              <circle
+                cx="60"
+                cy="{y - 5}"
+                r="7"
+                fill="{color}"/>
+
+              <text
+                x="80"
+                y="{y}"
+                fill="#F0F6FC"
+                font-family="Arial"
+                font-size="16">
+                {language}
+              </text>
+
+              <rect
+                x="250"
+                y="{y - 14}"
+                width="420"
+                height="12"
+                rx="6"
+                fill="#21262D"/>
+
+              <rect
+                x="250"
+                y="{y - 14}"
+                width="{420 * percentage / 100}"
+                height="12"
+                rx="6"
+                fill="{color}"/>
+
+              <text
+                x="700"
+                y="{y}"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="14">
+                {percentage:.1f}%
+              </text>
+
+              '''
+
+              y += 45
+
+
+          if not top_languages:
+
+              language_content += '''
+
+              <text
+                x="40"
+                y="120"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="16">
+                No language data available.
+              </text>
+
+              '''
+
+
+          write_svg(
+              "stats/top-languages.svg",
+              language_content,
+              900,
+              max(220, y + 20)
+          )
+
+
+
+          # ======================================
+          # CONTRIBUTION ACTIVITY SVG
+          # ======================================
+
+          graph_width = 900
+          graph_height = 380
+
+          graph_content = f'''
+          <text
+            x="40"
+            y="45"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Contribution Activity
+          </text>
+
+          <line
+            x1="40"
+            y1="65"
+            x2="860"
+            y2="65"
+            stroke="#30363D"/>
+          '''
+
+          # Show the most recent 31 contribution days.
+          recent_days = days[-31:]
+
+          if recent_days:
+
+              max_count = max(
+                  day["count"]
+                  for day in recent_days
+              )
+
+              max_count = max(max_count, 1)
+
+              graph_x = 65
+              graph_y = 100
+              graph_width_inner = 780
+              graph_height_inner = 210
+
+              step_x = (
+                  graph_width_inner /
+                  max(len(recent_days) - 1, 1)
+              )
+
+              points = []
+
+              # Grid lines and Y-axis labels.
+              for level in range(5):
+
+                  value = max_count * level / 4
+
+                  y = (
+                      graph_y
+                      + graph_height_inner
+                      - (
+                          value / max_count
+                          * graph_height_inner
+                      )
+                  )
+
+                  graph_content += f'''
+                  <line
+                    x1="{graph_x}"
+                    y1="{y:.2f}"
+                    x2="{graph_x + graph_width_inner}"
+                    y2="{y:.2f}"
+                    stroke="#21262D"
+                    stroke-width="1"/>
+
+                  <text
+                    x="{graph_x - 10}"
+                    y="{y + 4:.2f}"
+                    fill="#8B949E"
+                    font-family="Arial"
+                    font-size="11"
+                    text-anchor="end">
+                    {round(value)}
+                  </text>
+                  '''
+
+              for index, day in enumerate(recent_days):
+
+                  x = graph_x + index * step_x
+
+                  y = (
+                      graph_y
+                      + graph_height_inner
+                      - (
+                          day["count"] / max_count
+                          * graph_height_inner
+                      )
+                  )
+
+                  points.append(f"{x:.2f},{y:.2f}")
+
+                  graph_content += f'''
+                  <circle
+                    cx="{x:.2f}"
+                    cy="{y:.2f}"
+                    r="4"
+                    fill="#58A6FF"/>
+                  '''
+
+                  if (
+                      index % 5 == 0
+                      or index == len(recent_days) - 1
+                  ):
+
+                      graph_content += f'''
+                      <text
+                        x="{x:.2f}"
+                        y="{graph_y + graph_height_inner + 32:.2f}"
+                        fill="#8B949E"
+                        font-family="Arial"
+                        font-size="11"
+                        text-anchor="middle">
+                        {day["date"][5:]}
+                      </text>
+                      '''
+
+              graph_content += f'''
+              <polyline
+                points="{" ".join(points)}"
+                fill="none"
+                stroke="#58A6FF"
+                stroke-width="3"
+                stroke-linejoin="round"
+                stroke-linecap="round"/>
+
+              <line
+                x1="{graph_x}"
+                y1="{graph_y}"
+                x2="{graph_x}"
+                y2="{graph_y + graph_height_inner}"
+                stroke="#30363D"/>
+
+              <line
+                x1="{graph_x}"
+                y1="{graph_y + graph_height_inner}"
+                x2="{graph_x + graph_width_inner}"
+                y2="{graph_y + graph_height_inner}"
+                stroke="#30363D"/>
+              '''
+
+          else:
+
+              graph_content += '''
+              <text
+                x="40"
+                y="130"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="16">
+                No contribution data available.
+              </text>
+              '''
+
+          write_svg(
+              "stats/contribution-activity.svg",
+              graph_content,
+              graph_width,
+              graph_height
+          )
+
+          print()
+          print("SVG files generated:")
+          print(" - stats/github-stats.svg")
+          print(" - stats/streak.svg")
+          print(" - stats/top-languages.svg")
+          print(" - stats/contribution-activity.svg")
+          print()
+
+          PY
+
+
+      # ==========================================
+      # 4. COMMIT GENERATED FILES
+      # ==========================================
+
+      - name: Commit generated statistics
+        run: |
+
+          git config user.name "github-actions[bot]"
+
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add stats/
+
+          if git diff --cached --quiet; then
+
+            echo "No statistics changes."
+
+          else
+
+            git commit \
+              -m "chore: update GitHub profile statistics"
+
+            git push
+
+          fi
+name: Update GitHub Profile Stats
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # 08:00 WIB = 01:00 UTC
+    - cron: "0 1 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-profile:
+    name: Update GitHub Profile
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ==========================================
+      # 1. CHECKOUT
+      # ==========================================
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      # ==========================================
+      # 2. FETCH ALL GITHUB DATA
+      # ==========================================
+
+      - name: Fetch GitHub data
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+
+          gh api graphql \
+            -f query='
+            query($login: String!) {
+
+              user(login: $login) {
+
+                name
+                login
+
+                followers {
+                  totalCount
+                }
+
+                repositories(
+                  ownerAffiliations: OWNER
+                  first: 100
+                  privacy: PUBLIC
+                ) {
+
+                  totalCount
+
+                  nodes {
+
+                    name
+
+                    languages(
+                      first: 20
+                      orderBy: {
+                        field: SIZE
+                        direction: DESC
+                      }
+                    ) {
+
+                      edges {
+
+                        size
+
+                        node {
+                          name
+                          color
+                        }
+
+                      }
+
+                    }
+
+                  }
+
+                }
+
+                contributionsCollection {
+
+                  totalCommitContributions
+
+                  restrictedContributionsCount
+
+                  contributionCalendar {
+
+                    totalContributions
+
+                    weeks {
+
+                      contributionDays {
+                        date
+                        contributionCount
+                      }
+
+                    }
+
+                  }
+
+                }
+
+              }
+
+            }' \
+            -f login="dims154" \
+            > github-data.json
+
+
+      # ==========================================
+      # 3. GENERATE STATISTICS
+      # ==========================================
+
+      - name: Generate profile statistics
+        run: |
+
+          mkdir -p stats
+
+          python3 <<'PY'
+
+          import json
+          from pathlib import Path
+          from collections import defaultdict
+
+
+          # ======================================
+          # LOAD DATA
+          # ======================================
+
+          with open("github-data.json", encoding="utf-8") as f:
+              data = json.load(f)
+
+
+          if "errors" in data:
+
+              print("GitHub GraphQL error:")
+
+              for error in data["errors"]:
+                  print(error)
+
+              raise SystemExit(1)
+
+
+          user = data["data"]["user"]
+
+
+          if user is None:
+              raise SystemExit(
+                  "GitHub user 'dims154' tidak ditemukan."
+              )
+
+
+          # ======================================
+          # BASIC STATISTICS
+          # ======================================
+
+          repositories_data = user["repositories"]
+
+          repositories = repositories_data["totalCount"]
+
+          followers = user["followers"]["totalCount"]
+
+
+          contributions_collection = (
+              user["contributionsCollection"]
+          )
+
+
+          calendar = (
+              contributions_collection
+              ["contributionCalendar"]
+          )
+
+
+          total_contributions = (
+              calendar["totalContributions"]
+          )
+
+
+          # ======================================
+          # CONTRIBUTION DAYS
+          # ======================================
+
+          days = []
+
+
+          for week in calendar["weeks"]:
+
+              for day in week["contributionDays"]:
+
+                  days.append({
+                      "date": day["date"],
+                      "count": day["contributionCount"]
+                  })
+
+
+          days.sort(
+              key=lambda x: x["date"]
+          )
+
+
+          # ======================================
+          # CURRENT STREAK
+          # ======================================
+
+          current_streak = 0
+
+
+          for day in reversed(days):
+
+              if day["count"] > 0:
+
+                  current_streak += 1
+
+              else:
+
+                  break
+
+
+          # ======================================
+          # LONGEST STREAK
+          # ======================================
+
+          longest_streak = 0
+
+          streak = 0
+
+
+          for day in days:
+
+              if day["count"] > 0:
+
+                  streak += 1
+
+                  longest_streak = max(
+                      longest_streak,
+                      streak
+                  )
+
+              else:
+
+                  streak = 0
+
+
+          # ======================================
+          # LANGUAGE STATISTICS
+          # ======================================
+
+          language_totals = defaultdict(int)
+
+          language_colors = {}
+
+
+          for repo in repositories_data["nodes"]:
+
+              if repo is None:
+                  continue
+
+
+              languages = repo.get("languages")
+
+
+              if not languages:
+                  continue
+
+
+              for edge in languages["edges"]:
+
+                  if edge["node"] is None:
+                      continue
+
+
+                  language = edge["node"]["name"]
+
+                  size = edge["size"]
+
+
+                  language_totals[language] += size
+
+
+                  if edge["node"].get("color"):
+
+                      language_colors[
+                          language
+                      ] = edge["node"]["color"]
+
+
+          top_languages = sorted(
+              language_totals.items(),
+              key=lambda x: x[1],
+              reverse=True
+          )[:6]
+
+
+          total_language_size = sum(
+              language_totals.values()
+          )
+
+
+          # ======================================
+          # PRINT RESULTS
+          # ======================================
+
+          print()
+          print("====================================")
+          print(" GitHub Profile Statistics")
+          print("====================================")
+          print(
+              f"Contributions : {total_contributions}"
+          )
+          print(
+              f"Repositories  : {repositories}"
+          )
+          print(
+              f"Followers     : {followers}"
+          )
+          print(
+              f"Current Streak: {current_streak} days"
+          )
+          print(
+              f"Longest Streak: {longest_streak} days"
+          )
+
+          print()
+          print("Top Languages:")
+
+          for language, size in top_languages:
+
+              percentage = (
+                  size / total_language_size * 100
+                  if total_language_size
+                  else 0
+              )
+
+              print(
+                  f"  {language}: "
+                  f"{percentage:.1f}%"
+              )
+
+          print("====================================")
+          print()
+
+
+          # ======================================
+          # SVG HELPER
+          # ======================================
+
+          def write_svg(
+              path,
+              content,
+              width,
+              height
+          ):
+
+              svg = f'''<svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="{width}"
+              height="{height}"
+              viewBox="0 0 {width} {height}">
+
+              <rect
+                width="100%"
+                height="100%"
+                rx="12"
+                fill="#0D1117"/>
+
+              {content}
+
+              </svg>'''
+
+
+              Path(path).write_text(
+                  svg,
+                  encoding="utf-8"
+              )
+
+
+          # ======================================
+          # GITHUB STATISTICS SVG
+          # ======================================
+
+          stats_svg = f'''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            GitHub Statistics
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+
+          <text
+            x="80"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            CONTRIBUTIONS
+          </text>
+
+          <text
+            x="80"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {total_contributions}
+          </text>
+
+
+          <text
+            x="300"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            REPOSITORIES
+          </text>
+
+          <text
+            x="300"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {repositories}
+          </text>
+
+
+          <text
+            x="500"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            FOLLOWERS
+          </text>
+
+          <text
+            x="500"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {followers}
+          </text>
+
+
+          <text
+            x="700"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            CURRENT STREAK
+          </text>
+
+          <text
+            x="700"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {current_streak}
+          </text>
+
+
+          <text
+            x="80"
+            y="225"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            LONGEST STREAK
+          </text>
+
+          <text
+            x="80"
+            y="265"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="30"
+            font-weight="bold">
+            {longest_streak} days
+          </text>
+
+          '''
+
+
+          write_svg(
+              "stats/github-stats.svg",
+              stats_svg,
+              900,
+              300
+          )
+
+
+          # ======================================
+          # STREAK SVG
+          # ======================================
+
+          streak_svg = f'''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Contribution Streak
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+
+          <text
+            x="220"
+            y="125"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            🔥 CURRENT STREAK
+          </text>
+
+          <text
+            x="220"
+            y="185"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="45"
+            font-weight="bold">
+            {current_streak}
+          </text>
+
+          <text
+            x="220"
+            y="215"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            DAYS
+          </text>
+
+
+          <text
+            x="570"
+            y="125"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            🏆 LONGEST STREAK
+          </text>
+
+          <text
+            x="570"
+            y="185"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="45"
+            font-weight="bold">
+            {longest_streak}
+          </text>
+
+          <text
+            x="570"
+            y="215"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            DAYS
+          </text>
+
+          '''
+
+
+          write_svg(
+              "stats/streak.svg",
+              streak_svg,
+              900,
+              260
+          )
+
+
+          # ======================================
+          # TOP LANGUAGES SVG
+          # ======================================
+
+          language_content = '''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Top Languages
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+          '''
+
+
+          y = 115
+
+
+          for language, size in top_languages:
+
+              percentage = (
+                  size / total_language_size * 100
+                  if total_language_size
+                  else 0
+              )
+
+
+              color = language_colors.get(
+                  language,
+                  "#58A6FF"
+              )
+
+
+              language_content += f'''
+
+              <circle
+                cx="60"
+                cy="{y - 5}"
+                r="7"
+                fill="{color}"/>
+
+              <text
+                x="80"
+                y="{y}"
+                fill="#F0F6FC"
+                font-family="Arial"
+                font-size="16">
+                {language}
+              </text>
+
+              <rect
+                x="250"
+                y="{y - 14}"
+                width="420"
+                height="12"
+                rx="6"
+                fill="#21262D"/>
+
+              <rect
+                x="250"
+                y="{y - 14}"
+                width="{420 * percentage / 100}"
+                height="12"
+                rx="6"
+                fill="{color}"/>
+
+              <text
+                x="700"
+                y="{y}"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="14">
+                {percentage:.1f}%
+              </text>
+
+              '''
+
+              y += 45
+
+
+          if not top_languages:
+
+              language_content += '''
+
+              <text
+                x="40"
+                y="120"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="16">
+                No language data available.
+              </text>
+
+              '''
+
+
+          write_svg(
+              "stats/top-languages.svg",
+              language_content,
+              900,
+              max(220, y + 20)
+          )
+
+
+
+          # ======================================
+          # CONTRIBUTION ACTIVITY SVG
+          # ======================================
+
+          graph_width = 900
+          graph_height = 380
+
+          graph_content = f'''
+          <text
+            x="40"
+            y="45"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Contribution Activity
+          </text>
+
+          <line
+            x1="40"
+            y1="65"
+            x2="860"
+            y2="65"
+            stroke="#30363D"/>
+          '''
+
+          # Show the most recent 31 contribution days.
+          recent_days = days[-31:]
+
+          if recent_days:
+
+              max_count = max(
+                  day["count"]
+                  for day in recent_days
+              )
+
+              max_count = max(max_count, 1)
+
+              graph_x = 65
+              graph_y = 100
+              graph_width_inner = 780
+              graph_height_inner = 210
+
+              step_x = (
+                  graph_width_inner /
+                  max(len(recent_days) - 1, 1)
+              )
+
+              points = []
+
+              # Grid lines and Y-axis labels.
+              for level in range(5):
+
+                  value = max_count * level / 4
+
+                  y = (
+                      graph_y
+                      + graph_height_inner
+                      - (
+                          value / max_count
+                          * graph_height_inner
+                      )
+                  )
+
+                  graph_content += f'''
+                  <line
+                    x1="{graph_x}"
+                    y1="{y:.2f}"
+                    x2="{graph_x + graph_width_inner}"
+                    y2="{y:.2f}"
+                    stroke="#21262D"
+                    stroke-width="1"/>
+
+                  <text
+                    x="{graph_x - 10}"
+                    y="{y + 4:.2f}"
+                    fill="#8B949E"
+                    font-family="Arial"
+                    font-size="11"
+                    text-anchor="end">
+                    {round(value)}
+                  </text>
+                  '''
+
+              for index, day in enumerate(recent_days):
+
+                  x = graph_x + index * step_x
+
+                  y = (
+                      graph_y
+                      + graph_height_inner
+                      - (
+                          day["count"] / max_count
+                          * graph_height_inner
+                      )
+                  )
+
+                  points.append(f"{x:.2f},{y:.2f}")
+
+                  graph_content += f'''
+                  <circle
+                    cx="{x:.2f}"
+                    cy="{y:.2f}"
+                    r="4"
+                    fill="#58A6FF"/>
+                  '''
+
+                  if (
+                      index % 5 == 0
+                      or index == len(recent_days) - 1
+                  ):
+
+                      graph_content += f'''
+                      <text
+                        x="{x:.2f}"
+                        y="{graph_y + graph_height_inner + 32:.2f}"
+                        fill="#8B949E"
+                        font-family="Arial"
+                        font-size="11"
+                        text-anchor="middle">
+                        {day["date"][5:]}
+                      </text>
+                      '''
+
+              graph_content += f'''
+              <polyline
+                points="{" ".join(points)}"
+                fill="none"
+                stroke="#58A6FF"
+                stroke-width="3"
+                stroke-linejoin="round"
+                stroke-linecap="round"/>
+
+              <line
+                x1="{graph_x}"
+                y1="{graph_y}"
+                x2="{graph_x}"
+                y2="{graph_y + graph_height_inner}"
+                stroke="#30363D"/>
+
+              <line
+                x1="{graph_x}"
+                y1="{graph_y + graph_height_inner}"
+                x2="{graph_x + graph_width_inner}"
+                y2="{graph_y + graph_height_inner}"
+                stroke="#30363D"/>
+              '''
+
+          else:
+
+              graph_content += '''
+              <text
+                x="40"
+                y="130"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="16">
+                No contribution data available.
+              </text>
+              '''
+
+          write_svg(
+              "stats/contribution-activity.svg",
+              graph_content,
+              graph_width,
+              graph_height
+          )
+
+          print()
+          print("SVG files generated:")
+          print(" - stats/github-stats.svg")
+          print(" - stats/streak.svg")
+          print(" - stats/top-languages.svg")
+          print(" - stats/contribution-activity.svg")
+          print()
+
+          PY
+
+
+      # ==========================================
+      # 4. COMMIT GENERATED FILES
+      # ==========================================
+
+      - name: Commit generated statistics
+        run: |
+
+          git config user.name "github-actions[bot]"
+
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add stats/
+
+          if git diff --cached --quiet; then
+
+            echo "No statistics changes."
+
+          else
+
+            git commit \
+              -m "chore: update GitHub profile statistics"
+
+            git push
+
+          fi
+name: Update GitHub Profile Stats
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # 08:00 WIB = 01:00 UTC
+    - cron: "0 1 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-profile:
+    name: Update GitHub Profile
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ==========================================
+      # 1. CHECKOUT
+      # ==========================================
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      # ==========================================
+      # 2. FETCH ALL GITHUB DATA
+      # ==========================================
+
+      - name: Fetch GitHub data
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+
+          gh api graphql \
+            -f query='
+            query($login: String!) {
+
+              user(login: $login) {
+
+                name
+                login
+
+                followers {
+                  totalCount
+                }
+
+                repositories(
+                  ownerAffiliations: OWNER
+                  first: 100
+                  privacy: PUBLIC
+                ) {
+
+                  totalCount
+
+                  nodes {
+
+                    name
+
+                    languages(
+                      first: 20
+                      orderBy: {
+                        field: SIZE
+                        direction: DESC
+                      }
+                    ) {
+
+                      edges {
+
+                        size
+
+                        node {
+                          name
+                          color
+                        }
+
+                      }
+
+                    }
+
+                  }
+
+                }
+
+                contributionsCollection {
+
+                  totalCommitContributions
+
+                  restrictedContributionsCount
+
+                  contributionCalendar {
+
+                    totalContributions
+
+                    weeks {
+
+                      contributionDays {
+                        date
+                        contributionCount
+                      }
+
+                    }
+
+                  }
+
+                }
+
+              }
+
+            }' \
+            -f login="dims154" \
+            > github-data.json
+
+
+      # ==========================================
+      # 3. GENERATE STATISTICS
+      # ==========================================
+
+      - name: Generate profile statistics
+        run: |
+
+          mkdir -p stats
+
+          python3 <<'PY'
+
+          import json
+          from pathlib import Path
+          from collections import defaultdict
+
+
+          # ======================================
+          # LOAD DATA
+          # ======================================
+
+          with open("github-data.json", encoding="utf-8") as f:
+              data = json.load(f)
+
+
+          if "errors" in data:
+
+              print("GitHub GraphQL error:")
+
+              for error in data["errors"]:
+                  print(error)
+
+              raise SystemExit(1)
+
+
+          user = data["data"]["user"]
+
+
+          if user is None:
+              raise SystemExit(
+                  "GitHub user 'dims154' tidak ditemukan."
+              )
+
+
+          # ======================================
+          # BASIC STATISTICS
+          # ======================================
+
+          repositories_data = user["repositories"]
+
+          repositories = repositories_data["totalCount"]
+
+          followers = user["followers"]["totalCount"]
+
+
+          contributions_collection = (
+              user["contributionsCollection"]
+          )
+
+
+          calendar = (
+              contributions_collection
+              ["contributionCalendar"]
+          )
+
+
+          total_contributions = (
+              calendar["totalContributions"]
+          )
+
+
+          # ======================================
+          # CONTRIBUTION DAYS
+          # ======================================
+
+          days = []
+
+
+          for week in calendar["weeks"]:
+
+              for day in week["contributionDays"]:
+
+                  days.append({
+                      "date": day["date"],
+                      "count": day["contributionCount"]
+                  })
+
+
+          days.sort(
+              key=lambda x: x["date"]
+          )
+
+
+          # ======================================
+          # CURRENT STREAK
+          # ======================================
+
+          current_streak = 0
+
+
+          for day in reversed(days):
+
+              if day["count"] > 0:
+
+                  current_streak += 1
+
+              else:
+
+                  break
+
+
+          # ======================================
+          # LONGEST STREAK
+          # ======================================
+
+          longest_streak = 0
+
+          streak = 0
+
+
+          for day in days:
+
+              if day["count"] > 0:
+
+                  streak += 1
+
+                  longest_streak = max(
+                      longest_streak,
+                      streak
+                  )
+
+              else:
+
+                  streak = 0
+
+
+          # ======================================
+          # LANGUAGE STATISTICS
+          # ======================================
+
+          language_totals = defaultdict(int)
+
+          language_colors = {}
+
+
+          for repo in repositories_data["nodes"]:
+
+              if repo is None:
+                  continue
+
+
+              languages = repo.get("languages")
+
+
+              if not languages:
+                  continue
+
+
+              for edge in languages["edges"]:
+
+                  if edge["node"] is None:
+                      continue
+
+
+                  language = edge["node"]["name"]
+
+                  size = edge["size"]
+
+
+                  language_totals[language] += size
+
+
+                  if edge["node"].get("color"):
+
+                      language_colors[
+                          language
+                      ] = edge["node"]["color"]
+
+
+          top_languages = sorted(
+              language_totals.items(),
+              key=lambda x: x[1],
+              reverse=True
+          )[:6]
+
+
+          total_language_size = sum(
+              language_totals.values()
+          )
+
+
+          # ======================================
+          # PRINT RESULTS
+          # ======================================
+
+          print()
+          print("====================================")
+          print(" GitHub Profile Statistics")
+          print("====================================")
+          print(
+              f"Contributions : {total_contributions}"
+          )
+          print(
+              f"Repositories  : {repositories}"
+          )
+          print(
+              f"Followers     : {followers}"
+          )
+          print(
+              f"Current Streak: {current_streak} days"
+          )
+          print(
+              f"Longest Streak: {longest_streak} days"
+          )
+
+          print()
+          print("Top Languages:")
+
+          for language, size in top_languages:
+
+              percentage = (
+                  size / total_language_size * 100
+                  if total_language_size
+                  else 0
+              )
+
+              print(
+                  f"  {language}: "
+                  f"{percentage:.1f}%"
+              )
+
+          print("====================================")
+          print()
+
+
+          # ======================================
+          # SVG HELPER
+          # ======================================
+
+          def write_svg(
+              path,
+              content,
+              width,
+              height
+          ):
+
+              svg = f'''<svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="{width}"
+              height="{height}"
+              viewBox="0 0 {width} {height}">
+
+              <rect
+                width="100%"
+                height="100%"
+                rx="12"
+                fill="#0D1117"/>
+
+              {content}
+
+              </svg>'''
+
+
+              Path(path).write_text(
+                  svg,
+                  encoding="utf-8"
+              )
+
+
+          # ======================================
+          # GITHUB STATISTICS SVG
+          # ======================================
+
+          stats_svg = f'''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            GitHub Statistics
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+
+          <text
+            x="80"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            CONTRIBUTIONS
+          </text>
+
+          <text
+            x="80"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {total_contributions}
+          </text>
+
+
+          <text
+            x="300"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            REPOSITORIES
+          </text>
+
+          <text
+            x="300"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {repositories}
+          </text>
+
+
+          <text
+            x="500"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            FOLLOWERS
+          </text>
+
+          <text
+            x="500"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {followers}
+          </text>
+
+
+          <text
+            x="700"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            CURRENT STREAK
+          </text>
+
+          <text
+            x="700"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {current_streak}
+          </text>
+
+
+          <text
+            x="80"
+            y="225"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            LONGEST STREAK
+          </text>
+
+          <text
+            x="80"
+            y="265"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="30"
+            font-weight="bold">
+            {longest_streak} days
+          </text>
+
+          '''
+
+
+          write_svg(
+              "stats/github-stats.svg",
+              stats_svg,
+              900,
+              300
+          )
+
+
+          # ======================================
+          # STREAK SVG
+          # ======================================
+
+          streak_svg = f'''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Contribution Streak
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+
+          <text
+            x="220"
+            y="125"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            🔥 CURRENT STREAK
+          </text>
+
+          <text
+            x="220"
+            y="185"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="45"
+            font-weight="bold">
+            {current_streak}
+          </text>
+
+          <text
+            x="220"
+            y="215"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            DAYS
+          </text>
+
+
+          <text
+            x="570"
+            y="125"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            🏆 LONGEST STREAK
+          </text>
+
+          <text
+            x="570"
+            y="185"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="45"
+            font-weight="bold">
+            {longest_streak}
+          </text>
+
+          <text
+            x="570"
+            y="215"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            DAYS
+          </text>
+
+          '''
+
+
+          write_svg(
+              "stats/streak.svg",
+              streak_svg,
+              900,
+              260
+          )
+
+
+          # ======================================
+          # TOP LANGUAGES SVG
+          # ======================================
+
+          language_content = '''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Top Languages
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+          '''
+
+
+          y = 115
+
+
+          for language, size in top_languages:
+
+              percentage = (
+                  size / total_language_size * 100
+                  if total_language_size
+                  else 0
+              )
+
+
+              color = language_colors.get(
+                  language,
+                  "#58A6FF"
+              )
+
+
+              language_content += f'''
+
+              <circle
+                cx="60"
+                cy="{y - 5}"
+                r="7"
+                fill="{color}"/>
+
+              <text
+                x="80"
+                y="{y}"
+                fill="#F0F6FC"
+                font-family="Arial"
+                font-size="16">
+                {language}
+              </text>
+
+              <rect
+                x="250"
+                y="{y - 14}"
+                width="420"
+                height="12"
+                rx="6"
+                fill="#21262D"/>
+
+              <rect
+                x="250"
+                y="{y - 14}"
+                width="{420 * percentage / 100}"
+                height="12"
+                rx="6"
+                fill="{color}"/>
+
+              <text
+                x="700"
+                y="{y}"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="14">
+                {percentage:.1f}%
+              </text>
+
+              '''
+
+              y += 45
+
+
+          if not top_languages:
+
+              language_content += '''
+
+              <text
+                x="40"
+                y="120"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="16">
+                No language data available.
+              </text>
+
+              '''
+
+
+          write_svg(
+              "stats/top-languages.svg",
+              language_content,
+              900,
+              max(220, y + 20)
+          )
+
+
+
+          # ======================================
+          # CONTRIBUTION ACTIVITY SVG
+          # ======================================
+
+          graph_width = 900
+          graph_height = 380
+
+          graph_content = f'''
+          <text
+            x="40"
+            y="45"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Contribution Activity
+          </text>
+
+          <line
+            x1="40"
+            y1="65"
+            x2="860"
+            y2="65"
+            stroke="#30363D"/>
+          '''
+
+          # Show the most recent 31 contribution days.
+          recent_days = days[-31:]
+
+          if recent_days:
+
+              max_count = max(
+                  day["count"]
+                  for day in recent_days
+              )
+
+              max_count = max(max_count, 1)
+
+              graph_x = 65
+              graph_y = 100
+              graph_width_inner = 780
+              graph_height_inner = 210
+
+              step_x = (
+                  graph_width_inner /
+                  max(len(recent_days) - 1, 1)
+              )
+
+              points = []
+
+              # Grid lines and Y-axis labels.
+              for level in range(5):
+
+                  value = max_count * level / 4
+
+                  y = (
+                      graph_y
+                      + graph_height_inner
+                      - (
+                          value / max_count
+                          * graph_height_inner
+                      )
+                  )
+
+                  graph_content += f'''
+                  <line
+                    x1="{graph_x}"
+                    y1="{y:.2f}"
+                    x2="{graph_x + graph_width_inner}"
+                    y2="{y:.2f}"
+                    stroke="#21262D"
+                    stroke-width="1"/>
+
+                  <text
+                    x="{graph_x - 10}"
+                    y="{y + 4:.2f}"
+                    fill="#8B949E"
+                    font-family="Arial"
+                    font-size="11"
+                    text-anchor="end">
+                    {round(value)}
+                  </text>
+                  '''
+
+              for index, day in enumerate(recent_days):
+
+                  x = graph_x + index * step_x
+
+                  y = (
+                      graph_y
+                      + graph_height_inner
+                      - (
+                          day["count"] / max_count
+                          * graph_height_inner
+                      )
+                  )
+
+                  points.append(f"{x:.2f},{y:.2f}")
+
+                  graph_content += f'''
+                  <circle
+                    cx="{x:.2f}"
+                    cy="{y:.2f}"
+                    r="4"
+                    fill="#58A6FF"/>
+                  '''
+
+                  if (
+                      index % 5 == 0
+                      or index == len(recent_days) - 1
+                  ):
+
+                      graph_content += f'''
+                      <text
+                        x="{x:.2f}"
+                        y="{graph_y + graph_height_inner + 32:.2f}"
+                        fill="#8B949E"
+                        font-family="Arial"
+                        font-size="11"
+                        text-anchor="middle">
+                        {day["date"][5:]}
+                      </text>
+                      '''
+
+              graph_content += f'''
+              <polyline
+                points="{" ".join(points)}"
+                fill="none"
+                stroke="#58A6FF"
+                stroke-width="3"
+                stroke-linejoin="round"
+                stroke-linecap="round"/>
+
+              <line
+                x1="{graph_x}"
+                y1="{graph_y}"
+                x2="{graph_x}"
+                y2="{graph_y + graph_height_inner}"
+                stroke="#30363D"/>
+
+              <line
+                x1="{graph_x}"
+                y1="{graph_y + graph_height_inner}"
+                x2="{graph_x + graph_width_inner}"
+                y2="{graph_y + graph_height_inner}"
+                stroke="#30363D"/>
+              '''
+
+          else:
+
+              graph_content += '''
+              <text
+                x="40"
+                y="130"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="16">
+                No contribution data available.
+              </text>
+              '''
+
+          write_svg(
+              "stats/contribution-activity.svg",
+              graph_content,
+              graph_width,
+              graph_height
+          )
+
+          print()
+          print("SVG files generated:")
+          print(" - stats/github-stats.svg")
+          print(" - stats/streak.svg")
+          print(" - stats/top-languages.svg")
+          print(" - stats/contribution-activity.svg")
+          print()
+
+          PY
+
+
+      # ==========================================
+      # 4. COMMIT GENERATED FILES
+      # ==========================================
+
+      - name: Commit generated statistics
+        run: |
+
+          git config user.name "github-actions[bot]"
+
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add stats/
+
+          if git diff --cached --quiet; then
+
+            echo "No statistics changes."
+
+          else
+
+            git commit \
+              -m "chore: update GitHub profile statistics"
+
+            git push
+
+          fi
+name: Update GitHub Profile Stats
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # 08:00 WIB = 01:00 UTC
+    - cron: "0 1 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-profile:
+    name: Update GitHub Profile
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ==========================================
+      # 1. CHECKOUT
+      # ==========================================
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      # ==========================================
+      # 2. FETCH ALL GITHUB DATA
+      # ==========================================
+
+      - name: Fetch GitHub data
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+
+          gh api graphql \
+            -f query='
+            query($login: String!) {
+
+              user(login: $login) {
+
+                name
+                login
+
+                followers {
+                  totalCount
+                }
+
+                repositories(
+                  ownerAffiliations: OWNER
+                  first: 100
+                  privacy: PUBLIC
+                ) {
+
+                  totalCount
+
+                  nodes {
+
+                    name
+
+                    languages(
+                      first: 20
+                      orderBy: {
+                        field: SIZE
+                        direction: DESC
+                      }
+                    ) {
+
+                      edges {
+
+                        size
+
+                        node {
+                          name
+                          color
+                        }
+
+                      }
+
+                    }
+
+                  }
+
+                }
+
+                contributionsCollection {
+
+                  totalCommitContributions
+
+                  restrictedContributionsCount
+
+                  contributionCalendar {
+
+                    totalContributions
+
+                    weeks {
+
+                      contributionDays {
+                        date
+                        contributionCount
+                      }
+
+                    }
+
+                  }
+
+                }
+
+              }
+
+            }' \
+            -f login="dims154" \
+            > github-data.json
+
+
+      # ==========================================
+      # 3. GENERATE STATISTICS
+      # ==========================================
+
+      - name: Generate profile statistics
+        run: |
+
+          mkdir -p stats
+
+          python3 <<'PY'
+
+          import json
+          from pathlib import Path
+          from collections import defaultdict
+
+
+          # ======================================
+          # LOAD DATA
+          # ======================================
+
+          with open("github-data.json", encoding="utf-8") as f:
+              data = json.load(f)
+
+
+          if "errors" in data:
+
+              print("GitHub GraphQL error:")
+
+              for error in data["errors"]:
+                  print(error)
+
+              raise SystemExit(1)
+
+
+          user = data["data"]["user"]
+
+
+          if user is None:
+              raise SystemExit(
+                  "GitHub user 'dims154' tidak ditemukan."
+              )
+
+
+          # ======================================
+          # BASIC STATISTICS
+          # ======================================
+
+          repositories_data = user["repositories"]
+
+          repositories = repositories_data["totalCount"]
+
+          followers = user["followers"]["totalCount"]
+
+
+          contributions_collection = (
+              user["contributionsCollection"]
+          )
+
+
+          calendar = (
+              contributions_collection
+              ["contributionCalendar"]
+          )
+
+
+          total_contributions = (
+              calendar["totalContributions"]
+          )
+
+
+          # ======================================
+          # CONTRIBUTION DAYS
+          # ======================================
+
+          days = []
+
+
+          for week in calendar["weeks"]:
+
+              for day in week["contributionDays"]:
+
+                  days.append({
+                      "date": day["date"],
+                      "count": day["contributionCount"]
+                  })
+
+
+          days.sort(
+              key=lambda x: x["date"]
+          )
+
+
+          # ======================================
+          # CURRENT STREAK
+          # ======================================
+
+          current_streak = 0
+
+
+          for day in reversed(days):
+
+              if day["count"] > 0:
+
+                  current_streak += 1
+
+              else:
+
+                  break
+
+
+          # ======================================
+          # LONGEST STREAK
+          # ======================================
+
+          longest_streak = 0
+
+          streak = 0
+
+
+          for day in days:
+
+              if day["count"] > 0:
+
+                  streak += 1
+
+                  longest_streak = max(
+                      longest_streak,
+                      streak
+                  )
+
+              else:
+
+                  streak = 0
+
+
+          # ======================================
+          # LANGUAGE STATISTICS
+          # ======================================
+
+          language_totals = defaultdict(int)
+
+          language_colors = {}
+
+
+          for repo in repositories_data["nodes"]:
+
+              if repo is None:
+                  continue
+
+
+              languages = repo.get("languages")
+
+
+              if not languages:
+                  continue
+
+
+              for edge in languages["edges"]:
+
+                  if edge["node"] is None:
+                      continue
+
+
+                  language = edge["node"]["name"]
+
+                  size = edge["size"]
+
+
+                  language_totals[language] += size
+
+
+                  if edge["node"].get("color"):
+
+                      language_colors[
+                          language
+                      ] = edge["node"]["color"]
+
+
+          top_languages = sorted(
+              language_totals.items(),
+              key=lambda x: x[1],
+              reverse=True
+          )[:6]
+
+
+          total_language_size = sum(
+              language_totals.values()
+          )
+
+
+          # ======================================
+          # PRINT RESULTS
+          # ======================================
+
+          print()
+          print("====================================")
+          print(" GitHub Profile Statistics")
+          print("====================================")
+          print(
+              f"Contributions : {total_contributions}"
+          )
+          print(
+              f"Repositories  : {repositories}"
+          )
+          print(
+              f"Followers     : {followers}"
+          )
+          print(
+              f"Current Streak: {current_streak} days"
+          )
+          print(
+              f"Longest Streak: {longest_streak} days"
+          )
+
+          print()
+          print("Top Languages:")
+
+          for language, size in top_languages:
+
+              percentage = (
+                  size / total_language_size * 100
+                  if total_language_size
+                  else 0
+              )
+
+              print(
+                  f"  {language}: "
+                  f"{percentage:.1f}%"
+              )
+
+          print("====================================")
+          print()
+
+
+          # ======================================
+          # SVG HELPER
+          # ======================================
+
+          def write_svg(
+              path,
+              content,
+              width,
+              height
+          ):
+
+              svg = f'''<svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="{width}"
+              height="{height}"
+              viewBox="0 0 {width} {height}">
+
+              <rect
+                width="100%"
+                height="100%"
+                rx="12"
+                fill="#0D1117"/>
+
+              {content}
+
+              </svg>'''
+
+
+              Path(path).write_text(
+                  svg,
+                  encoding="utf-8"
+              )
+
+
+          # ======================================
+          # GITHUB STATISTICS SVG
+          # ======================================
+
+          stats_svg = f'''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            GitHub Statistics
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+
+          <text
+            x="80"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            CONTRIBUTIONS
+          </text>
+
+          <text
+            x="80"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {total_contributions}
+          </text>
+
+
+          <text
+            x="300"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            REPOSITORIES
+          </text>
+
+          <text
+            x="300"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {repositories}
+          </text>
+
+
+          <text
+            x="500"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            FOLLOWERS
+          </text>
+
+          <text
+            x="500"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {followers}
+          </text>
+
+
+          <text
+            x="700"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            CURRENT STREAK
+          </text>
+
+          <text
+            x="700"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {current_streak}
+          </text>
+
+
+          <text
+            x="80"
+            y="225"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            LONGEST STREAK
+          </text>
+
+          <text
+            x="80"
+            y="265"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="30"
+            font-weight="bold">
+            {longest_streak} days
+          </text>
+
+          '''
+
+
+          write_svg(
+              "stats/github-stats.svg",
+              stats_svg,
+              900,
+              300
+          )
+
+
+          # ======================================
+          # STREAK SVG
+          # ======================================
+
+          streak_svg = f'''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Contribution Streak
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+
+          <text
+            x="220"
+            y="125"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            🔥 CURRENT STREAK
+          </text>
+
+          <text
+            x="220"
+            y="185"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="45"
+            font-weight="bold">
+            {current_streak}
+          </text>
+
+          <text
+            x="220"
+            y="215"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            DAYS
+          </text>
+
+
+          <text
+            x="570"
+            y="125"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            🏆 LONGEST STREAK
+          </text>
+
+          <text
+            x="570"
+            y="185"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="45"
+            font-weight="bold">
+            {longest_streak}
+          </text>
+
+          <text
+            x="570"
+            y="215"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            DAYS
+          </text>
+
+          '''
+
+
+          write_svg(
+              "stats/streak.svg",
+              streak_svg,
+              900,
+              260
+          )
+
+
+          # ======================================
+          # TOP LANGUAGES SVG
+          # ======================================
+
+          language_content = '''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Top Languages
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+          '''
+
+
+          y = 115
+
+
+          for language, size in top_languages:
+
+              percentage = (
+                  size / total_language_size * 100
+                  if total_language_size
+                  else 0
+              )
+
+
+              color = language_colors.get(
+                  language,
+                  "#58A6FF"
+              )
+
+
+              language_content += f'''
+
+              <circle
+                cx="60"
+                cy="{y - 5}"
+                r="7"
+                fill="{color}"/>
+
+              <text
+                x="80"
+                y="{y}"
+                fill="#F0F6FC"
+                font-family="Arial"
+                font-size="16">
+                {language}
+              </text>
+
+              <rect
+                x="250"
+                y="{y - 14}"
+                width="420"
+                height="12"
+                rx="6"
+                fill="#21262D"/>
+
+              <rect
+                x="250"
+                y="{y - 14}"
+                width="{420 * percentage / 100}"
+                height="12"
+                rx="6"
+                fill="{color}"/>
+
+              <text
+                x="700"
+                y="{y}"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="14">
+                {percentage:.1f}%
+              </text>
+
+              '''
+
+              y += 45
+
+
+          if not top_languages:
+
+              language_content += '''
+
+              <text
+                x="40"
+                y="120"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="16">
+                No language data available.
+              </text>
+
+              '''
+
+
+          write_svg(
+              "stats/top-languages.svg",
+              language_content,
+              900,
+              max(220, y + 20)
+          )
+
+
+
+          # ======================================
+          # CONTRIBUTION ACTIVITY SVG
+          # ======================================
+
+          graph_width = 900
+          graph_height = 380
+
+          graph_content = f'''
+          <text
+            x="40"
+            y="45"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Contribution Activity
+          </text>
+
+          <line
+            x1="40"
+            y1="65"
+            x2="860"
+            y2="65"
+            stroke="#30363D"/>
+          '''
+
+          # Show the most recent 31 contribution days.
+          recent_days = days[-31:]
+
+          if recent_days:
+
+              max_count = max(
+                  day["count"]
+                  for day in recent_days
+              )
+
+              max_count = max(max_count, 1)
+
+              graph_x = 65
+              graph_y = 100
+              graph_width_inner = 780
+              graph_height_inner = 210
+
+              step_x = (
+                  graph_width_inner /
+                  max(len(recent_days) - 1, 1)
+              )
+
+              points = []
+
+              # Grid lines and Y-axis labels.
+              for level in range(5):
+
+                  value = max_count * level / 4
+
+                  y = (
+                      graph_y
+                      + graph_height_inner
+                      - (
+                          value / max_count
+                          * graph_height_inner
+                      )
+                  )
+
+                  graph_content += f'''
+                  <line
+                    x1="{graph_x}"
+                    y1="{y:.2f}"
+                    x2="{graph_x + graph_width_inner}"
+                    y2="{y:.2f}"
+                    stroke="#21262D"
+                    stroke-width="1"/>
+
+                  <text
+                    x="{graph_x - 10}"
+                    y="{y + 4:.2f}"
+                    fill="#8B949E"
+                    font-family="Arial"
+                    font-size="11"
+                    text-anchor="end">
+                    {round(value)}
+                  </text>
+                  '''
+
+              for index, day in enumerate(recent_days):
+
+                  x = graph_x + index * step_x
+
+                  y = (
+                      graph_y
+                      + graph_height_inner
+                      - (
+                          day["count"] / max_count
+                          * graph_height_inner
+                      )
+                  )
+
+                  points.append(f"{x:.2f},{y:.2f}")
+
+                  graph_content += f'''
+                  <circle
+                    cx="{x:.2f}"
+                    cy="{y:.2f}"
+                    r="4"
+                    fill="#58A6FF"/>
+                  '''
+
+                  if (
+                      index % 5 == 0
+                      or index == len(recent_days) - 1
+                  ):
+
+                      graph_content += f'''
+                      <text
+                        x="{x:.2f}"
+                        y="{graph_y + graph_height_inner + 32:.2f}"
+                        fill="#8B949E"
+                        font-family="Arial"
+                        font-size="11"
+                        text-anchor="middle">
+                        {day["date"][5:]}
+                      </text>
+                      '''
+
+              graph_content += f'''
+              <polyline
+                points="{" ".join(points)}"
+                fill="none"
+                stroke="#58A6FF"
+                stroke-width="3"
+                stroke-linejoin="round"
+                stroke-linecap="round"/>
+
+              <line
+                x1="{graph_x}"
+                y1="{graph_y}"
+                x2="{graph_x}"
+                y2="{graph_y + graph_height_inner}"
+                stroke="#30363D"/>
+
+              <line
+                x1="{graph_x}"
+                y1="{graph_y + graph_height_inner}"
+                x2="{graph_x + graph_width_inner}"
+                y2="{graph_y + graph_height_inner}"
+                stroke="#30363D"/>
+              '''
+
+          else:
+
+              graph_content += '''
+              <text
+                x="40"
+                y="130"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="16">
+                No contribution data available.
+              </text>
+              '''
+
+          write_svg(
+              "stats/contribution-activity.svg",
+              graph_content,
+              graph_width,
+              graph_height
+          )
+
+          print()
+          print("SVG files generated:")
+          print(" - stats/github-stats.svg")
+          print(" - stats/streak.svg")
+          print(" - stats/top-languages.svg")
+          print(" - stats/contribution-activity.svg")
+          print()
+
+          PY
+
+
+      # ==========================================
+      # 4. COMMIT GENERATED FILES
+      # ==========================================
+
+      - name: Commit generated statistics
+        run: |
+
+          git config user.name "github-actions[bot]"
+
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add stats/
+
+          if git diff --cached --quiet; then
+
+            echo "No statistics changes."
+
+          else
+
+            git commit \
+              -m "chore: update GitHub profile statistics"
+
+            git push
+
+          fi
+name: Update GitHub Profile Stats
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # 08:00 WIB = 01:00 UTC
+    - cron: "0 1 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-profile:
+    name: Update GitHub Profile
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ==========================================
+      # 1. CHECKOUT
+      # ==========================================
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      # ==========================================
+      # 2. FETCH ALL GITHUB DATA
+      # ==========================================
+
+      - name: Fetch GitHub data
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+
+          gh api graphql \
+            -f query='
+            query($login: String!) {
+
+              user(login: $login) {
+
+                name
+                login
+
+                followers {
+                  totalCount
+                }
+
+                repositories(
+                  ownerAffiliations: OWNER
+                  first: 100
+                  privacy: PUBLIC
+                ) {
+
+                  totalCount
+
+                  nodes {
+
+                    name
+
+                    languages(
+                      first: 20
+                      orderBy: {
+                        field: SIZE
+                        direction: DESC
+                      }
+                    ) {
+
+                      edges {
+
+                        size
+
+                        node {
+                          name
+                          color
+                        }
+
+                      }
+
+                    }
+
+                  }
+
+                }
+
+                contributionsCollection {
+
+                  totalCommitContributions
+
+                  restrictedContributionsCount
+
+                  contributionCalendar {
+
+                    totalContributions
+
+                    weeks {
+
+                      contributionDays {
+                        date
+                        contributionCount
+                      }
+
+                    }
+
+                  }
+
+                }
+
+              }
+
+            }' \
+            -f login="dims154" \
+            > github-data.json
+
+
+      # ==========================================
+      # 3. GENERATE STATISTICS
+      # ==========================================
+
+      - name: Generate profile statistics
+        run: |
+
+          mkdir -p stats
+
+          python3 <<'PY'
+
+          import json
+          from pathlib import Path
+          from collections import defaultdict
+
+
+          # ======================================
+          # LOAD DATA
+          # ======================================
+
+          with open("github-data.json", encoding="utf-8") as f:
+              data = json.load(f)
+
+
+          if "errors" in data:
+
+              print("GitHub GraphQL error:")
+
+              for error in data["errors"]:
+                  print(error)
+
+              raise SystemExit(1)
+
+
+          user = data["data"]["user"]
+
+
+          if user is None:
+              raise SystemExit(
+                  "GitHub user 'dims154' tidak ditemukan."
+              )
+
+
+          # ======================================
+          # BASIC STATISTICS
+          # ======================================
+
+          repositories_data = user["repositories"]
+
+          repositories = repositories_data["totalCount"]
+
+          followers = user["followers"]["totalCount"]
+
+
+          contributions_collection = (
+              user["contributionsCollection"]
+          )
+
+
+          calendar = (
+              contributions_collection
+              ["contributionCalendar"]
+          )
+
+
+          total_contributions = (
+              calendar["totalContributions"]
+          )
+
+
+          # ======================================
+          # CONTRIBUTION DAYS
+          # ======================================
+
+          days = []
+
+
+          for week in calendar["weeks"]:
+
+              for day in week["contributionDays"]:
+
+                  days.append({
+                      "date": day["date"],
+                      "count": day["contributionCount"]
+                  })
+
+
+          days.sort(
+              key=lambda x: x["date"]
+          )
+
+
+          # ======================================
+          # CURRENT STREAK
+          # ======================================
+
+          current_streak = 0
+
+
+          for day in reversed(days):
+
+              if day["count"] > 0:
+
+                  current_streak += 1
+
+              else:
+
+                  break
+
+
+          # ======================================
+          # LONGEST STREAK
+          # ======================================
+
+          longest_streak = 0
+
+          streak = 0
+
+
+          for day in days:
+
+              if day["count"] > 0:
+
+                  streak += 1
+
+                  longest_streak = max(
+                      longest_streak,
+                      streak
+                  )
+
+              else:
+
+                  streak = 0
+
+
+          # ======================================
+          # LANGUAGE STATISTICS
+          # ======================================
+
+          language_totals = defaultdict(int)
+
+          language_colors = {}
+
+
+          for repo in repositories_data["nodes"]:
+
+              if repo is None:
+                  continue
+
+
+              languages = repo.get("languages")
+
+
+              if not languages:
+                  continue
+
+
+              for edge in languages["edges"]:
+
+                  if edge["node"] is None:
+                      continue
+
+
+                  language = edge["node"]["name"]
+
+                  size = edge["size"]
+
+
+                  language_totals[language] += size
+
+
+                  if edge["node"].get("color"):
+
+                      language_colors[
+                          language
+                      ] = edge["node"]["color"]
+
+
+          top_languages = sorted(
+              language_totals.items(),
+              key=lambda x: x[1],
+              reverse=True
+          )[:6]
+
+
+          total_language_size = sum(
+              language_totals.values()
+          )
+
+
+          # ======================================
+          # PRINT RESULTS
+          # ======================================
+
+          print()
+          print("====================================")
+          print(" GitHub Profile Statistics")
+          print("====================================")
+          print(
+              f"Contributions : {total_contributions}"
+          )
+          print(
+              f"Repositories  : {repositories}"
+          )
+          print(
+              f"Followers     : {followers}"
+          )
+          print(
+              f"Current Streak: {current_streak} days"
+          )
+          print(
+              f"Longest Streak: {longest_streak} days"
+          )
+
+          print()
+          print("Top Languages:")
+
+          for language, size in top_languages:
+
+              percentage = (
+                  size / total_language_size * 100
+                  if total_language_size
+                  else 0
+              )
+
+              print(
+                  f"  {language}: "
+                  f"{percentage:.1f}%"
+              )
+
+          print("====================================")
+          print()
+
+
+          # ======================================
+          # SVG HELPER
+          # ======================================
+
+          def write_svg(
+              path,
+              content,
+              width,
+              height
+          ):
+
+              svg = f'''<svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="{width}"
+              height="{height}"
+              viewBox="0 0 {width} {height}">
+
+              <rect
+                width="100%"
+                height="100%"
+                rx="12"
+                fill="#0D1117"/>
+
+              {content}
+
+              </svg>'''
+
+
+              Path(path).write_text(
+                  svg,
+                  encoding="utf-8"
+              )
+
+
+          # ======================================
+          # GITHUB STATISTICS SVG
+          # ======================================
+
+          stats_svg = f'''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            GitHub Statistics
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+
+          <text
+            x="80"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            CONTRIBUTIONS
+          </text>
+
+          <text
+            x="80"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {total_contributions}
+          </text>
+
+
+          <text
+            x="300"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            REPOSITORIES
+          </text>
+
+          <text
+            x="300"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {repositories}
+          </text>
+
+
+          <text
+            x="500"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            FOLLOWERS
+          </text>
+
+          <text
+            x="500"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {followers}
+          </text>
+
+
+          <text
+            x="700"
+            y="120"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            CURRENT STREAK
+          </text>
+
+          <text
+            x="700"
+            y="160"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="32"
+            font-weight="bold">
+            {current_streak}
+          </text>
+
+
+          <text
+            x="80"
+            y="225"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            LONGEST STREAK
+          </text>
+
+          <text
+            x="80"
+            y="265"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="30"
+            font-weight="bold">
+            {longest_streak} days
+          </text>
+
+          '''
+
+
+          write_svg(
+              "stats/github-stats.svg",
+              stats_svg,
+              900,
+              300
+          )
+
+
+          # ======================================
+          # STREAK SVG
+          # ======================================
+
+          streak_svg = f'''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Contribution Streak
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+
+          <text
+            x="220"
+            y="125"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            🔥 CURRENT STREAK
+          </text>
+
+          <text
+            x="220"
+            y="185"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="45"
+            font-weight="bold">
+            {current_streak}
+          </text>
+
+          <text
+            x="220"
+            y="215"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            DAYS
+          </text>
+
+
+          <text
+            x="570"
+            y="125"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="15">
+            🏆 LONGEST STREAK
+          </text>
+
+          <text
+            x="570"
+            y="185"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="45"
+            font-weight="bold">
+            {longest_streak}
+          </text>
+
+          <text
+            x="570"
+            y="215"
+            fill="#8B949E"
+            font-family="Arial"
+            font-size="14">
+            DAYS
+          </text>
+
+          '''
+
+
+          write_svg(
+              "stats/streak.svg",
+              streak_svg,
+              900,
+              260
+          )
+
+
+          # ======================================
+          # TOP LANGUAGES SVG
+          # ======================================
+
+          language_content = '''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Top Languages
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+          '''
+
+
+          y = 115
+
+
+          for language, size in top_languages:
+
+              percentage = (
+                  size / total_language_size * 100
+                  if total_language_size
+                  else 0
+              )
+
+
+              color = language_colors.get(
+                  language,
+                  "#58A6FF"
+              )
+
+
+              language_content += f'''
+
+              <circle
+                cx="60"
+                cy="{y - 5}"
+                r="7"
+                fill="{color}"/>
+
+              <text
+                x="80"
+                y="{y}"
+                fill="#F0F6FC"
+                font-family="Arial"
+                font-size="16">
+                {language}
+              </text>
+
+              <rect
+                x="250"
+                y="{y - 14}"
+                width="420"
+                height="12"
+                rx="6"
+                fill="#21262D"/>
+
+              <rect
+                x="250"
+                y="{y - 14}"
+                width="{420 * percentage / 100}"
+                height="12"
+                rx="6"
+                fill="{color}"/>
+
+              <text
+                x="700"
+                y="{y}"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="14">
+                {percentage:.1f}%
+              </text>
+
+              '''
+
+              y += 45
+
+
+          if not top_languages:
+
+              language_content += '''
+
+              <text
+                x="40"
+                y="120"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="16">
+                No language data available.
+              </text>
+
+              '''
+
+
+          write_svg(
+              "stats/top-languages.svg",
+              language_content,
+              900,
+              max(220, y + 20)
+          )
+
+
+
+          # ======================================
+          # CONTRIBUTION ACTIVITY SVG
+          # ======================================
+
+          graph_width = 900
+          graph_height = 380
+
+          graph_content = f'''
+          <text
+            x="40"
+            y="45"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Contribution Activity
+          </text>
+
+          <line
+            x1="40"
+            y1="65"
+            x2="860"
+            y2="65"
+            stroke="#30363D"/>
+          '''
+
+          # Show the most recent 31 contribution days.
+          recent_days = days[-31:]
+
+          if recent_days:
+
+              max_count = max(
+                  day["count"]
+                  for day in recent_days
+              )
+
+              max_count = max(max_count, 1)
+
+              graph_x = 65
+              graph_y = 100
+              graph_width_inner = 780
+              graph_height_inner = 210
+
+              step_x = (
+                  graph_width_inner /
+                  max(len(recent_days) - 1, 1)
+              )
+
+              points = []
+
+              # Grid lines and Y-axis labels.
+              for level in range(5):
+
+                  value = max_count * level / 4
+
+                  y = (
+                      graph_y
+                      + graph_height_inner
+                      - (
+                          value / max_count
+                          * graph_height_inner
+                      )
+                  )
+
+                  graph_content += f'''
+                  <line
+                    x1="{graph_x}"
+                    y1="{y:.2f}"
+                    x2="{graph_x + graph_width_inner}"
+                    y2="{y:.2f}"
+                    stroke="#21262D"
+                    stroke-width="1"/>
+
+                  <text
+                    x="{graph_x - 10}"
+                    y="{y + 4:.2f}"
+                    fill="#8B949E"
+                    font-family="Arial"
+                    font-size="11"
+                    text-anchor="end">
+                    {round(value)}
+                  </text>
+                  '''
+
+              for index, day in enumerate(recent_days):
+
+                  x = graph_x + index * step_x
+
+                  y = (
+                      graph_y
+                      + graph_height_inner
+                      - (
+                          day["count"] / max_count
+                          * graph_height_inner
+                      )
+                  )
+
+                  points.append(f"{x:.2f},{y:.2f}")
+
+                  graph_content += f'''
+                  <circle
+                    cx="{x:.2f}"
+                    cy="{y:.2f}"
+                    r="4"
+                    fill="#58A6FF"/>
+                  '''
+
+                  if (
+                      index % 5 == 0
+                      or index == len(recent_days) - 1
+                  ):
+
+                      graph_content += f'''
+                      <text
+                        x="{x:.2f}"
+                        y="{graph_y + graph_height_inner + 32:.2f}"
+                        fill="#8B949E"
+                        font-family="Arial"
+                        font-size="11"
+                        text-anchor="middle">
+                        {day["date"][5:]}
+                      </text>
+                      '''
+
+              graph_content += f'''
+              <polyline
+                points="{" ".join(points)}"
+                fill="none"
+                stroke="#58A6FF"
+                stroke-width="3"
+                stroke-linejoin="round"
+                stroke-linecap="round"/>
+
+              <line
+                x1="{graph_x}"
+                y1="{graph_y}"
+                x2="{graph_x}"
+                y2="{graph_y + graph_height_inner}"
+                stroke="#30363D"/>
+
+              <line
+                x1="{graph_x}"
+                y1="{graph_y + graph_height_inner}"
+                x2="{graph_x + graph_width_inner}"
+                y2="{graph_y + graph_height_inner}"
+                stroke="#30363D"/>
+              '''
+
+          else:
+
+              graph_content += '''
+              <text
+                x="40"
+                y="130"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="16">
+                No contribution data available.
+              </text>
+              '''
+
+          write_svg(
+              "stats/contribution-activity.svg",
+              graph_content,
+              graph_width,
+              graph_height
+          )
+
+          print()
+          print("SVG files generated:")
+          print(" - stats/github-stats.svg")
+          print(" - stats/streak.svg")
+          print(" - stats/top-languages.svg")
+          print(" - stats/contribution-activity.svg")
+          print()
+
+          PY
+
+
+      # ==========================================
+      # 4. COMMIT GENERATED FILES
+      # ==========================================
+
+      - name: Commit generated statistics
+        run: |
+
+          git config user.name "github-actions[bot]"
+
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add stats/
+
+          if git diff --cached --quiet; then
+
+            echo "No statistics changes."
+
+          else
+
+            git commit \
+              -m "chore: update GitHub profile statistics"
+
+            git push
+
+          fi
