@@ -4,7 +4,6 @@ on:
   workflow_dispatch:
 
   schedule:
-    # Every day at 08:00 WIB
     # 08:00 WIB = 01:00 UTC
     - cron: "0 1 * * *"
 
@@ -13,19 +12,21 @@ permissions:
 
 jobs:
   update-profile:
+    name: Update GitHub Profile
     runs-on: ubuntu-latest
 
     steps:
 
       # ==========================================
-      # CHECKOUT
+      # 1. CHECKOUT
       # ==========================================
 
       - name: Checkout repository
         uses: actions/checkout@v4
 
+
       # ==========================================
-      # GET GITHUB DATA
+      # 2. FETCH ALL GITHUB DATA
       # ==========================================
 
       - name: Fetch GitHub data
@@ -49,13 +50,44 @@ jobs:
                 repositories(
                   ownerAffiliations: OWNER
                   first: 100
+                  privacy: PUBLIC
                 ) {
+
                   totalCount
+
+                  nodes {
+
+                    name
+
+                    languages(
+                      first: 20
+                      orderBy: {
+                        field: SIZE
+                        direction: DESC
+                      }
+                    ) {
+
+                      edges {
+
+                        size
+
+                        node {
+                          name
+                          color
+                        }
+
+                      }
+
+                    }
+
+                  }
+
                 }
 
                 contributionsCollection {
 
                   totalCommitContributions
+
                   restrictedContributionsCount
 
                   contributionCalendar {
@@ -83,23 +115,7 @@ jobs:
 
 
       # ==========================================
-      # GET REPOSITORY LANGUAGES
-      # ==========================================
-
-      - name: Fetch repository languages
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-
-          gh api \
-            --paginate \
-            /users/dims154/repos \
-            -f per_page=100 \
-            > repositories.json
-
-
-      # ==========================================
-      # GENERATE SVG FILES
+      # 3. GENERATE STATISTICS
       # ==========================================
 
       - name: Generate profile statistics
@@ -110,45 +126,70 @@ jobs:
           python3 <<'PY'
 
           import json
-          import html
           from pathlib import Path
           from collections import defaultdict
+
 
           # ======================================
           # LOAD DATA
           # ======================================
 
-          with open("github-data.json") as f:
+          with open("github-data.json", encoding="utf-8") as f:
               data = json.load(f)
 
+
+          if "errors" in data:
+
+              print("GitHub GraphQL error:")
+
+              for error in data["errors"]:
+                  print(error)
+
+              raise SystemExit(1)
+
+
           user = data["data"]["user"]
+
+
+          if user is None:
+              raise SystemExit(
+                  "GitHub user 'dims154' tidak ditemukan."
+              )
+
+
+          # ======================================
+          # BASIC STATISTICS
+          # ======================================
+
+          repositories_data = user["repositories"]
+
+          repositories = repositories_data["totalCount"]
+
+          followers = user["followers"]["totalCount"]
+
 
           contributions_collection = (
               user["contributionsCollection"]
           )
+
 
           calendar = (
               contributions_collection
               ["contributionCalendar"]
           )
 
+
           total_contributions = (
               calendar["totalContributions"]
           )
 
-          repositories = (
-              user["repositories"]["totalCount"]
-          )
-
-          followers = (
-              user["followers"]["totalCount"]
-          )
 
           # ======================================
           # CONTRIBUTION DAYS
           # ======================================
 
           days = []
+
 
           for week in calendar["weeks"]:
 
@@ -159,13 +200,18 @@ jobs:
                       "count": day["contributionCount"]
                   })
 
-          days.sort(key=lambda x: x["date"])
+
+          days.sort(
+              key=lambda x: x["date"]
+          )
+
 
           # ======================================
           # CURRENT STREAK
           # ======================================
 
           current_streak = 0
+
 
           for day in reversed(days):
 
@@ -177,12 +223,15 @@ jobs:
 
                   break
 
+
           # ======================================
           # LONGEST STREAK
           # ======================================
 
           longest_streak = 0
+
           streak = 0
+
 
           for day in days:
 
@@ -199,66 +248,116 @@ jobs:
 
                   streak = 0
 
+
           # ======================================
-          # TOP LANGUAGES
+          # LANGUAGE STATISTICS
           # ======================================
 
           language_totals = defaultdict(int)
 
-          try:
+          language_colors = {}
 
-              with open("repositories.json") as f:
-                  repositories_data = json.load(f)
 
-              for repo in repositories_data:
+          for repo in repositories_data["nodes"]:
 
-                  if repo.get("fork"):
+              if repo is None:
+                  continue
+
+
+              languages = repo.get("languages")
+
+
+              if not languages:
+                  continue
+
+
+              for edge in languages["edges"]:
+
+                  if edge["node"] is None:
                       continue
 
-                  owner = repo.get("owner", {}).get("login")
 
-                  if owner != "dims154":
-                      continue
+                  language = edge["node"]["name"]
 
-                  languages_url = repo.get(
-                      "languages_url"
-                  )
+                  size = edge["size"]
 
-                  if not languages_url:
-                      continue
 
-                  # Language information will be
-                  # collected separately below.
+                  language_totals[language] += size
 
-          except Exception:
-              pass
 
-          # ======================================
-          # COLORS
-          # ======================================
+                  if edge["node"].get("color"):
 
-          language_colors = {
+                      language_colors[
+                          language
+                      ] = edge["node"]["color"]
 
-              "Python": "#3572A5",
-              "JavaScript": "#f1e05a",
-              "PHP": "#4F5D95",
-              "Java": "#b07219",
-              "HTML": "#e34c26",
-              "CSS": "#563d7c",
-              "TypeScript": "#3178c6",
-              "C": "#555555",
-              "C++": "#f34b7d",
-              "C#": "#178600",
-              "Shell": "#89e051",
-              "SQL": "#e38c00"
 
-          }
+          top_languages = sorted(
+              language_totals.items(),
+              key=lambda x: x[1],
+              reverse=True
+          )[:6]
+
+
+          total_language_size = sum(
+              language_totals.values()
+          )
+
 
           # ======================================
-          # SVG HELPERS
+          # PRINT RESULTS
           # ======================================
 
-          def write_svg(path, content, width=900, height=300):
+          print()
+          print("====================================")
+          print(" GitHub Profile Statistics")
+          print("====================================")
+          print(
+              f"Contributions : {total_contributions}"
+          )
+          print(
+              f"Repositories  : {repositories}"
+          )
+          print(
+              f"Followers     : {followers}"
+          )
+          print(
+              f"Current Streak: {current_streak} days"
+          )
+          print(
+              f"Longest Streak: {longest_streak} days"
+          )
+
+          print()
+          print("Top Languages:")
+
+          for language, size in top_languages:
+
+              percentage = (
+                  size / total_language_size * 100
+                  if total_language_size
+                  else 0
+              )
+
+              print(
+                  f"  {language}: "
+                  f"{percentage:.1f}%"
+              )
+
+          print("====================================")
+          print()
+
+
+          # ======================================
+          # SVG HELPER
+          # ======================================
+
+          def write_svg(
+              path,
+              content,
+              width,
+              height
+          ):
 
               svg = f'''<svg
               xmlns="http://www.w3.org/2000/svg"
@@ -276,20 +375,22 @@ jobs:
 
               </svg>'''
 
+
               Path(path).write_text(
                   svg,
                   encoding="utf-8"
               )
 
+
           # ======================================
-          # GITHUB STATS SVG
+          # GITHUB STATISTICS SVG
           # ======================================
 
           stats_svg = f'''
 
           <text
             x="40"
-            y="55"
+            y="50"
             fill="#58A6FF"
             font-family="Arial"
             font-size="28"
@@ -299,114 +400,121 @@ jobs:
 
           <line
             x1="40"
-            y1="75"
+            y1="70"
             x2="860"
-            y2="75"
+            y2="70"
             stroke="#30363D"/>
 
+
           <text
-            x="120"
-            y="135"
+            x="80"
+            y="120"
             fill="#8B949E"
             font-family="Arial"
-            font-size="15">
+            font-size="14">
             CONTRIBUTIONS
           </text>
 
           <text
-            x="120"
-            y="180"
+            x="80"
+            y="160"
             fill="#58A6FF"
             font-family="Arial"
-            font-size="36"
+            font-size="32"
             font-weight="bold">
             {total_contributions}
           </text>
 
+
           <text
-            x="350"
-            y="135"
+            x="300"
+            y="120"
             fill="#8B949E"
             font-family="Arial"
-            font-size="15">
+            font-size="14">
             REPOSITORIES
           </text>
 
           <text
-            x="350"
-            y="180"
+            x="300"
+            y="160"
             fill="#58A6FF"
             font-family="Arial"
-            font-size="36"
+            font-size="32"
             font-weight="bold">
             {repositories}
           </text>
 
+
           <text
-            x="580"
-            y="135"
+            x="500"
+            y="120"
             fill="#8B949E"
             font-family="Arial"
-            font-size="15">
+            font-size="14">
             FOLLOWERS
           </text>
 
           <text
-            x="580"
-            y="180"
+            x="500"
+            y="160"
             fill="#58A6FF"
             font-family="Arial"
-            font-size="36"
+            font-size="32"
             font-weight="bold">
             {followers}
           </text>
 
+
           <text
-            x="120"
-            y="235"
+            x="700"
+            y="120"
             fill="#8B949E"
             font-family="Arial"
-            font-size="15">
+            font-size="14">
             CURRENT STREAK
           </text>
 
           <text
-            x="120"
-            y="270"
+            x="700"
+            y="160"
             fill="#58A6FF"
             font-family="Arial"
-            font-size="25"
+            font-size="32"
             font-weight="bold">
-            {current_streak} days
+            {current_streak}
           </text>
 
+
           <text
-            x="350"
-            y="235"
+            x="80"
+            y="225"
             fill="#8B949E"
             font-family="Arial"
-            font-size="15">
+            font-size="14">
             LONGEST STREAK
           </text>
 
           <text
-            x="350"
-            y="270"
+            x="80"
+            y="265"
             fill="#58A6FF"
             font-family="Arial"
-            font-size="25"
+            font-size="30"
             font-weight="bold">
             {longest_streak} days
           </text>
 
           '''
 
+
           write_svg(
               "stats/github-stats.svg",
               stats_svg,
               900,
-              320
+              300
           )
+
 
           # ======================================
           # STREAK SVG
@@ -416,7 +524,7 @@ jobs:
 
           <text
             x="40"
-            y="55"
+            y="50"
             fill="#58A6FF"
             font-family="Arial"
             font-size="28"
@@ -426,23 +534,24 @@ jobs:
 
           <line
             x1="40"
-            y1="75"
+            y1="70"
             x2="860"
-            y2="75"
+            y2="70"
             stroke="#30363D"/>
 
+
           <text
-            x="250"
-            y="145"
+            x="220"
+            y="125"
             fill="#8B949E"
             font-family="Arial"
-            font-size="16">
-            CURRENT STREAK
+            font-size="15">
+            🔥 CURRENT STREAK
           </text>
 
           <text
-            x="250"
-            y="205"
+            x="220"
+            y="185"
             fill="#58A6FF"
             font-family="Arial"
             font-size="45"
@@ -451,26 +560,27 @@ jobs:
           </text>
 
           <text
-            x="250"
-            y="235"
+            x="220"
+            y="215"
             fill="#8B949E"
             font-family="Arial"
-            font-size="15">
+            font-size="14">
             DAYS
           </text>
 
+
           <text
             x="570"
-            y="145"
+            y="125"
             fill="#8B949E"
             font-family="Arial"
-            font-size="16">
-            LONGEST STREAK
+            font-size="15">
+            🏆 LONGEST STREAK
           </text>
 
           <text
             x="570"
-            y="205"
+            y="185"
             fill="#58A6FF"
             font-family="Arial"
             font-size="45"
@@ -480,29 +590,151 @@ jobs:
 
           <text
             x="570"
-            y="235"
+            y="215"
             fill="#8B949E"
             font-family="Arial"
-            font-size="15">
+            font-size="14">
             DAYS
           </text>
 
           '''
 
+
           write_svg(
               "stats/streak.svg",
               streak_svg,
               900,
-              280
+              260
           )
 
-          print("Statistics generated successfully.")
+
+          # ======================================
+          # TOP LANGUAGES SVG
+          # ======================================
+
+          language_content = '''
+
+          <text
+            x="40"
+            y="50"
+            fill="#58A6FF"
+            font-family="Arial"
+            font-size="28"
+            font-weight="bold">
+            Top Languages
+          </text>
+
+          <line
+            x1="40"
+            y1="70"
+            x2="860"
+            y2="70"
+            stroke="#30363D"/>
+
+          '''
+
+
+          y = 115
+
+
+          for language, size in top_languages:
+
+              percentage = (
+                  size / total_language_size * 100
+                  if total_language_size
+                  else 0
+              )
+
+
+              color = language_colors.get(
+                  language,
+                  "#58A6FF"
+              )
+
+
+              language_content += f'''
+
+              <circle
+                cx="60"
+                cy="{y - 5}"
+                r="7"
+                fill="{color}"/>
+
+              <text
+                x="80"
+                y="{y}"
+                fill="#F0F6FC"
+                font-family="Arial"
+                font-size="16">
+                {language}
+              </text>
+
+              <rect
+                x="250"
+                y="{y - 14}"
+                width="420"
+                height="12"
+                rx="6"
+                fill="#21262D"/>
+
+              <rect
+                x="250"
+                y="{y - 14}"
+                width="{420 * percentage / 100}"
+                height="12"
+                rx="6"
+                fill="{color}"/>
+
+              <text
+                x="700"
+                y="{y}"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="14">
+                {percentage:.1f}%
+              </text>
+
+              '''
+
+              y += 45
+
+
+          if not top_languages:
+
+              language_content += '''
+
+              <text
+                x="40"
+                y="120"
+                fill="#8B949E"
+                font-family="Arial"
+                font-size="16">
+                No language data available.
+              </text>
+
+              '''
+
+
+          write_svg(
+              "stats/top-languages.svg",
+              language_content,
+              900,
+              max(220, y + 20)
+          )
+
+
+          print()
+          print("SVG files generated:")
+          print(" - stats/github-stats.svg")
+          print(" - stats/streak.svg")
+          print(" - stats/top-languages.svg")
+          print()
 
           PY
 
 
       # ==========================================
-      # COMMIT
+      # 4. COMMIT GENERATED FILES
       # ==========================================
 
       - name: Commit generated statistics
