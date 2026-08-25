@@ -831,21 +831,23 @@ jobs:
                     fill="#58A6FF"/>
                   '''
 
-                 if index % 5 == 0 or index == len(recent_days) - 1:
+                  if (
+                      index % 5 == 0
+                      or index == len(recent_days) - 1
+                  ):
 
-    month_day = f"{day['date'][5:7]}/{day['date'][8:10]}"
+                      graph_content += f'''
+                      <text
+                        x="{x:.2f}"
+                        y="{graph_y + graph_height_inner + 32:.2f}"
+                        fill="#8B949E"
+                        font-family="Arial"
+                        font-size="11"
+                        text-anchor="middle">
+                        {day["date"][5:7]}/{day["date"][8:10]}
+                      </text>
+                      '''
 
-    graph_content += f'''
-    <text
-      x="{x:.2f}"
-      y="{graph_y + graph_height_inner + 32:.2f}"
-      fill="#8B949E"
-      font-family="Arial"
-      font-size="11"
-      text-anchor="middle">
-      {month_day}
-    </text>
-    '''
               graph_content += f'''
               <polyline
                 points="{" ".join(points)}"
