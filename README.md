@@ -2,9 +2,9 @@
 
 <img src="./assets/cyberpunk.png" width="100%" alt="Cyberpunk Banner">
 
-# 👨‍💻 Muhammad Ilham
+👨‍💻 Muhammad Ilham
 
-### Information Systems Student · Backend Developer · System Enthusiast
+Information Systems Student · Backend Developer · System Enthusiast
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=22&duration=3000&pause=1000&color=58A6FF&center=true&vCenter=true&width=720&lines=Welcome+to+my+GitHub+Profile;Backend+Developer;Information+Systems+Student;Building+Real+World+Systems;Learning+System+Design;Turning+Ideas+Into+Code;Code+%E2%80%A2+Build+%E2%80%A2+Improve" alt="Typing SVG">
 
@@ -20,15 +20,12 @@
 
 </div>
 
----
+🌌 About Me
 
-## 🌌 About Me
-
-I'm an **Information Systems student** with a strong interest in backend development, software architecture, and building practical systems.
+I'm an Information Systems student with a strong interest in backend development, software architecture, and building practical systems.
 
 I enjoy understanding how systems work behind the scenes, turning ideas into working software, and continuously improving through real-world projects.
 
-```yaml
 name: Muhammad Ilham
 username: dims154
 location: Jambi, Indonesia
@@ -52,47 +49,61 @@ interests:
   - Business Intelligence
   - Open Source
   - Continuous Learning
-```
 
----
-
-## 🚀 Tech Stack
+🚀 Tech Stack
 
 <div align="center">
 
-### 💻 Programming Languages
+💻 Programming Languages
 
 <img src="https://skillicons.dev/icons?i=python,java,php,javascript" alt="Programming Languages">
 
-### ⚙️ Backend & Framework
+⚙️ Backend & Framework
 
 <img src="https://skillicons.dev/icons?i=laravel,nodejs" alt="Backend Technologies">
 
-### 🗄️ Database
+🗄️ Database
 
 <img src="https://skillicons.dev/icons?i=mysql,sqlite" alt="Database Technologies">
 
-### 🛠️ Development Tools
+🛠️ Development Tools
 
 <img src="https://skillicons.dev/icons?i=git,github,vscode,postman" alt="Development Tools">
 
-### 🌐 Web Technologies
+🌐 Web Technologies
 
 <img src="https://skillicons.dev/icons?i=html,css" alt="Web Technologies">
 
 </div>
 
----
-
-## 📊 GitHub Statistics
+📊 GitHub Statistics
 
 <div align="center">
 
-![GitHub Statistics](./stats/github-stats.svg)
+<img
+src="https://raw.githubusercontent.com/dims154/dims154/main/stats/github-stats.svg"
+width="100%"
+alt="GitHub Statistics"
 
-![Top Languages](./stats/top-languages.svg)
 
-![GitHub Contribution Streak](./stats/streak.svg)
+
+<br>
+
+<img
+src="https://raw.githubusercontent.com/dims154/dims154/main/stats/top-languages.svg"
+width="100%"
+alt="Top Languages"
+
+
+
+<br>
+
+<img
+src="https://raw.githubusercontent.com/dims154/dims154/main/stats/streak.svg"
+width="100%"
+alt="GitHub Contribution Streak"
+
+
 
 </div>
 
@@ -100,9 +111,7 @@ interests:
 <sub>🔄 Automatically generated and updated with GitHub Actions</sub>
 </p>
 
----
-
-## 📈 Contribution Activity
+📈 Contribution Activity
 
 <div align="center">
 
@@ -110,72 +119,107 @@ interests:
 src="https://raw.githubusercontent.com/dims154/dims154/main/stats/contribution-activity.svg"
 width="100%"
 alt="Contribution Activity"
->
+
+
 
 </div>
 
 <p align="center">
 <sub>Last 31 days · Automatically generated with GitHub Actions</sub>
 </p>
-## 🎯 Current Focus
+
+🎯 Current Focus
 
 <div align="center">
 
-|         🎯 Area        | 🚀 Current Focus                                     |
-| :--------------------: | :--------------------------------------------------- |
-|     ⚙️ **Backend**     | Building practical and scalable backend applications |
-|  🏗️ **Architecture**  | Learning system design and enterprise architecture   |
-|    🗄️ **Database**    | Designing structured and reliable data systems       |
-|    🤖 **Automation**   | Building bots, workflows, and integrations           |
-|    📊 **Analytics**    | Exploring data analytics and business intelligence   |
-| 🧠 **Problem Solving** | Improving programming and logical thinking           |
-|   🌱 **Open Source**   | Learning through real-world projects                 |
+🎯 Area
+
+🚀 Current Focus
+
+⚙️ Backend
+
+Building practical and scalable backend applications
+
+🏗️ Architecture
+
+Learning system design and enterprise architecture
+
+🗄️ Database
+
+Designing structured and reliable data systems
+
+🤖 Automation
+
+Building bots, workflows, and integrations
+
+📊 Analytics
+
+Exploring data analytics and business intelligence
+
+🧠 Problem Solving
+
+Improving programming and logical thinking
+
+🌱 Open Source
+
+Learning through real-world projects
 
 </div>
 
----
+🛠️ What I'm Building
 
-## 🛠️ What I'm Building
-
-### 🤖 Backend & Automation
+🤖 Backend & Automation
 
 Building backend systems and automation workflows with a focus on:
 
-* API development
-* Command-based architecture
-* Authentication & authorization
-* Permission systems
-* User management
-* Automation
-* Structured data
+API development
 
-### 🏢 Enterprise Systems
+Command-based architecture
+
+Authentication & authorization
+
+Permission systems
+
+User management
+
+Automation
+
+Structured data
+
+🏢 Enterprise Systems
 
 Exploring enterprise-oriented software architecture through:
 
-* Modular architecture
-* Multi-tenant systems
-* Tenant isolation
-* Database design
-* Scalable backend architecture
-* System integration
+Modular architecture
 
-### 📊 Data & Business Systems
+Multi-tenant systems
+
+Tenant isolation
+
+Database design
+
+Scalable backend architecture
+
+System integration
+
+📊 Data & Business Systems
 
 Exploring applications involving:
 
-* Inventory management
-* Product management
-* Customer management
-* Transactions
-* Reporting
-* Business analytics
+Inventory management
 
----
+Product management
 
-## 🧠 Development Philosophy
+Customer management
 
-```text
+Transactions
+
+Reporting
+
+Business analytics
+
+🧠 Development Philosophy
+
              ┌───────────┐
              │   LEARN   │
              └─────┬─────┘
@@ -206,33 +250,50 @@ Exploring applications involving:
              └─────┬─────┘
                    │
                    └──────────────► REPEAT
-```
 
-> I don't aim to write perfect code from the beginning.
->
-> I aim to understand **why it works, why it fails, and how it can be improved.**
+I don't aim to write perfect code from the beginning.
 
----
+I aim to understand why it works, why it fails, and how it can be improved.
 
-## 📚 Currently Learning
+📚 Currently Learning
 
 <div align="center">
 
-| Technology / Concept           | Focus                           |
-| :----------------------------- | :------------------------------ |
-| 🐍 **Python**                  | Programming & automation        |
-| 🐘 **PHP / Laravel**           | Backend development             |
-| 🟨 **JavaScript / Node.js**    | Backend & integrations          |
-| 🏗️ **System Design**          | Scalable software architecture  |
-| 🏢 **Enterprise Architecture** | Business-oriented system design |
-| 🗄️ **Database Design**        | Data modeling & optimization    |
-| 🤖 **GitHub Actions**          | CI/CD & automation              |
+Technology / Concept
+
+Focus
+
+🐍 Python
+
+Programming & automation
+
+🐘 PHP / Laravel
+
+Backend development
+
+🟨 JavaScript / Node.js
+
+Backend & integrations
+
+🏗️ System Design
+
+Scalable software architecture
+
+🏢 Enterprise Architecture
+
+Business-oriented system design
+
+🗄️ Database Design
+
+Data modeling & optimization
+
+🤖 GitHub Actions
+
+CI/CD & automation
 
 </div>
 
----
-
-## 🔥 Areas of Interest
+🔥 Areas of Interest
 
 <div align="center">
 
@@ -242,7 +303,7 @@ Exploring applications involving:
 
 <td width="50%" align="center">
 
-### ⚙️ Backend Development
+⚙️ Backend Development
 
 APIs, business logic, authentication, databases, integrations, and backend architecture.
 
@@ -250,7 +311,7 @@ APIs, business logic, authentication, databases, integrations, and backend archi
 
 <td width="50%" align="center">
 
-### 🏢 Enterprise Architecture
+🏢 Enterprise Architecture
 
 System structure, modularity, scalability, maintainability, and business processes.
 
@@ -262,7 +323,7 @@ System structure, modularity, scalability, maintainability, and business process
 
 <td width="50%" align="center">
 
-### 🤖 Automation
+🤖 Automation
 
 Bots, workflows, scheduled tasks, integrations, and developer automation.
 
@@ -270,7 +331,7 @@ Bots, workflows, scheduled tasks, integrations, and developer automation.
 
 <td width="50%" align="center">
 
-### 📊 Data & Analytics
+📊 Data & Analytics
 
 Databases, reporting, analytics, and business intelligence.
 
@@ -282,11 +343,8 @@ Databases, reporting, analytics, and business intelligence.
 
 </div>
 
----
+🔄 Development Workflow
 
-## 🔄 Development Workflow
-
-```text
              ┌───────────┐
              │   IDEA    │
              └─────┬─────┘
@@ -327,15 +385,11 @@ Databases, reporting, analytics, and business intelligence.
              └─────┬─────┘
                    │
                    └──────────────► REPEAT
-```
 
----
+📌 GitHub Automation
 
-## 📌 GitHub Automation
+This profile uses GitHub Actions to automatically generate and update GitHub statistics.
 
-This profile uses **GitHub Actions** to automatically generate and update GitHub statistics.
-
-```text
 GitHub API
      │
      ▼
@@ -354,17 +408,15 @@ Generate SVG
 stats/
  ├── github-stats.svg
  ├── top-languages.svg
- └── streak.svg
+ ├── streak.svg
+ └── contribution-activity.svg
      │
      ▼
 README.md
-```
 
-The statistics are generated from GitHub data and stored directly inside this repository.
+The statistics and contribution activity are generated from GitHub data and stored directly inside this repository.
 
----
-
-## 🌐 Connect With Me
+🌐 Connect With Me
 
 <div align="center">
 
@@ -378,13 +430,11 @@ The statistics are generated from GitHub data and stored directly inside this re
 
 </div>
 
----
-
 <div align="center">
 
-### ⚡ Code • Build • Learn • Improve • Repeat
+⚡ Code • Build • Learn • Improve • Repeat
 
-*"Every expert was once a beginner."*
+"Every expert was once a beginner."
 
 <br>
 
@@ -392,7 +442,7 @@ The statistics are generated from GitHub data and stored directly inside this re
 src="https://komarev.com/ghpvc/?username=dims154&style=for-the-badge&color=58A6FF&label=PROFILE+VIEWS"
 alt="Profile Views"
 
->
+
 
 <br><br>
 
