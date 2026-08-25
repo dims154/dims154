@@ -106,12 +106,17 @@ interests:
 
 <div align="center">
 
-![GitHub Contribution Activity](https://github-readme-activity-graph.vercel.app/graph?username=dims154\&theme=github-dark\&hide_border=true\&bg_color=0D1117)
+<img
+src="https://raw.githubusercontent.com/dims154/dims154/main/stats/contribution-activity.svg"
+width="100%"
+alt="Contribution Activity"
+>
 
 </div>
 
----
-
+<p align="center">
+<sub>Last 31 days · Automatically generated with GitHub Actions</sub>
+</p>
 ## 🎯 Current Focus
 
 <div align="center">
