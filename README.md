@@ -4,14 +4,18 @@
 
 # 👨‍💻 Muhammad Ilham
 
-### Information Systems Student | Backend Enthusiast
+### Information Systems Student · Backend Developer · System Enthusiast
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=22&duration=3000&pause=1000&color=58A6FF&center=true&vCenter=true&width=700&lines=Welcome+to+my+GitHub+Profile;Backend+Developer;Information+Systems+Student;Building+Real+World+Systems;Always+Learning+New+Things;Code+%E2%80%A2+Learn+%E2%80%A2+Build+%E2%80%A2+Improve" alt="Typing SVG">
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=22&duration=3000&pause=1000&color=58A6FF&center=true&vCenter=true&width=720&lines=Welcome+to+my+GitHub+Profile;Backend+Developer;Information+Systems+Student;Building+Real+World+Systems;Learning+System+Design;Turning+Ideas+Into+Code;Code+%E2%80%A2+Build+%E2%80%A2+Improve" alt="Typing SVG">
 
-<br>
+<br><br>
 
 <a href="https://github.com/dims154">
 <img src="https://img.shields.io/badge/GitHub-dims154-0D1117?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
+</a>
+
+<a href="https://wa.me/6287785567289">
+<img src="https://img.shields.io/badge/WhatsApp-Contact-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp">
 </a>
 
 </div>
@@ -20,33 +24,29 @@
 
 ## 🌌 About Me
 
+I'm an **Information Systems student** with a strong interest in backend development and software architecture.
+
+I enjoy building systems, understanding how they work behind the scenes, and continuously improving them through real-world projects.
+
 ```yaml
 name: Muhammad Ilham
 username: dims154
 location: Jambi, Indonesia
 
-role:
-  - Information Systems Student
-  - Backend Enthusiast
-
-interests:
+focus:
   - Backend Development
   - System Design
   - Enterprise Architecture
-  - Data Analytics
-  - Business Intelligence
+  - Database Design
   - Automation
-  - Open Source
+  - Data Analytics
 
-currently_learning:
-  - Python
-  - PHP
-  - Laravel
-  - JavaScript
-  - Node.js
-  - System Design
-  - Enterprise Architecture
-  - GitHub Actions
+interests:
+  - Building Real World Systems
+  - Software Architecture
+  - Business Intelligence
+  - Open Source
+  - Continuous Learning
 ```
 
 ---
@@ -55,7 +55,7 @@ currently_learning:
 
 <div align="center">
 
-### 💻 Languages
+### 💻 Programming Languages
 
 <img src="https://skillicons.dev/icons?i=python,java,php,javascript" alt="Programming Languages">
 
@@ -67,11 +67,11 @@ currently_learning:
 
 <img src="https://skillicons.dev/icons?i=mysql,sqlite" alt="Database Technologies">
 
-### 🛠️ Tools
+### 🛠️ Development Tools
 
 <img src="https://skillicons.dev/icons?i=git,github,vscode,postman" alt="Development Tools">
 
-### 🌐 Web
+### 🌐 Web Technologies
 
 <img src="https://skillicons.dev/icons?i=html,css" alt="Web Technologies">
 
@@ -93,6 +93,15 @@ alt="GitHub Statistics"
 <br>
 
 <img
+src="./stats/top-languages.svg"
+width="100%"
+alt="Top Languages"
+
+>
+
+<br>
+
+<img
 src="./stats/streak.svg"
 width="100%"
 alt="GitHub Contribution Streak"
@@ -101,7 +110,9 @@ alt="GitHub Contribution Streak"
 
 </div>
 
-> 🔄 Statistics are automatically generated and updated by GitHub Actions.
+<p align="center">
+<sub>🔄 Automatically generated and updated with GitHub Actions</sub>
+</p>
 
 ---
 
@@ -124,15 +135,15 @@ alt="GitHub Contribution Activity"
 
 <div align="center">
 
-| 🎯 Area            | 🚀 Focus                                             |
-| :----------------- | :--------------------------------------------------- |
-| ⚙️ Backend         | Building practical and scalable backend applications |
-| 🏗️ System Design  | Designing maintainable and modular software systems  |
-| 🏢 Enterprise      | Learning Enterprise Architecture                     |
-| 📊 Analytics       | Exploring Data Analytics & Business Intelligence     |
-| 🤖 Automation      | Building bots, workflows, and integrations           |
-| 🧠 Problem Solving | Improving programming and logical thinking           |
-| 🌱 Open Source     | Learning through real-world projects                 |
+|          Area          | Current Focus                                        |
+| :--------------------: | :--------------------------------------------------- |
+|     ⚙️ **Backend**     | Building practical and scalable backend applications |
+|  🏗️ **Architecture**  | Learning system design and enterprise architecture   |
+|    🗄️ **Database**    | Designing structured and reliable data systems       |
+|    🤖 **Automation**   | Building bots, workflows, and integrations           |
+|    📊 **Analytics**    | Exploring data analytics and business intelligence   |
+| 🧠 **Problem Solving** | Improving programming and logical thinking           |
+|   🌱 **Open Source**   | Learning through real-world projects                 |
 
 </div>
 
@@ -140,106 +151,116 @@ alt="GitHub Contribution Activity"
 
 ## 🛠️ What I'm Building
 
-### 🤖 WhatsApp Bot & Automation
+### 🤖 Backend & Automation
 
-Exploring backend architecture for automated WhatsApp systems, including:
+Building backend systems and automation workflows with a focus on:
 
-* Command architecture
-* User management
+* API development
+* Command-based architecture
+* Authentication & authorization
 * Permission systems
-* Tenant isolation
-* Structured output
-* Automation workflows
+* User management
+* Automation
+* Structured data
 
 ### 🏢 Enterprise Systems
 
-Learning and building enterprise-oriented applications with focus on:
+Exploring enterprise-oriented software architecture through:
 
 * Modular architecture
-* Authentication & authorization
-* User management
-* Multi-tenant architecture
+* Multi-tenant systems
+* Tenant isolation
 * Database design
-* Scalable backend systems
+* Scalable backend architecture
+* System integration
 
-### ☕ Business & Operational Systems
+### 📊 Data & Business Systems
 
-Exploring software systems for business operations, including:
+Exploring applications involving:
 
-* Inventory
-* Products
-* Customers
+* Inventory management
+* Product management
+* Customer management
 * Transactions
 * Reporting
 * Business analytics
 
 ---
 
-## 🧠 Development Philosophy
+## 🧠 How I Learn
 
 ```text
-             LEARN
-               │
-               ▼
-             BUILD
-               │
-               ▼
-             BREAK
-               │
-               ▼
-             DEBUG
-               │
-               ▼
-           UNDERSTAND
-               │
-               ▼
-            IMPROVE
-               │
-               ▼
-             REPEAT
+             ┌───────────┐
+             │   LEARN   │
+             └─────┬─────┘
+                   │
+                   ▼
+             ┌───────────┐
+             │   BUILD   │
+             └─────┬─────┘
+                   │
+                   ▼
+             ┌───────────┐
+             │   BREAK   │
+             └─────┬─────┘
+                   │
+                   ▼
+             ┌───────────┐
+             │   DEBUG   │
+             └─────┬─────┘
+                   │
+                   ▼
+             ┌───────────┐
+             │UNDERSTAND │
+             └─────┬─────┘
+                   │
+                   ▼
+             ┌───────────┐
+             │  IMPROVE  │
+             └─────┬─────┘
+                   │
+                   └──────────────┐
+                                  │
+                                  ▼
+                                REPEAT
 ```
 
-> I don't try to write perfect code from the beginning.
+> I don't aim to write perfect code from the beginning.
 >
-> I try to understand why the code works, why it fails,
-> and how I can make it better.
+> I aim to understand **why it works, why it fails, and how it can be improved.**
 
 ---
 
 ## 📚 Currently Learning
 
-```text
-┌─────────────────────────────────────────────┐
-│              CURRENT LEARNING               │
-├─────────────────────────────────────────────┤
-│                                             │
-│  🐍 Python                                  │
-│  🐘 PHP / Laravel                           │
-│  🟨 JavaScript / Node.js                    │
-│  🏗️ System Design                           │
-│  🏢 Enterprise Architecture                 │
-│  🗄️ Database Design                         │
-│  🤖 Automation                              │
-│  🔧 Git & GitHub Actions                    │
-│                                             │
-└─────────────────────────────────────────────┘
-```
+<div align="center">
+
+| Technology / Concept       | Focus                               |
+| :------------------------- | :---------------------------------- |
+| 🐍 Python                  | Programming & automation            |
+| 🐘 PHP / Laravel           | Backend development                 |
+| 🟨 JavaScript / Node.js    | Backend & integrations              |
+| 🏗️ System Design          | Scalable software architecture      |
+| 🏢 Enterprise Architecture | Designing business-oriented systems |
+| 🗄️ Database Design        | Data modeling & optimization        |
+| 🤖 GitHub Actions          | CI/CD & automation                  |
+
+</div>
 
 ---
 
-## 🔥 Featured Areas
+## 🔥 Areas of Interest
 
 <div align="center">
 
 <table>
-
 <tr>
 
 <td width="50%" align="center">
 
 ### ⚙️ Backend Development
 
-APIs, business logic, authentication, database integration, and backend architecture.
+APIs, business logic, authentication, databases, integrations, and backend architecture.
 
 </td>
 
@@ -247,7 +268,7 @@ APIs, business logic, authentication, database integration, and backend architec
 
 ### 🏢 Enterprise Architecture
 
-System architecture, scalability, modularity, maintainability, and software structure.
+System structure, modularity, scalability, maintainability, and business processes.
 
 </td>
 
@@ -259,15 +280,15 @@ System architecture, scalability, modularity, maintainability, and software stru
 
 ### 🤖 Automation
 
-Bots, scheduled workflows, integrations, and automated systems.
+Bots, workflows, scheduled tasks, integrations, and developer automation.
 
 </td>
 
 <td width="50%" align="center">
 
-### 📊 Data
+### 📊 Data & Analytics
 
-Databases, analytics, reporting, and business intelligence.
+Databases, reporting, analytics, and business intelligence.
 
 </td>
 
@@ -279,27 +300,64 @@ Databases, analytics, reporting, and business intelligence.
 
 ---
 
-## 📌 GitHub Workflow
+## 🔄 Development Workflow
 
 ```text
-Write Code
-    │
-    ▼
-Git
-    │
-    ▼
-GitHub
-    │
-    ▼
-GitHub Actions
-    │
-    ├── Test
-    ├── Analyze
-    └── Update Profile
-             │
-             ▼
-          README
+       IDEA
+        │
+        ▼
+     DESIGN
+        │
+        ▼
+       CODE
+        │
+        ▼
+       TEST
+        │
+        ▼
+      DEBUG
+        │
+        ▼
+      IMPROVE
+        │
+        ▼
+      DEPLOY
+        │
+        ▼
+      LEARN
+        │
+        └──────────────► REPEAT
 ```
+
+---
+
+## 📌 GitHub Automation
+
+This profile uses **GitHub Actions** to automatically generate and update profile statistics.
+
+```text
+GitHub API
+     │
+     ▼
+GitHub Actions
+     │
+     ├── Contributions
+     ├── Repositories
+     ├── Followers
+     ├── Streak
+     └── Top Languages
+     │
+     ▼
+Generate SVG
+     │
+     ▼
+/stats/
+     │
+     ▼
+README.md
+```
+
+This keeps the profile statistics updated without relying on external GitHub statistics cards.
 
 ---
 
@@ -312,7 +370,7 @@ GitHub Actions
 </a>
 
 <a href="https://wa.me/6287785567289">
-<img src="https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp">
+<img src="https://img.shields.io/badge/WhatsApp-Contact-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp">
 </a>
 
 </div>
@@ -321,7 +379,7 @@ GitHub Actions
 
 <div align="center">
 
-### ⚡ Code • Learn • Build • Improve • Repeat
+### ⚡ Code • Build • Learn • Improve • Repeat
 
 *"Every expert was once a beginner."*
 
@@ -332,5 +390,9 @@ src="https://komarev.com/ghpvc/?username=dims154&style=for-the-badge&color=58A6F
 alt="Profile Views"
 
 >
+
+<br><br>
+
+<sub>Thanks for visiting my profile 🚀</sub>
 
 </div>
