@@ -1,0 +1,118 @@
+name: Update GitHub Profile Stats
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "0 1 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get GitHub statistics
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api graphql \
+            -f query='
+            query($login: String!) {
+              user(login: $login) {
+                repositories(ownerAffiliations: OWNER, first: 100) {
+                  totalCount
+                }
+
+                followers {
+                  totalCount
+                }
+
+                contributionsCollection {
+                  contributionCalendar {
+                    totalContributions
+                  }
+                }
+              }
+            }' \
+            -f login="dims154" \
+            > stats.json
+
+      - name: Update README
+        run: |
+          python3 <<'PY'
+          import json
+          import re
+
+          with open("stats.json") as f:
+              data = json.load(f)
+
+          user = data["data"]["user"]
+
+          contributions = (
+              user["contributionsCollection"]
+              ["contributionCalendar"]
+              ["totalContributions"]
+          )
+
+          repositories = user["repositories"]["totalCount"]
+          followers = user["followers"]["totalCount"]
+
+          with open("README.md", encoding="utf-8") as f:
+              readme = f.read()
+
+          start = "<!-- STATS_START -->"
+          end = "<!-- STATS_END -->"
+
+          stats = f"""
+          {start}
+
+          ## 📊 GitHub Statistics
+
+          <div align="center">
+
+          | 📈 Contributions | 📦 Repositories | 👥 Followers |
+          |:---:|:---:|:---:|
+          | **{contributions}** | **{repositories}** | **{followers}** |
+
+          </div>
+
+          {end}
+          """
+
+          pattern = re.escape(start) + r".*?" + re.escape(end)
+
+          if re.search(pattern, readme, re.DOTALL):
+              readme = re.sub(
+                  pattern,
+                  stats.strip(),
+                  readme,
+                  flags=re.DOTALL
+              )
+          else:
+              raise Exception(
+                  "STATS_START/STATS_END tidak ditemukan di README.md"
+              )
+
+          with open("README.md", "w", encoding="utf-8") as f:
+              f.write(readme)
+          PY
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add README.md
+
+          if git diff --cached --quiet; then
+            echo "Tidak ada perubahan."
+          else
+            git commit -m "chore: update GitHub profile stats"
+            git push
+          fi
