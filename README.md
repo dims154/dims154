@@ -81,29 +81,9 @@ currently_learning:
 
 <div align="center">
 
-<table>
-<tr>
-
-<td align="center">
-<strong>📈</strong><br>
-<strong>0</strong><br>
-Contributions
-</td>
-
-<td align="center">
-<strong>📦</strong><br>
-<strong>0</strong><br>
-Repositories
-</td>
-
-<td align="center">
-<strong>👥</strong><br>
-<strong>0</strong><br>
-Followers
-</td>
-
-</tr>
-</table>
+| 📈 Contributions | 📦 Repositories | 👥 Followers |
+|:---:|:---:|:---:|
+| **70** | **8** | **2** |
 
 </div>
 
