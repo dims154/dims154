@@ -24,14 +24,19 @@
 
 ## 🌌 About Me
 
-I'm an **Information Systems student** with a strong interest in backend development and software architecture.
+I'm an **Information Systems student** with a strong interest in backend development, software architecture, and building practical systems.
 
-I enjoy building systems, understanding how they work behind the scenes, and continuously improving them through real-world projects.
+I enjoy understanding how systems work behind the scenes, turning ideas into working software, and continuously improving through real-world projects.
 
 ```yaml
 name: Muhammad Ilham
 username: dims154
 location: Jambi, Indonesia
+
+role:
+  - Information Systems Student
+  - Backend Developer
+  - System Enthusiast
 
 focus:
   - Backend Development
@@ -83,30 +88,11 @@ interests:
 
 <div align="center">
 
-<img
-src="./stats/github-stats.svg"
-width="100%"
-alt="GitHub Statistics"
+![GitHub Statistics](./stats/github-stats.svg)
 
->
+![Top Languages](./stats/top-languages.svg)
 
-<br>
-
-<img
-src="./stats/top-languages.svg"
-width="100%"
-alt="Top Languages"
-
->
-
-<br>
-
-<img
-src="./stats/streak.svg"
-width="100%"
-alt="GitHub Contribution Streak"
-
->
+![GitHub Contribution Streak](./stats/streak.svg)
 
 </div>
 
@@ -120,12 +106,7 @@ alt="GitHub Contribution Streak"
 
 <div align="center">
 
-<img
-src="https://github-readme-activity-graph.vercel.app/graph?username=dims154&theme=github-dark&hide_border=true&bg_color=0D1117"
-width="100%"
-alt="GitHub Contribution Activity"
-
->
+![GitHub Contribution Activity](https://github-readme-activity-graph.vercel.app/graph?username=dims154\&theme=github-dark\&hide_border=true\&bg_color=0D1117)
 
 </div>
 
@@ -135,7 +116,7 @@ alt="GitHub Contribution Activity"
 
 <div align="center">
 
-|          Area          | Current Focus                                        |
+|         🎯 Area        | 🚀 Current Focus                                     |
 | :--------------------: | :--------------------------------------------------- |
 |     ⚙️ **Backend**     | Building practical and scalable backend applications |
 |  🏗️ **Architecture**  | Learning system design and enterprise architecture   |
@@ -187,7 +168,7 @@ Exploring applications involving:
 
 ---
 
-## 🧠 How I Learn
+## 🧠 Development Philosophy
 
 ```text
              ┌───────────┐
@@ -219,10 +200,7 @@ Exploring applications involving:
              │  IMPROVE  │
              └─────┬─────┘
                    │
-                   └──────────────┐
-                                  │
-                                  ▼
-                                REPEAT
+                   └──────────────► REPEAT
 ```
 
 > I don't aim to write perfect code from the beginning.
@@ -235,15 +213,15 @@ Exploring applications involving:
 
 <div align="center">
 
-| Technology / Concept       | Focus                               |
-| :------------------------- | :---------------------------------- |
-| 🐍 Python                  | Programming & automation            |
-| 🐘 PHP / Laravel           | Backend development                 |
-| 🟨 JavaScript / Node.js    | Backend & integrations              |
-| 🏗️ System Design          | Scalable software architecture      |
-| 🏢 Enterprise Architecture | Designing business-oriented systems |
-| 🗄️ Database Design        | Data modeling & optimization        |
-| 🤖 GitHub Actions          | CI/CD & automation                  |
+| Technology / Concept           | Focus                           |
+| :----------------------------- | :------------------------------ |
+| 🐍 **Python**                  | Programming & automation        |
+| 🐘 **PHP / Laravel**           | Backend development             |
+| 🟨 **JavaScript / Node.js**    | Backend & integrations          |
+| 🏗️ **System Design**          | Scalable software architecture  |
+| 🏢 **Enterprise Architecture** | Business-oriented system design |
+| 🗄️ **Database Design**        | Data modeling & optimization    |
+| 🤖 **GitHub Actions**          | CI/CD & automation              |
 
 </div>
 
@@ -254,6 +232,7 @@ Exploring applications involving:
 <div align="center">
 
 <table>
+
 <tr>
 
 <td width="50%" align="center">
@@ -303,37 +282,53 @@ Databases, reporting, analytics, and business intelligence.
 ## 🔄 Development Workflow
 
 ```text
-       IDEA
-        │
-        ▼
-     DESIGN
-        │
-        ▼
-       CODE
-        │
-        ▼
-       TEST
-        │
-        ▼
-      DEBUG
-        │
-        ▼
-      IMPROVE
-        │
-        ▼
-      DEPLOY
-        │
-        ▼
-      LEARN
-        │
-        └──────────────► REPEAT
+             ┌───────────┐
+             │   IDEA    │
+             └─────┬─────┘
+                   │
+                   ▼
+             ┌───────────┐
+             │  DESIGN   │
+             └─────┬─────┘
+                   │
+                   ▼
+             ┌───────────┐
+             │   CODE    │
+             └─────┬─────┘
+                   │
+                   ▼
+             ┌───────────┐
+             │   TEST    │
+             └─────┬─────┘
+                   │
+                   ▼
+             ┌───────────┐
+             │  DEBUG    │
+             └─────┬─────┘
+                   │
+                   ▼
+             ┌───────────┐
+             │  IMPROVE  │
+             └─────┬─────┘
+                   │
+                   ▼
+             ┌───────────┐
+             │  DEPLOY   │
+             └─────┬─────┘
+                   │
+                   ▼
+             ┌───────────┐
+             │   LEARN   │
+             └─────┬─────┘
+                   │
+                   └──────────────► REPEAT
 ```
 
 ---
 
 ## 📌 GitHub Automation
 
-This profile uses **GitHub Actions** to automatically generate and update profile statistics.
+This profile uses **GitHub Actions** to automatically generate and update GitHub statistics.
 
 ```text
 GitHub API
@@ -344,20 +339,23 @@ GitHub Actions
      ├── Contributions
      ├── Repositories
      ├── Followers
-     ├── Streak
+     ├── Contribution Streak
      └── Top Languages
      │
      ▼
 Generate SVG
      │
      ▼
-/stats/
+stats/
+ ├── github-stats.svg
+ ├── top-languages.svg
+ └── streak.svg
      │
      ▼
 README.md
 ```
 
-This keeps the profile statistics updated without relying on external GitHub statistics cards.
+The statistics are generated from GitHub data and stored directly inside this repository.
 
 ---
 
