@@ -2,9 +2,9 @@
 
 <img src="./assets/profile-hero.svg" width="100%" alt="Muhammad Ilham Profile">
 
-# 👨‍💻 Muhammad Ilham
+👨‍💻 Muhammad Ilham
 
-### Information Systems Student • Backend Developer • System Enthusiast
+Information Systems Student • Backend Developer • System Enthusiast
 
 Building backend systems, automation, and practical software architecture.
 
@@ -19,19 +19,16 @@ Building backend systems, automation, and practical software architecture.
 
 </div>
 
----
+🌌 About Me
 
-## 🌌 About Me
-
-I'm an **Information Systems student** interested in backend development, system architecture, automation, databases, and building practical software systems.
+I'm an Information Systems student interested in backend development, system architecture, automation, databases, and building practical software systems.
 
 I enjoy understanding what happens behind the interface — from business logic and data flow to APIs, authentication, authorization, integrations, and system design.
 
-> **My goal is not simply to write code.**
->
-> I want to understand the system behind the code.
+My goal is not simply to write code.
 
-```yaml
+I want to understand the system behind the code.
+
 name: Muhammad Ilham
 username: dims154
 location: Jambi, Indonesia
@@ -48,39 +45,34 @@ interests:
   - Database Design
   - Automation
   - Data Analytics
-```
 
----
-
-## ⚙️ Tech Stack
+⚙️ Tech Stack
 
 <div align="center">
 
-### Languages
+Languages
 
 <img src="https://skillicons.dev/icons?i=python,java,php,javascript" alt="Programming Languages">
 
-### Backend
+Backend
 
 <img src="https://skillicons.dev/icons?i=laravel,nodejs" alt="Backend Technologies">
 
-### Database
+Database
 
 <img src="https://skillicons.dev/icons?i=mysql,sqlite" alt="Database Technologies">
 
-### Tools
+Tools
 
 <img src="https://skillicons.dev/icons?i=git,github,vscode,postman" alt="Development Tools">
 
-### Web
+Web
 
 <img src="https://skillicons.dev/icons?i=html,css" alt="Web Technologies">
 
 </div>
 
----
-
-## 📊 GitHub Statistics
+📊 GitHub Statistics
 
 <div align="center">
 
@@ -100,9 +92,7 @@ interests:
   <sub>🔄 Automatically generated and updated with GitHub Actions</sub>
 </p>
 
----
-
-## 📈 Contribution Activity
+📈 Contribution Activity
 
 <div align="center">
 
@@ -114,190 +104,180 @@ interests:
 
 </div>
 
----
+🛠️ Currently Building
 
-# 🚀 Featured Projects
-
-The projects below represent the direction I'm currently exploring: **backend systems, architecture, automation, and enterprise-oriented software.**
-
----
-
-## 🤖 Enterprise WhatsApp Backend System
-
-> A practical backend system focused on command processing, authentication, authorization, permissions, user management, tenant isolation, and structured output.
-
-### Architecture
-
-```text
-                         CLIENT
-                           │
-                           ▼
-                    ┌─────────────┐
-                    │   WEBHOOK   │
-                    └──────┬──────┘
-                           │
-                           ▼
-                    ┌─────────────┐
-                    │    COMMAND  │
-                    │    ROUTER   │
-                    └──────┬──────┘
-                           │
-             ┌─────────────┼─────────────┐
-             ▼             ▼             ▼
-       AUTHENTICATION    USERS      PERMISSIONS
-             │             │             │
-             └─────────────┼─────────────┘
-                           ▼
-                 ┌─────────────────┐
-                 │ BUSINESS LOGIC  │
-                 └────────┬────────┘
-                          │
-             ┌────────────┼────────────┐
-             ▼            ▼            ▼
-        TENANT       TRANSACTIONS   INTEGRATIONS
-       ISOLATION
-             │            │            │
-             └────────────┼────────────┘
-                          ▼
-                    ┌─────────────┐
-                    │  DATABASE   │
-                    └─────────────┘
-```
-
-### Core Areas
-
-- Command-based architecture
-- Command registry and execution flow
-- Authentication & authorization
-- Permission resolution
-- User resolution
-- User management
-- Tenant isolation
-- Structured output
-- Business logic separation
-- System integrations
-- Automated testing
-
-### Engineering Focus
-
-| Area | Goal |
-| :--- | :--- |
-| 🧩 Architecture | Keep components modular and maintainable |
-| 🔐 Security | Control authentication, authorization, and permissions |
-| 🏢 Multi-tenancy | Keep tenant data properly isolated |
-| ⚡ Backend | Build predictable and reusable business logic |
-| 🧪 Testing | Validate behavior before expanding the system |
-| 🔄 Automation | Reduce repetitive operational work |
-
-**Status:** 🚧 Active Development
-
----
-
-## 🏢 Enterprise System Architecture
-
-I'm also exploring how backend applications evolve into larger enterprise systems.
-
-```text
-                         APPLICATION
-                              │
-                              ▼
-                       BUSINESS LOGIC
-                              │
-              ┌───────────────┼───────────────┐
-              ▼               ▼               ▼
-           USERS           TENANTS         WORKFLOWS
-              │               │               │
-              ▼               ▼               ▼
-        PERMISSIONS        ISOLATION      TRANSACTIONS
-              │               │               │
-              └───────────────┼───────────────┘
-                              ▼
-                           DATABASE
-```
-
-### Focus
-
-- Modular architecture
-- Multi-tenant systems
-- Tenant isolation
-- Authentication & authorization
-- Permission systems
-- Database design
-- Transaction handling
-- System integrations
-- Maintainable backend architecture
-
----
-
-# 🎯 Current Focus
+Building practical backend systems while learning how real software architecture works.
 
 <table>
 <tr>
 <td width="50%" valign="top">
 
-### ⚙️ Backend Engineering
+🤖 Enterprise WhatsApp Backend
 
-- API development
-- Business logic
-- Authentication
-- Authorization
-- Permission systems
-- Database integration
-- System integrations
-- Backend architecture
+A backend system focused on command-based interaction, permissions, users, and tenant isolation.
+
+Architecture
+
+WhatsApp
+   │
+   ▼
+Command Router
+   │
+   ▼
+Command Executor
+   │
+   ├── Authentication
+   ├── Authorization
+   ├── Permissions
+   ├── User Resolver
+   └── Tenant Context
+           │
+           ▼
+      Business Logic
+           │
+           ▼
+        Database
+
+Current work
+
+Command architecture
+
+Command registry
+
+Command loader
+
+Command executor
+
+Permission resolver
+
+User resolver
+
+Tenant isolation
+
+User management
+
+Structured output
+
+Automated testing
 
 </td>
+
 <td width="50%" valign="top">
 
-### 🏗️ System Architecture
+🏢 Enterprise System Architecture
 
-- Modular design
-- Separation of concerns
-- Maintainability
-- Scalability
-- Security
-- Reliability
-- Business-oriented architecture
+Exploring how backend systems can remain maintainable as complexity grows.
 
-</td>
-</tr>
+Current focus
 
-<tr>
-<td width="50%" valign="top">
+Modular architecture
 
-### 🤖 Automation
+Multi-tenant systems
 
-- Bots
-- Workflows
-- GitHub Actions
-- CI/CD
-- Scheduled processes
-- Developer tooling
-- System integrations
+Tenant isolation
 
-</td>
-<td width="50%" valign="top">
+Authentication
 
-### 📊 Data Systems
+Authorization
 
-- Database design
-- Data modeling
-- Data analytics
-- Reporting
-- Structured data
-- Business intelligence
+Permission systems
+
+Database design
+
+Service integration
+
+Business logic separation
+
+Engineering goal
+
+Simple
+  ↓
+Modular
+  ↓
+Maintainable
+  ↓
+Scalable
+  ↓
+Reliable
 
 </td>
 </tr>
 </table>
 
----
+🔬 Engineering Experiments
 
-# 🧠 Development Philosophy
+I'm also using smaller experiments to understand how different parts of a system work.
+
+Area
+
+What I'm Exploring
+
+🔐 Authentication
+
+Identity and access control
+
+🛡️ Authorization
+
+Permission and role systems
+
+🏢 Multi-tenancy
+
+Tenant isolation and boundaries
+
+⚙️ Commands
+
+Command-driven application architecture
+
+🗄️ Databases
+
+Data modeling and relationships
+
+🤖 Automation
+
+GitHub Actions and automated workflows
+
+🧪 Testing
+
+Verifying system behavior
+
+🔌 Integration
+
+Connecting independent services
+
+📌 Current Engineering Direction
+
+             USER
+               │
+               ▼
+          APPLICATION
+               │
+               ▼
+             API
+               │
+       ┌───────┼───────┐
+       ▼       ▼       ▼
+     AUTH    USERS   COMMANDS
+       │       │       │
+       └───────┼───────┘
+               ▼
+        BUSINESS LOGIC
+               │
+       ┌───────┼───────┐
+       ▼       ▼       ▼
+    TENANTS PERMISSIONS WORKFLOWS
+       │       │       │
+       └───────┼───────┘
+               ▼
+            DATABASE
+
+The goal is not to build the biggest system.
+
+The goal is to understand how each part works, where its responsibility belongs, and how the pieces should communicate.
+
+🧠 Development Philosophy
 
 I prefer learning by building.
 
-```text
         ┌───────────┐
         │   LEARN   │
         └─────┬─────┘
@@ -328,29 +308,46 @@ I prefer learning by building.
         └─────┬─────┘
               │
               └──────────────► REPEAT
-```
 
-> I don't aim to write perfect code from the beginning.
->
-> I aim to understand **why it works, why it fails, and how it can be improved.**
+I don't aim to write perfect code from the beginning.
 
----
+I aim to understand why it works, why it fails, and how it can be improved.
 
-# 📚 Currently Learning
+📚 Currently Learning
 
-| Technology / Concept | Focus |
-| :--- | :--- |
-| 🐍 **Python** | Programming & automation |
-| 🐘 **PHP / Laravel** | Backend development |
-| 🟨 **JavaScript / Node.js** | Backend & integrations |
-| 🏗️ **System Design** | Scalable software architecture |
-| 🏢 **Enterprise Architecture** | Business-oriented system design |
-| 🗄️ **Database Design** | Data modeling & optimization |
-| 🤖 **GitHub Actions** | CI/CD & automation |
+Technology / Concept
 
----
+Focus
 
-# 🔥 Areas of Interest
+🐍 Python
+
+Programming & automation
+
+🐘 PHP / Laravel
+
+Backend development
+
+🟨 JavaScript / Node.js
+
+Backend & integrations
+
+🏗️ System Design
+
+Scalable software architecture
+
+🏢 Enterprise Architecture
+
+Business-oriented system design
+
+🗄️ Database Design
+
+Data modeling & optimization
+
+🤖 GitHub Actions
+
+CI/CD & automation
+
+🔥 Areas of Interest
 
 <div align="center">
 
@@ -358,44 +355,44 @@ I prefer learning by building.
 <tr>
 <td width="25%" align="center">
 
-### ⚙️ BACKEND
+⚙️ BACKEND
 
-APIs  
-Business Logic  
-Databases  
+APIs
+Business Logic
+Databases
 Integrations
 
 </td>
 
 <td width="25%" align="center">
 
-### 🏢 ENTERPRISE
+🏢 ENTERPRISE
 
-Architecture  
-Scalability  
-Modularity  
+Architecture
+Scalability
+Modularity
 Maintainability
 
 </td>
 
 <td width="25%" align="center">
 
-### 🤖 AUTOMATION
+🤖 AUTOMATION
 
-Bots  
-Workflows  
-Integrations  
+Bots
+Workflows
+Integrations
 CI/CD
 
 </td>
 
 <td width="25%" align="center">
 
-### 📊 DATA
+📊 DATA
 
-Analytics  
-Reporting  
-Business Intelligence  
+Analytics
+Reporting
+Business Intelligence
 Data Systems
 
 </td>
@@ -404,13 +401,10 @@ Data Systems
 
 </div>
 
----
-
-# 🔄 Development Workflow
+🔄 Development Workflow
 
 <div align="center">
 
-```text
 IDEA
   ↓
 DESIGN
@@ -428,17 +422,13 @@ DEPLOY
 LEARN
   ↓
 REPEAT
-```
 
 </div>
 
----
+🤖 GitHub Automation
 
-# 🤖 GitHub Automation
+This profile uses GitHub Actions to automatically generate and update profile statistics.
 
-This profile uses **GitHub Actions** to automatically generate and update profile statistics.
-
-```text
 GitHub Data
      │
      ▼
@@ -462,15 +452,11 @@ stats/
      │
      ▼
 README.md
-```
 
-The goal is to keep the profile **dynamic, reproducible, and automatically maintained** rather than manually updating statistics.
+The goal is to keep the profile dynamic, reproducible, and automatically maintained rather than manually updating statistics.
 
----
+🧩 Profile Structure
 
-# 🧩 Profile Structure
-
-```text
 dims154/
 │
 ├── README.md
@@ -487,13 +473,9 @@ dims154/
 └── .github/
     └── workflows/
         └── update-profile.yml
-```
 
----
+🌱 What I'm Working Toward
 
-# 🌱 What I'm Working Toward
-
-```text
                  SOFTWARE ENGINEERING
                          │
           ┌──────────────┼──────────────┐
@@ -506,21 +488,24 @@ dims154/
                          │
                          ▼
                  BETTER ENGINEERING
-```
 
-My long-term direction is to become a developer who can understand not only **how to implement a feature**, but also:
+My long-term direction is to become a developer who can understand not only how to implement a feature, but also:
 
-- Why the system needs it
-- Where the responsibility belongs
-- How components should communicate
-- How data should flow
-- How access should be controlled
-- How the system can be maintained
-- How it can evolve without becoming fragile
+Why the system needs it
 
----
+Where the responsibility belongs
 
-# 🌐 Connect With Me
+How components should communicate
+
+How data should flow
+
+How access should be controlled
+
+How the system can be maintained
+
+How it can evolve without becoming fragile
+
+🌐 Connect With Me
 
 <div align="center">
 
@@ -538,13 +523,11 @@ My long-term direction is to become a developer who can understand not only **ho
 
 </div>
 
----
-
 <div align="center">
 
-### ⚡ CODE • BUILD • LEARN • IMPROVE • REPEAT
+⚡ CODE • BUILD • LEARN • IMPROVE • REPEAT
 
-*"Every expert was once a beginner."*
+"Every expert was once a beginner."
 
 <br>
 
