@@ -1,17 +1,9 @@
 <div align="center">
 
-![Cyberpunk Banner](./assets/cyberpunk.png)
 
-# 👨‍💻 Muhammad Ilham
-
-### Information Systems Student · Backend Developer · System Enthusiast
-
-![Typing SVG](https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=22&duration=3000&pause=1000&color=58A6FF&center=true&vCenter=true&width=720&lines=Welcome+to+my+GitHub+Profile;Backend+Developer;Information+Systems+Student;Building+Real+World+Systems;Learning+System+Design;Turning+Ideas+Into+Code;Code+%E2%80%A2+Build+%E2%80%A2+Improve)
-
-<br>
-
-[![GitHub](https://img.shields.io/badge/GitHub-dims154-0D1117?style=for-the-badge&logo=github&logoColor=white)](https://github.com/dims154)
-[![WhatsApp](https://img.shields.io/badge/WhatsApp-Contact-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/6287785567289)
+<img src="./assets/profile-hero.svg"
+     width="100%"
+     alt="Muhammad Ilham Cyberpunk Profile">
 
 </div>
 
