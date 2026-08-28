@@ -8,110 +8,127 @@
 
 </div>
 
----
-
-## 👨‍💻 About Me
+👨‍💻 About Me
 
 <table>
 <tr>
 <td width="65%" valign="top">
 
-I'm an **Information Systems student** with a strong interest in **backend development, system architecture, automation, and practical software systems**.
+I'm an Information Systems student with a strong interest in backend development, system architecture, automation, and practical software systems.
 
 I enjoy understanding what happens behind the interface — from business logic and databases to APIs, architecture, integrations, and automation.
 
 My goal is not simply to write code.
 
-> **I want to understand the system behind the code.**
+I want to understand the system behind the code.
 
 </td>
 <td width="35%" valign="top">
 
-### 🛰️ System Status
+🛰️ System Status
 
-| | |
-|---|---|
-| 🟢 **Status** | Online |
-| ⚙️ **Role** | Backend Developer |
-| 🎓 **Study** | Information Systems |
-| 📍 **Location** | Jambi, Indonesia |
-| 🔧 **Mode** | Build · Learn · Improve |
+
+
+
+
+🟢 Status
+
+Online
+
+⚙️ Role
+
+Backend Developer
+
+🎓 Study
+
+Information Systems
+
+📍 Location
+
+Jambi, Indonesia
+
+🔧 Mode
+
+Build · Learn · Improve
 
 </td>
 </tr>
 </table>
 
----
-
-## 🧬 Profile Data
+🧬 Profile Data
 
 <table>
 <tr>
 <td width="50%" valign="top">
 
-**Identity**
+Identity
 
-- **Name:** Muhammad Ilham
-- **Username:** `dims154`
-- **Location:** Jambi, Indonesia
-- **Role:** Information Systems Student
-- **Role:** Backend Developer
+Name: Muhammad Ilham
+
+Username: dims154
+
+Location: Jambi, Indonesia
+
+Role: Information Systems Student
+
+Role: Backend Developer
 
 </td>
 <td width="50%" valign="top">
 
-**Primary Focus**
+Primary Focus
 
-- Backend Development
-- System Design
-- Enterprise Architecture
-- Database Design
-- Automation
-- Data Analytics
+Backend Development
+
+System Design
+
+Enterprise Architecture
+
+Database Design
+
+Automation
+
+Data Analytics
 
 </td>
 </tr>
 </table>
 
----
-
-## 🚀 Tech Stack
+🚀 Tech Stack
 
 <div align="center">
 
-**💻 Programming Languages**
+💻 Programming Languages
 
 <img src="https://skillicons.dev/icons?i=python,java,php,javascript" alt="Programming Languages">
 
 <br><br>
 
-**⚙️ Backend & Framework**
+⚙️ Backend & Framework
 
 <img src="https://skillicons.dev/icons?i=laravel,nodejs" alt="Backend Technologies">
 
 <br><br>
 
-**🗄️ Database**
+🗄️ Database
 
 <img src="https://skillicons.dev/icons?i=mysql,sqlite" alt="Database Technologies">
 
 <br><br>
 
-**🛠️ Development Tools**
+🛠️ Development Tools
 
 <img src="https://skillicons.dev/icons?i=git,github,vscode,postman" alt="Development Tools">
 
 <br><br>
 
-**🌐 Web Technologies**
+🌐 Web Technologies
 
 <img src="https://skillicons.dev/icons?i=html,css" alt="Web Technologies">
 
 </div>
 
----
-
-## 📊 GitHub Intelligence
+📊 GitHub Intelligence
 
 <div align="center">
 
@@ -136,7 +153,7 @@ My goal is not simply to write code.
 </td>
 <td width="50%" align="center">
 
-### ⚡ LIVE PROFILE DATA
+⚡ LIVE PROFILE DATA
 
 Automatically generated from GitHub activity.
 
@@ -152,9 +169,7 @@ Repositories · Commits · Languages · Streak
 <sub>⚡ Automatically generated and updated with GitHub Actions</sub>
 </p>
 
----
-
-## 📈 Contribution Activity
+📈 Contribution Activity
 
 <div align="center">
 
@@ -166,145 +181,176 @@ Repositories · Commits · Languages · Streak
 
 </div>
 
----
-
-## 🎯 Current Mission
+🎯 Current Mission
 
 <table>
 <tr>
 <td width="50%" valign="top">
 
-### ⚙️ Backend
+⚙️ Backend
 
 Building practical backend applications with:
 
-- API development
-- Business logic
-- Authentication & authorization
-- Database integration
-- System integrations
-- Backend architecture
+API development
+
+Business logic
+
+Authentication & authorization
+
+Database integration
+
+System integrations
+
+Backend architecture
 
 </td>
 <td width="50%" valign="top">
 
-### 🏗️ System Architecture
+🏗️ System Architecture
 
 Learning to design systems that are:
 
-- Modular
-- Maintainable
-- Scalable
-- Secure
-- Reliable
-- Business-oriented
+Modular
+
+Maintainable
+
+Scalable
+
+Secure
+
+Reliable
+
+Business-oriented
 
 </td>
 </tr>
 <tr>
 <td width="50%" valign="top">
 
-### 🤖 Automation
+🤖 Automation
 
 Exploring:
 
-- Bots
-- Workflows
-- GitHub Actions
-- Scheduled systems
-- API integrations
-- Developer automation
+Bots
+
+Workflows
+
+GitHub Actions
+
+Scheduled systems
+
+API integrations
+
+Developer automation
 
 </td>
 <td width="50%" valign="top">
 
-### 📊 Data
+📊 Data
 
 Working with:
 
-- Database design
-- Data analytics
-- Reporting
-- Business intelligence
-- Structured data
-- Data-driven systems
+Database design
+
+Data analytics
+
+Reporting
+
+Business intelligence
+
+Structured data
+
+Data-driven systems
 
 </td>
 </tr>
 </table>
 
----
-
-## 🛠️ What I'm Building
+🛠️ What I'm Building
 
 <table>
 <tr>
 <td width="33%" valign="top">
 
-### 🤖 Backend & Automation
+🤖 Backend & Automation
 
 Practical backend systems focused on:
 
-- APIs
-- Command-based architecture
-- Authentication
-- Authorization
-- Permission systems
-- User management
-- Structured output
-- Automation workflows
+APIs
+
+Command-based architecture
+
+Authentication
+
+Authorization
+
+Permission systems
+
+User management
+
+Structured output
+
+Automation workflows
 
 </td>
 <td width="33%" valign="top">
 
-### 🏢 Enterprise Systems
+🏢 Enterprise Systems
 
 Exploring enterprise architecture through:
 
-- Modular architecture
-- Multi-tenant systems
-- Tenant isolation
-- Database design
-- Scalable backend architecture
-- System integration
-- Business processes
+Modular architecture
+
+Multi-tenant systems
+
+Tenant isolation
+
+Database design
+
+Scalable backend architecture
+
+System integration
+
+Business processes
 
 </td>
 <td width="33%" valign="top">
 
-### 📊 Business Systems
+📊 Business Systems
 
 Exploring systems involving:
 
-- Inventory management
-- Product management
-- Customer management
-- Transactions
-- Reporting
-- Business analytics
-- Business intelligence
+Inventory management
+
+Product management
+
+Customer management
+
+Transactions
+
+Reporting
+
+Business analytics
+
+Business intelligence
 
 </td>
 </tr>
 </table>
 
----
-
-## 🧠 Development Philosophy
+🧠 Development Philosophy
 
 <div align="center">
 
-### LEARN → BUILD → BREAK → DEBUG → UNDERSTAND → IMPROVE → REPEAT
+LEARN → BUILD → BREAK → DEBUG → UNDERSTAND → IMPROVE → REPEAT
 
 </div>
 
-> I don't aim to write perfect code from the beginning.
->
-> I aim to understand **why it works, why it fails, and how it can be improved.**
+I don't aim to write perfect code from the beginning.
 
----
+I aim to understand why it works, why it fails, and how it can be improved.
 
-## 📚 Currently Learning
+📚 Currently Learning
 
 <table>
 <tr>
@@ -320,9 +366,7 @@ Exploring systems involving:
 <tr><td>🤖 <b>GitHub Actions</b></td><td>CI/CD & automation</td></tr>
 </table>
 
----
-
-## 🔥 Areas of Interest
+🔥 Areas of Interest
 
 <div align="center">
 
@@ -330,41 +374,41 @@ Exploring systems involving:
 <tr>
 <td width="25%" align="center" valign="top">
 
-### ⚙️ Backend
+⚙️ Backend
 
-APIs  
-Business Logic  
-Databases  
+APIs
+Business Logic
+Databases
 Integrations
 
 </td>
 <td width="25%" align="center" valign="top">
 
-### 🏢 Enterprise
+🏢 Enterprise
 
-Architecture  
-Scalability  
-Modularity  
+Architecture
+Scalability
+Modularity
 Maintainability
 
 </td>
 <td width="25%" align="center" valign="top">
 
-### 🤖 Automation
+🤖 Automation
 
-Bots  
-Workflows  
-Integrations  
+Bots
+Workflows
+Integrations
 CI/CD
 
 </td>
 <td width="25%" align="center" valign="top">
 
-### 📊 Data
+📊 Data
 
-Analytics  
-Reporting  
-Business Intelligence  
+Analytics
+Reporting
+Business Intelligence
 Data Systems
 
 </td>
@@ -373,43 +417,42 @@ Data Systems
 
 </div>
 
----
-
-## 🔄 Development Workflow
+🔄 Development Workflow
 
 <div align="center">
 
-**IDEA** → **DESIGN** → **CODE** → **TEST** → **DEBUG** → **IMPROVE** → **DEPLOY** → **LEARN** → **REPEAT**
+IDEA → DESIGN → CODE → TEST → DEBUG → IMPROVE → DEPLOY → LEARN → REPEAT
 
 </div>
 
----
+🤖 GitHub Automation
 
-## 🤖 GitHub Automation
-
-This profile uses **GitHub Actions** to automatically generate and update profile statistics and visual assets.
+This profile uses GitHub Actions to automatically generate and update profile statistics and visual assets.
 
 <div align="center">
 
-**GitHub API** → **GitHub Actions** → **Generate SVG** → **README**
+GitHub API → GitHub Actions → Generate SVG → README
 
 </div>
 
-### Automated Components
+Automated Components
 
-- GitHub statistics
-- Repository statistics
-- Top languages
-- Contribution streak
-- Contribution activity
-- Cyberpunk profile hero
-- Scheduled profile updates
+GitHub statistics
 
----
+Repository statistics
 
-## 🧩 Profile Components
+Top languages
 
-```text
+Contribution streak
+
+Contribution activity
+
+Cyberpunk profile hero
+
+Scheduled profile updates
+
+🧩 Profile Components
+
 dims154/
 ├── README.md
 ├── assets/
@@ -422,11 +465,8 @@ dims154/
 └── .github/
     └── workflows/
         └── update-profile.yml
-```
 
----
-
-## 🌐 Connect With Me
+🌐 Connect With Me
 
 <div align="center">
 
@@ -444,9 +484,8 @@ dims154/
 
 <br><br>
 
-### ⚡ CODE • BUILD • LEARN • IMPROVE • REPEAT
+⚡ CODE • BUILD • LEARN • IMPROVE • REPEAT
 
 <sub>Thanks for visiting my profile 🚀</sub>
 
 </div>
-
