@@ -394,19 +394,12 @@ jobs:
 
           for index, day in enumerate(activity):
               x = chart_x + index * step
-
               ratio = (
                   day["count"] / max_count
                   if max_count
                   else 0
               )
-
-              y = (
-                  chart_y
-                  + chart_h
-                  - ratio * chart_h
-              )
-
+              y = chart_y + chart_h - ratio * chart_h
               points.append((x, y))
 
           polyline = " ".join(
@@ -454,13 +447,10 @@ jobs:
                   label = format_date(activity[index]["date"])
 
                   date_ticks.append(
-                      f'<line x1="{x:.1f}" '
-                      f'y1="{chart_y + chart_h}" '
-                      f'x2="{x:.1f}" '
-                      f'y2="{chart_y + chart_h + 8}" '
+                      f'<line x1="{x:.1f}" y1="{chart_y + chart_h}" '
+                      f'x2="{x:.1f}" y2="{chart_y + chart_h + 8}" '
                       'stroke="#ff1744" stroke-opacity=".42"/>'
-                      f'<text x="{x:.1f}" '
-                      f'y="{chart_y + chart_h + 22}" '
+                      f'<text x="{x:.1f}" y="{chart_y + chart_h + 22}" '
                       'fill="#ffffff" font-family="monospace" '
                       'font-size="10" font-weight="bold" '
                       'text-anchor="middle">'
@@ -472,21 +462,32 @@ jobs:
           activity_body = "".join([
               '<style>',
               '@keyframes pulse{0%,100%{opacity:.30}50%{opacity:1}}',
-              '@keyframes draw{0%{stroke-dashoffset:2200}100%{stroke-dashoffset:0}}',
-              '@keyframes flow{0%{stroke-dashoffset:0}100%{stroke-dashoffset:-900}}',
+              '@keyframes streamFlow{'
+              '0%{stroke-dashoffset:1200;opacity:.10}'
+              '18%{opacity:.42}'
+              '42%{opacity:1}'
+              '68%{opacity:1}'
+              '88%{opacity:.42}'
+              '100%{stroke-dashoffset:0;opacity:.10}'
+              '}',
               '.pulse{animation:pulse 2.8s ease-in-out infinite}',
-              '.draw{stroke-dasharray:2200;animation:draw 2.8s ease-out forwards}',
-              '.flow{stroke-dasharray:10 10;animation:flow 4.5s linear infinite}',
+              '.stream{'
+              'stroke-dasharray:220 980;'
+              'stroke-linecap:round;'
+              'animation:streamFlow 9s cubic-bezier(.45,0,.25,1) infinite;'
+              'filter:url(#glow)'
+              '}',
               '</style>',
 
               '<defs>',
-              '<linearGradient id="streamGradient" x1="0%" y1="0%" x2="100%" y2="0%">',
+              '<linearGradient id="streamGradient" '
+              'x1="0%" y1="0%" x2="100%" y2="0%">',
               '<stop offset="0%" stop-color="#ff1744" stop-opacity="0"/>',
-              '<stop offset="35%" stop-color="#ff1744" stop-opacity=".05"/>',
-              '<stop offset="60%" stop-color="#ff1744" stop-opacity=".16"/>',
-              '<stop offset="80%" stop-color="#ff1744" stop-opacity=".55"/>',
-              '<stop offset="93%" stop-color="#ff1744" stop-opacity="1"/>',
-              '<stop offset="100%" stop-color="#ff1744" stop-opacity=".70"/>',
+              '<stop offset="42%" stop-color="#ff1744" stop-opacity=".06"/>',
+              '<stop offset="65%" stop-color="#ff1744" stop-opacity=".20"/>',
+              '<stop offset="82%" stop-color="#ff1744" stop-opacity=".58"/>',
+              '<stop offset="94%" stop-color="#ff1744" stop-opacity="1"/>',
+              '<stop offset="100%" stop-color="#ff1744" stop-opacity=".78"/>',
               '</linearGradient>',
               '</defs>',
 
@@ -508,65 +509,58 @@ jobs:
               '<line x1="38" y1="82" x2="982" y2="82" '
               'stroke="#ff1744" stroke-opacity=".22"/>',
 
-              '<rect x="55" y="94" width="900" height="2" '
-              'fill="#ff1744" fill-opacity=".10"/>',
-
               f'<rect x="{chart_x}" y="{chart_y}" width="{chart_w}" '
               f'height="{chart_h}" fill="none" stroke="#ff1744" '
-              'stroke-opacity=".08"/>',
+              'stroke-opacity=".07"/>',
 
               f'<line x1="{chart_x}" y1="{chart_y + chart_h}" '
               f'x2="{chart_x + chart_w}" y2="{chart_y + chart_h}" '
-              'stroke="#ff1744" stroke-opacity=".16"/>',
+              'stroke="#ff1744" stroke-opacity=".14"/>',
 
               f'<line x1="{chart_x}" '
               f'y1="{chart_y + chart_h / 2}" '
               f'x2="{chart_x + chart_w}" '
               f'y2="{chart_y + chart_h / 2}" '
-              'stroke="#ff1744" stroke-opacity=".05" '
+              'stroke="#ff1744" stroke-opacity=".045" '
               'stroke-dasharray="4 8"/>',
 
-              # Static red statistical line.
+              # Original statistical line — unchanged neon red.
               f'<polyline points="{polyline}" fill="none" '
-              'stroke="#ff1744" stroke-opacity=".36" '
+              'stroke="#ff1744" stroke-opacity=".42" '
               'stroke-width="2.4" stroke-linecap="round" '
               'stroke-linejoin="round"/>',
 
-              # One flowing stream segment with a bright leading edge
-              # and progressively fading trailing edge.
+              # Single flowing data stream: bright head, fading trail.
               f'<polyline points="{polyline}" fill="none" '
-              'stroke="url(#streamGradient)" '
-              'stroke-width="3" stroke-linecap="round" '
-              'stroke-linejoin="round" class="draw"/>',
+              'stroke="url(#streamGradient)" stroke-width="3" '
+              'stroke-linecap="round" stroke-linejoin="round" '
+              'class="stream"/>',
 
-              # Very subtle dark dashes in the background only.
-              f'<polyline points="{polyline}" fill="none" '
-              'stroke="#050005" stroke-opacity=".75" '
-              'stroke-width="1.2" stroke-linecap="round" '
-              'stroke-linejoin="round" class="flow"/>',
-
+              circles,
               tick_nodes,
 
-              f'<text x="55" y="304" '
-              'fill="#ffffff" font-family="monospace" '
-              'font-size="9" font-weight="bold">'
+              f'<text x="55" y="304" fill="#ffffff" '
+              'font-family="monospace" font-size="9" font-weight="bold">'
               'DATE / MONTH</text>',
 
-              '<line x1="38" y1="326" x2="982" y2="326" '
+              f'<text x="55" y="318" fill="#ffffff" '
+              'font-family="monospace" font-size="9">'
+              f'WINDOW: {esc(first_date)} → {esc(last_date)}</text>',
+
+              '<line x1="38" y1="329" x2="982" y2="329" '
               'stroke="#ff1744" stroke-opacity=".12"/>',
 
-              f'<text x="38" y="346" '
-              'fill="#ff6b87" font-family="monospace" '
-              'font-size="11">TOTAL / '
-              f'{recent_total} CONTRIBUTIONS</text>',
+              f'<text x="38" y="348" fill="#ff6b87" '
+              'font-family="monospace" font-size="11">'
+              f'TOTAL / {recent_total} CONTRIBUTIONS</text>',
 
-              '<circle cx="38" cy="362" r="3.5" fill="#ff1744" '
+              '<circle cx="38" cy="365" r="3.5" fill="#ff1744" '
               'filter="url(#glow)" class="pulse"/>',
 
-              '<text x="50" y="366" class="mono muted" font-size="8">'
+              '<text x="50" y="369" class="mono muted" font-size="8">'
               'GITHUB CONTRIBUTION CALENDAR / AUTO-GENERATED</text>',
 
-              '<text x="982" y="366" class="mono muted" '
+              '<text x="982" y="369" class="mono muted" '
               'font-size="8" text-anchor="end">'
               'FLOW: SMOOTH / SYNCED</text>',
           ])
