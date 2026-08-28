@@ -102,11 +102,11 @@ interests:
 
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/dims154/dims154/main/stats/contribution-activity.svg" width="100%" alt="Contribution Activity">
+<img src="https://raw.githubusercontent.com/dims154/dims154/main/stats/contribution-activity.svg?v=2" width="100%" alt="Contribution Activity">
 
 <br>
 
-<sub>Last 31 days · Automatically generated with GitHub Actions</sub>
+<sub>Last 31 days · Updated automatically with GitHub Actions</sub>
 
 </div>
 
