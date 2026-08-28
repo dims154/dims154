@@ -557,6 +557,11 @@ jobs:
               else ""
           )
 
+          recent_total = sum(
+              day["count"]
+              for day in activity
+          )
+
           ticks = []
 
           if activity:
