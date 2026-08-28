@@ -314,7 +314,7 @@ jobs:
               f'<line x1="{chart_x}" y1="{chart_y}" x2="{chart_x}" y2="{chart_y+chart_h}" stroke="#ff1744" stroke-opacity=".18"/>'
               f'<line x1="{chart_x}" y1="{chart_y+chart_h/2}" x2="{chart_x+chart_w}" y2="{chart_y+chart_h/2}" stroke="#ff1744" stroke-opacity=".08" stroke-dasharray="4 6"/>'
               f'<polyline points="{polyline}" fill="none" stroke="#ff1744" stroke-width="2.5" filter="url(#glow)"/>'
-              circles
+              + circles +
               f'<text x="38" y="300" fill="#9d7a82" font-family="monospace" font-size="9">{first_date}</text>'
               f'<text x="920" y="300" fill="#9d7a82" font-family="monospace" font-size="9">{last_date}</text>'
               f'<text x="38" y="330" fill="#f4f4f4" font-family="monospace" font-size="11">TOTAL / {recent_total} CONTRIBUTIONS</text>'
