@@ -325,6 +325,37 @@ jobs:
                   font-weight: bold;
                 }
 
+                .card {
+                  fill: #090306;
+                  stroke: #ff1744;
+                  stroke-opacity: 0.22;
+                  stroke-width: 1;
+                }
+
+                .cardGlow {
+                  fill: none;
+                  stroke: #ff1744;
+                  stroke-opacity: 0.08;
+                  stroke-width: 4;
+                  filter: url(#softGlow);
+                  animation: glow 2.8s ease-in-out infinite;
+                }
+
+                .bar {
+                  transform-box: fill-box;
+                  transform-origin: left center;
+                  animation: barGlow 2.4s ease-in-out infinite;
+                }
+
+                @keyframes barGlow {
+                  0%, 100% {
+                    opacity: 0.72;
+                  }
+                  50% {
+                    opacity: 1;
+                  }
+                }
+
                 @keyframes pulse {
                   0%, 100% {
                     opacity: 0.35;
@@ -619,10 +650,22 @@ jobs:
               GITHUB STATISTICS
             </text>
 
+            <circle cx="900" cy="48"
+                    r="5"
+                    fill="#ff1744"
+                    filter="url(#glow)"
+                    class="pulse"/>
+
+            <text x="915" y="52"
+                  class="mono muted"
+                  font-size="9">
+              LIVE
+            </text>
+
             <text x="55" y="80"
                   class="mono muted"
                   font-size="10">
-              LIVE PROFILE DATA / DIMS154
+              REAL-TIME PROFILE DATA / DIMS154
             </text>
 
             <line x1="55" y1="98"
@@ -630,88 +673,81 @@ jobs:
                   stroke="#ff1744"
                   stroke-opacity="0.25"/>
 
-            <text x="75" y="145"
-                  class="mono muted"
-                  font-size="11">
+            <rect x="55" y="112" width="270" height="105" rx="8" class="card"/>
+            <rect x="55" y="112" width="270" height="105" rx="8" class="cardGlow"/>
+            <text x="75" y="140" class="mono muted" font-size="10">
               CONTRIBUTIONS
             </text>
-
-            <text x="75" y="190"
-                  class="number"
-                  font-size="38">
+            <text x="75" y="185" class="number" font-size="40">
               {esc(total_contributions)}
             </text>
+            <text x="75" y="204" class="mono muted" font-size="8">
+              TOTAL CONTRIBUTION COUNT
+            </text>
 
-            <text x="335" y="145"
-                  class="mono muted"
-                  font-size="11">
+            <rect x="365" y="112" width="270" height="105" rx="8" class="card"/>
+            <rect x="365" y="112" width="270" height="105" rx="8" class="cardGlow"/>
+            <text x="385" y="140" class="mono muted" font-size="10">
               REPOSITORIES
             </text>
-
-            <text x="335" y="190"
-                  class="number"
-                  font-size="38">
+            <text x="385" y="185" class="number" font-size="40">
               {esc(repositories)}
             </text>
+            <text x="385" y="204" class="mono muted" font-size="8">
+              PUBLIC OWNER REPOSITORIES
+            </text>
 
-            <text x="595" y="145"
-                  class="mono muted"
-                  font-size="11">
+            <rect x="675" y="112" width="270" height="105" rx="8" class="card"/>
+            <rect x="675" y="112" width="270" height="105" rx="8" class="cardGlow"/>
+            <text x="695" y="140" class="mono muted" font-size="10">
               FOLLOWERS
             </text>
-
-            <text x="595" y="190"
-                  class="number"
-                  font-size="38">
+            <text x="695" y="185" class="number" font-size="40">
               {esc(followers)}
             </text>
-
-            <text x="75" y="235"
-                  class="mono muted"
-                  font-size="10">
-              CURRENT STREAK
+            <text x="695" y="204" class="mono muted" font-size="8">
+              PROFILE FOLLOWERS
             </text>
 
-            <text x="75" y="275"
-                  class="number"
-                  font-size="27">
+            <text x="55" y="255" class="mono muted" font-size="10">
+              CURRENT STREAK
+            </text>
+            <text x="55" y="288" class="number" font-size="25">
               {esc(current_streak)} DAYS
             </text>
 
-            <text x="335" y="235"
-                  class="mono muted"
-                  font-size="10">
+            <text x="365" y="255" class="mono muted" font-size="10">
               LONGEST STREAK
             </text>
-
-            <text x="335" y="275"
-                  class="number"
-                  font-size="27">
+            <text x="365" y="288" class="number" font-size="25">
               {esc(longest_streak)} DAYS
             </text>
 
-            <text x="595" y="235"
-                  class="mono muted"
-                  font-size="10">
-              STATUS
+            <text x="675" y="255" class="mono muted" font-size="10">
+              SYSTEM STATUS
             </text>
-
-            <circle cx="605" cy="262"
+            <circle cx="686" cy="282"
                     r="5"
                     fill="#ff1744"
                     filter="url(#glow)"
                     class="pulse"/>
-
-            <text x="620" y="267"
+            <text x="701" y="287"
                   class="mono red"
                   font-size="12">
-              ACTIVE
+              ACTIVE / TRACKING
             </text>
 
-            <text x="55" y="305"
+            <line x1="55" y1="307"
+                  x2="945" y2="307"
+                  stroke="#ff1744"
+                  stroke-opacity="0.15"
+                  stroke-dasharray="5 8"
+                  class="dash"/>
+
+            <text x="55" y="321"
                   class="mono muted"
-                  font-size="9">
-              AUTOMATICALLY GENERATED WITH GITHUB ACTIONS
+                  font-size="8">
+              AUTOMATICALLY GENERATED FROM GITHUB API
             </text>
           """
 
@@ -1086,7 +1122,8 @@ jobs:
               stroke-width="3"
               stroke-linecap="round"
               stroke-linejoin="round"
-              filter="url(#glow)"/>
+              filter="url(#glow)"
+              class="dash"/>
 
             {graph_points}
 
