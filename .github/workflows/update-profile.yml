@@ -256,10 +256,10 @@ jobs:
               '<text x="38" y="250" fill="#f4f4f4" font-family="monospace" font-size="12">LAST 365 DAYS</text>'
 
               '<text x="390" y="224" fill="#9d7a82" font-family="monospace" font-size="9">CURRENT STREAK</text>'
-              f'<text x="390" y="250" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="26">{current_streak_label}</text>'
+              f'<text x="390" y="250" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="26">{current_streak} {"DAY" if current_streak == 1 else "DAYS"}</text>'
 
               '<text x="660" y="224" fill="#9d7a82" font-family="monospace" font-size="9">LONGEST STREAK</text>'
-              f'<text x="660" y="250" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="26">{longest_streak_label}</text>'
+              f'<text x="660" y="250" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="26">{longest_streak} {"DAY" if longest_streak == 1 else "DAYS"}</text>'
 
               '<path d="M38 280 H982" stroke="#ff1744" stroke-opacity=".35" fill="none" class="dash"/>'
 
