@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
@@ -218,7 +218,7 @@ jobs:
               '<rect x="0" y="0" width="1020" height="330" rx="14" fill="#050005" fill-opacity=".72"/>'
 
               '<text x="38" y="42" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="22">GITHUB STATISTICS</text>'
-              '<text x="38" y="64" fill="#9d7a82" font-family="monospace" font-size="10">LIVE PROFILE DATA / DIMS154 / SYSTEM MONITOR</text>'
+              '<text x="38" y="64" fill="#9d7a82" font-family="monospace" font-size="10">LATEST PROFILE SNAPSHOT / DIMS154 / SYSTEM MONITOR</text>'
 
               '<circle cx="944" cy="36" r="7" fill="#ff1744" filter="url(#glow)" class="pulse"/>'
               '<text x="958" y="40" fill="#9d7a82" font-family="monospace" font-size="10">ONLINE</text>'
@@ -256,10 +256,10 @@ jobs:
               '<text x="38" y="250" fill="#f4f4f4" font-family="monospace" font-size="12">LAST 365 DAYS</text>'
 
               '<text x="390" y="224" fill="#9d7a82" font-family="monospace" font-size="9">CURRENT STREAK</text>'
-              f'<text x="390" y="250" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="26">{current_streak} DAYS</text>'
+              f'<text x="390" y="250" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="26">{current_streak_label}</text>'
 
               '<text x="660" y="224" fill="#9d7a82" font-family="monospace" font-size="9">LONGEST STREAK</text>'
-              f'<text x="660" y="250" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="26">{longest_streak} DAYS</text>'
+              f'<text x="660" y="250" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="26">{longest_streak_label}</text>'
 
               '<path d="M38 280 H982" stroke="#ff1744" stroke-opacity=".35" fill="none" class="dash"/>'
 
@@ -283,7 +283,7 @@ jobs:
               '<text x="38" y="42" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="22">TOP LANGUAGES</text>'
               '<text x="38" y="64" fill="#9d7a82" font-family="monospace" font-size="10">PUBLIC REPOSITORIES / LANGUAGE DISTRIBUTION</text>'
               '<circle cx="944" cy="36" r="7" fill="#ff1744" filter="url(#glow)" class="pulse"/>'
-              '<text x="958" y="40" fill="#9d7a82" font-family="monospace" font-size="10">LIVE</text>'
+              '<text x="958" y="40" fill="#9d7a82" font-family="monospace" font-size="10">SYNCED</text>'
 
               '<line x1="38" y1="82" x2="982" y2="82" stroke="#ff1744" stroke-opacity=".22"/>'
               '<line x1="38" y1="84" x2="982" y2="84" stroke="#ff1744" stroke-opacity=".06" stroke-dasharray="2 8"/>'
@@ -343,7 +343,7 @@ jobs:
               '<text x="38" y="64" fill="#9d7a82" font-family="monospace" font-size="10">CONSISTENCY MONITOR / DIMS154</text>'
 
               '<circle cx="944" cy="36" r="7" fill="#ff1744" filter="url(#glow)" class="pulse"/>'
-              '<text x="958" y="40" fill="#9d7a82" font-family="monospace" font-size="10">ACTIVE</text>'
+              '<text x="958" y="40" fill="#9d7a82" font-family="monospace" font-size="10">SYNCED</text>'
 
               '<line x1="38" y1="82" x2="982" y2="82" stroke="#ff1744" stroke-opacity=".22"/>'
               '<line x1="38" y1="84" x2="982" y2="84" stroke="#ff1744" stroke-opacity=".06" stroke-dasharray="2 8"/>'
@@ -452,10 +452,10 @@ jobs:
               + '<text x="38" y="42" class="title red" font-size="22">'
               + 'CONTRIBUTION ACTIVITY</text>'
               + '<text x="38" y="64" class="mono muted" font-size="10">'
-              + 'LAST 31 DAYS / LIVE ACTIVITY MONITOR</text>'
+              + 'LAST 31 DAYS / ACTIVITY MONITOR</text>'
               + '<circle cx="944" cy="36" r="7" fill="#ff1744" '
               + 'filter="url(#glow)" class="pulse"/>'
-              + '<text x="958" y="40" class="mono muted" font-size="10">LIVE</text>'
+              + '<text x="958" y="40" class="mono muted" font-size="10">SYNCED</text>'
               + '<line x1="38" y1="82" x2="982" y2="82" '
               + 'stroke="#ff1744" stroke-opacity=".22"/>'
               + '<line x1="38" y1="84" x2="982" y2="84" '
