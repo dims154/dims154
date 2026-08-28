@@ -1,4 +1,4 @@
-name: Update GitHub Profile Stats
+aname: Update GitHub Profile Stats
 
 on:
   workflow_dispatch:
@@ -145,6 +145,13 @@ jobs:
 
           days.sort(key=lambda item: item["date"])
           last_31_days = days[-31:]
+          activity_data = [
+    (
+        datetime.strptime(day["date"], "%Y-%m-%d"),
+        day["count"]
+    )
+    for day in last_31_days
+]
 
           # ======================================================
           # CURRENT STREAK
