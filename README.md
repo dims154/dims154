@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./assets/profile-hero.svg" width="100%" alt="Muhammad Ilham Profile">
+<img src="./assets/profile-hero.svg" width="100%" alt="Muhammad Ilham Cyberpunk Profile">
 
 👨‍💻 Muhammad Ilham
 
@@ -8,14 +8,8 @@ Information Systems Student • Backend Developer • System Enthusiast
 
 Building backend systems, automation, and practical software architecture.
 
-<p>
-  <a href="https://github.com/dims154">
-    <img src="https://img.shields.io/badge/GitHub-dims154-0D1117?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
-  </a>
-  <a href="https://wa.me/6287785567289">
-    <img src="https://img.shields.io/badge/WhatsApp-Contact-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp">
-  </a>
-</p>
+<a href="https://github.com/dims154"><img src="https://img.shields.io/badge/GitHub-dims154-0D1117?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
+<a href="https://wa.me/6287785567289"><img src="https://img.shields.io/badge/WhatsApp-Contact-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp"></a>
 
 </div>
 
@@ -521,15 +515,9 @@ How it can evolve without becoming fragile
 
 <img src="https://komarev.com/ghpvc/?username=dims154&style=for-the-badge&color=58A6FF&label=PROFILE+VIEWS" alt="Profile Views">
 
-</div>
-
-<div align="center">
+<br><br>
 
 ⚡ CODE • BUILD • LEARN • IMPROVE • REPEAT
-
-"Every expert was once a beginner."
-
-<br>
 
 <sub>Thanks for visiting my profile 🚀</sub>
 
