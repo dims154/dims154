@@ -424,7 +424,7 @@ jobs:
               return datetime.strptime(
                   value,
                   "%Y-%m-%d",
-              ).strftime("%d %b")
+              ).strftime("%d/%m")
 
           first_date = (
               format_date(activity[0]["date"])
@@ -459,11 +459,17 @@ jobs:
                       f'<line x1="{x:.1f}" '
                       f'y1="{chart_y + chart_h}" '
                       f'x2="{x:.1f}" '
-                      f'y2="{chart_y + chart_h + 7}" '
-                      'stroke="#ff1744" stroke-opacity=".30"/>'
+                      f'y2="{chart_y + chart_h + 9}" '
+                      'stroke="#ff1744" stroke-opacity=".55"/>'
+                      f'<rect x="{x-25:.1f}" '
+                      f'y="{chart_y + chart_h + 11}" '
+                      'width="50" height="18" rx="4" '
+                      'fill="#050005" fill-opacity=".92" '
+                      'stroke="#ff1744" stroke-opacity=".18"/>'
                       f'<text x="{x:.1f}" '
-                      f'y="{chart_y + chart_h + 22}" '
-                      'class="mono muted" font-size="9" '
+                      f'y="{chart_y + chart_h + 24}" '
+                      'fill="#ff6b87" font-family="monospace" '
+                      'font-size="10" font-weight="bold" '
                       'text-anchor="middle">'
                       f'{esc(label)}</text>'
                   )
@@ -479,41 +485,58 @@ jobs:
               '<style>',
               '@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}',
               '@keyframes draw{0%{stroke-dashoffset:2200}100%{stroke-dashoffset:0}}',
-              '@keyframes scan{0%{transform:translateY(0);opacity:0}15%{opacity:.12}50%{opacity:.2}85%{opacity:.12}100%{transform:translateY(165px);opacity:0}}',
-              '@keyframes travel{0%{transform:translateX(0);opacity:0}15%{opacity:.8}50%{opacity:.35}85%{opacity:.8}100%{transform:translateX(900px);opacity:0}}',
+              '@keyframes scan{0%{transform:translateY(0);opacity:0}15%{opacity:.10}50%{opacity:.18}85%{opacity:.10}100%{transform:translateY(165px);opacity:0}}',
+              '@keyframes flow{0%{stroke-dashoffset:0}100%{stroke-dashoffset:-140}}',
               '.pulse{animation:pulse 2s ease-in-out infinite}',
               '.draw{stroke-dasharray:2200;animation:draw 2.6s ease-out forwards}',
               '.scan{animation:scan 5s linear infinite}',
-              '.travel{animation:travel 4s linear infinite}',
+              '.flow{stroke-dasharray:10 10;animation:flow 1.3s linear infinite}',
               '</style>',
-              '<rect x="0" y="0" width="1020" height="380" rx="14" fill="#050005" fill-opacity=".72"/>',
+
+              '<rect x="0" y="0" width="1020" height="395" rx="14" fill="#050005" fill-opacity=".72"/>',
+
               '<text x="38" y="42" class="title red" font-size="22">CONTRIBUTION ACTIVITY</text>',
               '<text x="38" y="64" class="mono muted" font-size="10">LAST 31 DAYS / ACTIVITY MONITOR</text>',
+
               '<circle cx="944" cy="36" r="7" fill="#ff1744" filter="url(#glow)" class="pulse"/>',
               '<text x="958" y="40" class="mono muted" font-size="10">SYNCED</text>',
+
               '<line x1="38" y1="82" x2="982" y2="82" stroke="#ff1744" stroke-opacity=".22"/>',
               '<line x1="38" y1="84" x2="982" y2="84" stroke="#ff1744" stroke-opacity=".06" stroke-dasharray="2 8"/>',
+
               '<rect x="55" y="94" width="900" height="2" fill="#ff1744" fill-opacity=".16" class="scan"/>',
+
               f'<rect x="{chart_x}" y="{chart_y}" width="{chart_w}" height="{chart_h}" fill="none" stroke="#ff1744" stroke-opacity=".10"/>',
               f'<line x1="{chart_x}" y1="{chart_y + chart_h}" x2="{chart_x + chart_w}" y2="{chart_y + chart_h}" stroke="#ff1744" stroke-opacity=".20"/>',
               f'<line x1="{chart_x}" y1="{chart_y}" x2="{chart_x}" y2="{chart_y + chart_h}" stroke="#ff1744" stroke-opacity=".20"/>',
               f'<line x1="{chart_x}" y1="{chart_y + chart_h / 2}" x2="{chart_x + chart_w}" y2="{chart_y + chart_h / 2}" stroke="#ff1744" stroke-opacity=".07" stroke-dasharray="4 7"/>',
+
+              # Main contribution line.
               f'<polyline points="{polyline}" fill="none" stroke="#ff1744" stroke-width="2.6" filter="url(#glow)" class="draw"/>',
-              f'<polyline points="{polyline}" fill="none" stroke="#ff1744" stroke-opacity=".30" stroke-width="1" class="travel"/>',
+
+              # Moving dashed line flowing along the chart.
+              f'<polyline points="{polyline}" fill="none" stroke="#050005" stroke-opacity=".95" '
+              'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="flow"/>',
+
               circles,
               tick_nodes,
-              f'<text x="38" y="304" class="mono muted" font-size="8">WINDOW: {esc(first_date)} → {esc(last_date)}</text>',
-              '<line x1="38" y1="318" x2="982" y2="318" stroke="#ff1744" stroke-opacity=".14"/>',
-              f'<text x="38" y="341" class="mono white" font-size="11">TOTAL / {recent_total} CONTRIBUTIONS</text>',
-              '<circle cx="38" cy="358" r="3.5" fill="#ff1744" filter="url(#glow)" class="pulse"/>',
-              '<text x="50" y="362" class="mono muted" font-size="8">GITHUB CONTRIBUTION CALENDAR / AUTO-GENERATED</text>',
-              '<text x="982" y="362" class="mono muted" font-size="8" text-anchor="end">SIGNAL: SYNCED</text>',
+
+              # Explicit date/month range in dd/mm.
+              f'<text x="55" y="304" class="mono muted" font-size="9">WINDOW: {esc(first_date)} → {esc(last_date)}</text>',
+
+              '<line x1="38" y1="326" x2="982" y2="326" stroke="#ff1744" stroke-opacity=".14"/>',
+
+              f'<text x="38" y="346" fill="#ff6b87" font-family="monospace" font-size="11">TOTAL / {recent_total} CONTRIBUTIONS</text>',
+
+              '<circle cx="38" cy="362" r="3.5" fill="#ff1744" filter="url(#glow)" class="pulse"/>',
+              '<text x="50" y="366" class="mono muted" font-size="8">GITHUB CONTRIBUTION CALENDAR / AUTO-GENERATED</text>',
+              '<text x="982" y="366" class="mono muted" font-size="8" text-anchor="end">SIGNAL: SYNCED</text>',
           ])
 
           write_svg(
               "contribution-activity.svg",
               1020,
-              380,
+              395,
               "GitHub contribution activity for dims154",
               activity_body,
           )
