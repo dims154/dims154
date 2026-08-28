@@ -224,13 +224,13 @@ jobs:
                       rx="11" fill="none" stroke="url(#red)"
                       stroke-opacity=".65"/>
               """
-                  return header.format(
+              return header.format(
                       width=width,
                       height=height,
                       inner_width=width - 14,
                       inner_height=height - 14,
                       title=esc(title),
-                  ) + body + "</svg>"
+              ) + body + "</svg>"
 
           def write(name, width, height, body, title):
               (OUT / name).write_text(
