@@ -93,6 +93,37 @@
         font-weight: bold;
       }
 
+      .card {
+        fill: #090306;
+        stroke: #ff1744;
+        stroke-opacity: 0.22;
+        stroke-width: 1;
+      }
+
+      .cardGlow {
+        fill: none;
+        stroke: #ff1744;
+        stroke-opacity: 0.08;
+        stroke-width: 4;
+        filter: url(#softGlow);
+        animation: glow 2.8s ease-in-out infinite;
+      }
+
+      .bar {
+        transform-box: fill-box;
+        transform-origin: left center;
+        animation: barGlow 2.4s ease-in-out infinite;
+      }
+
+      @keyframes barGlow {
+        0%, 100% {
+          opacity: 0.72;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
       @keyframes pulse {
         0%, 100% {
           opacity: 0.35;
