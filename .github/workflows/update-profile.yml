@@ -1,4 +1,4 @@
-aname: Update GitHub Profile Stats
+name: Update GitHub Profile Stats
 
 on:
   workflow_dispatch:
@@ -145,13 +145,6 @@ jobs:
 
           days.sort(key=lambda item: item["date"])
           last_31_days = days[-31:]
-          activity_data = [
-    (
-        datetime.strptime(day["date"], "%Y-%m-%d"),
-        day["count"]
-    )
-    for day in last_31_days
-]
 
           # ======================================================
           # CURRENT STREAK
@@ -330,37 +323,6 @@ jobs:
                 .number {
                   fill: #ff1744;
                   font-weight: bold;
-                }
-
-                .card {
-                  fill: #090306;
-                  stroke: #ff1744;
-                  stroke-opacity: 0.22;
-                  stroke-width: 1;
-                }
-
-                .cardGlow {
-                  fill: none;
-                  stroke: #ff1744;
-                  stroke-opacity: 0.08;
-                  stroke-width: 4;
-                  filter: url(#softGlow);
-                  animation: glow 2.8s ease-in-out infinite;
-                }
-
-                .bar {
-                  transform-box: fill-box;
-                  transform-origin: left center;
-                  animation: barGlow 2.4s ease-in-out infinite;
-                }
-
-                @keyframes barGlow {
-                  0%, 100% {
-                    opacity: 0.72;
-                  }
-                  50% {
-                    opacity: 1;
-                  }
                 }
 
                 @keyframes pulse {
@@ -657,22 +619,10 @@ jobs:
               GITHUB STATISTICS
             </text>
 
-            <circle cx="900" cy="48"
-                    r="5"
-                    fill="#ff1744"
-                    filter="url(#glow)"
-                    class="pulse"/>
-
-            <text x="915" y="52"
-                  class="mono muted"
-                  font-size="9">
-              LIVE
-            </text>
-
             <text x="55" y="80"
                   class="mono muted"
                   font-size="10">
-              REAL-TIME PROFILE DATA / DIMS154
+              LIVE PROFILE DATA / DIMS154
             </text>
 
             <line x1="55" y1="98"
@@ -680,81 +630,88 @@ jobs:
                   stroke="#ff1744"
                   stroke-opacity="0.25"/>
 
-            <rect x="55" y="112" width="270" height="105" rx="8" class="card"/>
-            <rect x="55" y="112" width="270" height="105" rx="8" class="cardGlow"/>
-            <text x="75" y="140" class="mono muted" font-size="10">
+            <text x="75" y="145"
+                  class="mono muted"
+                  font-size="11">
               CONTRIBUTIONS
             </text>
-            <text x="75" y="185" class="number" font-size="40">
+
+            <text x="75" y="190"
+                  class="number"
+                  font-size="38">
               {esc(total_contributions)}
             </text>
-            <text x="75" y="204" class="mono muted" font-size="8">
-              TOTAL CONTRIBUTION COUNT
-            </text>
 
-            <rect x="365" y="112" width="270" height="105" rx="8" class="card"/>
-            <rect x="365" y="112" width="270" height="105" rx="8" class="cardGlow"/>
-            <text x="385" y="140" class="mono muted" font-size="10">
+            <text x="335" y="145"
+                  class="mono muted"
+                  font-size="11">
               REPOSITORIES
             </text>
-            <text x="385" y="185" class="number" font-size="40">
+
+            <text x="335" y="190"
+                  class="number"
+                  font-size="38">
               {esc(repositories)}
             </text>
-            <text x="385" y="204" class="mono muted" font-size="8">
-              PUBLIC OWNER REPOSITORIES
-            </text>
 
-            <rect x="675" y="112" width="270" height="105" rx="8" class="card"/>
-            <rect x="675" y="112" width="270" height="105" rx="8" class="cardGlow"/>
-            <text x="695" y="140" class="mono muted" font-size="10">
+            <text x="595" y="145"
+                  class="mono muted"
+                  font-size="11">
               FOLLOWERS
             </text>
-            <text x="695" y="185" class="number" font-size="40">
+
+            <text x="595" y="190"
+                  class="number"
+                  font-size="38">
               {esc(followers)}
             </text>
-            <text x="695" y="204" class="mono muted" font-size="8">
-              PROFILE FOLLOWERS
-            </text>
 
-            <text x="55" y="255" class="mono muted" font-size="10">
+            <text x="75" y="235"
+                  class="mono muted"
+                  font-size="10">
               CURRENT STREAK
             </text>
-            <text x="55" y="288" class="number" font-size="25">
+
+            <text x="75" y="275"
+                  class="number"
+                  font-size="27">
               {esc(current_streak)} DAYS
             </text>
 
-            <text x="365" y="255" class="mono muted" font-size="10">
+            <text x="335" y="235"
+                  class="mono muted"
+                  font-size="10">
               LONGEST STREAK
             </text>
-            <text x="365" y="288" class="number" font-size="25">
+
+            <text x="335" y="275"
+                  class="number"
+                  font-size="27">
               {esc(longest_streak)} DAYS
             </text>
 
-            <text x="675" y="255" class="mono muted" font-size="10">
-              SYSTEM STATUS
+            <text x="595" y="235"
+                  class="mono muted"
+                  font-size="10">
+              STATUS
             </text>
-            <circle cx="686" cy="282"
+
+            <circle cx="605" cy="262"
                     r="5"
                     fill="#ff1744"
                     filter="url(#glow)"
                     class="pulse"/>
-            <text x="701" y="287"
+
+            <text x="620" y="267"
                   class="mono red"
                   font-size="12">
-              ACTIVE / TRACKING
+              ACTIVE
             </text>
 
-            <line x1="55" y1="307"
-                  x2="945" y2="307"
-                  stroke="#ff1744"
-                  stroke-opacity="0.15"
-                  stroke-dasharray="5 8"
-                  class="dash"/>
-
-            <text x="55" y="321"
+            <text x="55" y="305"
                   class="mono muted"
-                  font-size="8">
-              AUTOMATICALLY GENERATED FROM GITHUB API
+                  font-size="9">
+              AUTOMATICALLY GENERATED WITH GITHUB ACTIONS
             </text>
           """
 
@@ -957,156 +914,189 @@ jobs:
 
           # ======================================================
           # CONTRIBUTION ACTIVITY
-          # Build chart coordinates from the real 31-day contribution data.
-          chart_left = 85
-          chart_right = 925
-          chart_top = 125
-          chart_bottom = 305
-          max_value = max((value for _, value in activity_data), default=1)
-          max_value = max(max_value, 1)
+          # ======================================================
 
-          point_coords = []
-          date_labels = []
+          graph_width = 1100
+          graph_height = 500
 
-          for index, (date_value, value) in enumerate(activity_data):
-              ratio = index / max(len(activity_data) - 1, 1)
-              x = chart_left + ratio * (chart_right - chart_left)
-              y = chart_bottom - (value / max_value) * (chart_bottom - chart_top)
-              point_coords.append((round(x, 1), round(y, 1)))
+          left = 80
+          right = 1035
+          top = 105
+          bottom = 390
 
-          points = " ".join(f"{x},{y}" for x, y in point_coords)
+          inner_width = right - left
+          inner_height = bottom - top
 
-          for index, (date_value, _) in enumerate(activity_data):
-              if index % max(len(activity_data) // 6, 1) == 0 or index == len(activity_data) - 1:
-                  ratio = index / max(len(activity_data) - 1, 1)
-                  x = chart_left + ratio * (chart_right - chart_left)
-                  date_labels.append((round(x, 1), date_value.strftime("%m/%d")))
+          counts = [
+              item["count"]
+              for item in last_31_days
+          ]
 
-          activity = f"""
-            <text x="55" y="50"
+          max_count = max(
+              counts if counts else [1]
+          )
+
+          max_count = max(1, max_count)
+
+          points = []
+
+          for index, day in enumerate(last_31_days):
+              if len(last_31_days) <= 1:
+                  x = left
+              else:
+                  x = (
+                      left
+                      + index * inner_width
+                      / (len(last_31_days) - 1)
+                  )
+
+              y = (
+                  bottom
+                  - (
+                      day["count"] / max_count
+                  ) * inner_height
+              )
+
+              points.append(
+                  f"{x:.2f},{y:.2f}"
+              )
+
+          polyline_points = " ".join(points)
+
+          grid = ""
+
+          for level in range(5):
+              value = max_count * level / 4
+
+              y = (
+                  bottom
+                  - (level / 4) * inner_height
+              )
+
+              grid += f"""
+                <line x1="{left}"
+                      y1="{y:.2f}"
+                      x2="{right}"
+                      y2="{y:.2f}"
+                      stroke="#ff1744"
+                      stroke-opacity="0.10"/>
+
+                <text x="60"
+                      y="{y + 4:.2f}"
+                      class="mono muted"
+                      font-size="9"
+                      text-anchor="end">
+                  {round(value)}
+                </text>
+              """
+
+          graph_points = ""
+
+          for index, day in enumerate(last_31_days):
+              if len(last_31_days) <= 1:
+                  x = left
+              else:
+                  x = (
+                      left
+                      + index * inner_width
+                      / (len(last_31_days) - 1)
+                  )
+
+              y = (
+                  bottom
+                  - (
+                      day["count"] / max_count
+                  ) * inner_height
+              )
+
+              graph_points += f"""
+                <circle cx="{x:.2f}"
+                        cy="{y:.2f}"
+                        r="3.5"
+                        fill="#ff1744"
+                        filter="url(#glow)"
+                        class="pulse"/>
+              """
+
+          date_labels = ""
+
+          label_indexes = [
+              0, 5, 10, 15, 20, 25, 30
+          ]
+
+          for index in label_indexes:
+              if index >= len(last_31_days):
+                  continue
+
+              day = last_31_days[index]
+
+              if len(last_31_days) <= 1:
+                  x = left
+              else:
+                  x = (
+                      left
+                      + index * inner_width
+                      / (len(last_31_days) - 1)
+                  )
+
+              date_value = datetime.strptime(
+                  day["date"],
+                  "%Y-%m-%d"
+              )
+
+              # IMPORTANT:
+              # Month/day with slash, not YYYY-MM-DD.
+              label = date_value.strftime("%m/%d")
+
+              date_labels += f"""
+                <text x="{x:.2f}"
+                      y="{bottom + 30}"
+                      class="mono muted"
+                      font-size="9"
+                      text-anchor="middle">
+                  {label}
+                </text>
+              """
+
+          activity_svg = f"""
+            <text x="55" y="55"
                   class="title red"
                   font-size="24"
                   letter-spacing="1">
               CONTRIBUTION ACTIVITY
             </text>
 
-            <circle cx="900" cy="43"
-                    r="5"
-                    fill="#ff1744"
-                    filter="url(#glow)"
-                    class="pulse"/>
-
-            <text x="915" y="47"
+            <text x="55" y="80"
                   class="mono muted"
-                  font-size="9">
-              LIVE
+                  font-size="10">
+              LAST 31 DAYS / DAILY CONTRIBUTIONS
             </text>
 
-            <text x="55" y="74"
-                  class="mono muted"
-                  font-size="9"
-                  letter-spacing="1">
-              LAST 31 DAYS / ACTIVITY MONITOR / MM/DD
-            </text>
-
-            <line x1="55" y1="92"
-                  x2="945" y2="92"
+            <line x1="55" y1="90"
+                  x2="1045" y2="90"
                   stroke="#ff1744"
                   stroke-opacity="0.25"/>
 
-            <rect x="55" y="108"
-                  width="890"
-                  height="215"
-                  rx="10"
-                  fill="#080305"
-                  stroke="#ff1744"
-                  stroke-opacity="0.20"/>
+            {grid}
 
-            <rect x="55" y="108"
-                  width="890"
-                  height="215"
-                  rx="10"
-                  fill="none"
-                  stroke="#ff1744"
-                  stroke-opacity="0.08"
-                  stroke-width="5"
-                  filter="url(#softGlow)"/>
+            <polyline
+              points="{polyline_points}"
+              fill="none"
+              stroke="#ff1744"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              filter="url(#glow)"/>
 
-            <path d="M75 145H925
-                     M75 185H925
-                     M75 225H925
-                     M75 265H925
-                     M75 305H925"
-                  stroke="#ff1744"
-                  stroke-opacity="0.10"
-                  stroke-width="1"/>
+            {graph_points}
 
-            <path d="M75 125V305
-                     M245 125V305
-                     M415 125V305
-                     M585 125V305
-                     M755 125V305
-                     M925 125V305"
-                  stroke="#ff1744"
-                  stroke-opacity="0.08"
-                  stroke-width="1"/>
+            {date_labels}
 
-            <text x="65" y="148" class="mono muted" font-size="8">30</text>
-            <text x="65" y="188" class="mono muted" font-size="8">20</text>
-            <text x="65" y="228" class="mono muted" font-size="8">10</text>
-            <text x="65" y="308" class="mono muted" font-size="8">0</text>
-
-            <polyline points="{points}"
-                      fill="none"
-                      stroke="#ff1744"
-                      stroke-width="3"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      filter="url(#glow)"
-                      class="dash"/>
-
-            <polyline points="{points}"
-                      fill="none"
-                      stroke="#ff667f"
-                      stroke-opacity="0.25"
-                      stroke-width="8"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      filter="url(#softGlow)"/>
-
-            {''.join(
-                f'<circle cx="{x}" cy="{y}" r="3.5" fill="#ff1744" filter="url(#glow)" class="pulse"/>'
-                for x, y in point_coords
-            )}
-
-            {''.join(
-                f'<text x="{x}" y="338" text-anchor="middle" class="mono muted" font-size="8">{label}</text>'
-                for x, label in date_labels
-            )}
-
-            <text x="55" y="365"
+            <text x="550" y="455"
                   class="mono muted"
-                  font-size="8">
-              CONTRIBUTION SIGNAL
-            </text>
-
-            <circle cx="185" cy="361"
-                    r="4"
-                    fill="#ff1744"
-                    filter="url(#glow)"
-                    class="pulse"/>
-
-            <text x="200" y="365"
-                  class="mono red"
-                  font-size="9">
-              ACTIVE
-            </text>
-
-            <text x="945" y="365"
-                  text-anchor="end"
-                  class="mono muted"
-                  font-size="8">
-              AUTO-GENERATED / GITHUB ACTIONS
+                  font-size="9"
+                  text-anchor="middle">
+              LAST 31 DAYS · AUTOMATICALLY GENERATED WITH GITHUB ACTIONS
             </text>
           """
 
@@ -1207,5 +1197,3 @@ jobs:
           echo "=========================================="
           echo " GitHub profile update completed."
           echo "=========================================="
-
-      
