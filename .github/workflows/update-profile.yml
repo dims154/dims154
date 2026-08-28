@@ -329,22 +329,48 @@ jobs:
           write_svg("top-languages.svg", 1020, 375, "Top languages for dims154", language_body)
 
           streak = (
+              '<style>'
+              '@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}'
+              '@keyframes scan{0%{transform:translateY(0);opacity:0}20%{opacity:.10}50%{opacity:.18}80%{opacity:.10}100%{transform:translateY(125px);opacity:0}}'
+              '@keyframes dash{to{stroke-dashoffset:-120}}'
+              '.pulse{animation:pulse 2s ease-in-out infinite}'
+              '.scan{animation:scan 5s linear infinite}'
+              '.dash{stroke-dasharray:8 8;animation:dash 2s linear infinite}'
+              '</style>'
+
+              '<rect x="0" y="0" width="1020" height="325" rx="14" fill="#050005" fill-opacity=".72"/>'
               '<text x="38" y="42" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="22">CONTRIBUTION STREAK</text>'
               '<text x="38" y="64" fill="#9d7a82" font-family="monospace" font-size="10">CONSISTENCY MONITOR / DIMS154</text>'
-              '<circle cx="944" cy="36" r="5" fill="#ff1744" filter="url(#glow)"/>'
+
+              '<circle cx="944" cy="36" r="7" fill="#ff1744" filter="url(#glow)" class="pulse"/>'
               '<text x="958" y="40" fill="#9d7a82" font-family="monospace" font-size="10">ACTIVE</text>'
-              '<text x="38" y="108" fill="#9d7a82" font-family="monospace" font-size="11">CURRENT STREAK</text>'
-              f'<text x="38" y="178" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="58">{current_streak}</text>'
-              '<text x="38" y="200" fill="#9d7a82" font-family="monospace" font-size="10">DAYS</text>'
-              '<text x="340" y="108" fill="#9d7a82" font-family="monospace" font-size="11">LONGEST STREAK</text>'
-              f'<text x="340" y="178" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="58">{longest_streak}</text>'
-              '<text x="340" y="200" fill="#9d7a82" font-family="monospace" font-size="10">DAYS</text>'
-              '<text x="650" y="108" fill="#9d7a82" font-family="monospace" font-size="11">TOTAL CONTRIBUTIONS</text>'
-              f'<text x="650" y="178" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="58">{total_contributions}</text>'
-              '<text x="650" y="200" fill="#9d7a82" font-family="monospace" font-size="10">YEAR</text>'
-              '<line x1="38" y1="236" x2="982" y2="236" stroke="#ff1744" stroke-opacity=".35" stroke-dasharray="7 7"/>'
-              '<text x="38" y="268" fill="#f4f4f4" font-family="monospace" font-size="12">KEEP BUILDING. KEEP LEARNING.</text>'
-              '<text x="38" y="292" fill="#9d7a82" font-family="monospace" font-size="10">CONTRIBUTION DATA IS GENERATED AUTOMATICALLY.</text>'
+
+              '<line x1="38" y1="82" x2="982" y2="82" stroke="#ff1744" stroke-opacity=".22"/>'
+              '<line x1="38" y1="84" x2="982" y2="84" stroke="#ff1744" stroke-opacity=".06" stroke-dasharray="2 8"/>'
+
+              '<rect x="38" y="92" width="944" height="2" fill="#ff1744" fill-opacity=".18" class="scan"/>'
+
+              '<line x1="340" y1="108" x2="340" y2="205" stroke="#ff1744" stroke-opacity=".10"/>'
+              '<line x1="650" y1="108" x2="650" y2="205" stroke="#ff1744" stroke-opacity=".10"/>'
+
+              '<text x="38" y="116" fill="#9d7a82" font-family="monospace" font-size="9">CURRENT STREAK</text>'
+              f'<text x="38" y="175" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="52">{current_streak}</text>'
+              '<text x="38" y="195" fill="#6d4f57" font-family="monospace" font-size="8">CONSECUTIVE DAYS</text>'
+
+              '<text x="390" y="116" fill="#9d7a82" font-family="monospace" font-size="9">LONGEST STREAK</text>'
+              f'<text x="390" y="175" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="52">{longest_streak}</text>'
+              '<text x="390" y="195" fill="#6d4f57" font-family="monospace" font-size="8">BEST RUN</text>'
+
+              '<text x="700" y="116" fill="#9d7a82" font-family="monospace" font-size="9">TOTAL CONTRIBUTIONS</text>'
+              f'<text x="700" y="175" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="52">{total_contributions}</text>'
+              '<text x="700" y="195" fill="#6d4f57" font-family="monospace" font-size="8">LAST 365 DAYS</text>'
+
+              '<line x1="38" y1="218" x2="982" y2="218" stroke="#ff1744" stroke-opacity=".14"/>'
+              '<path d="M38 245 H982" stroke="#ff1744" stroke-opacity=".35" fill="none" class="dash"/>'
+
+              '<circle cx="38" cy="274" r="3.5" fill="#ff1744" filter="url(#glow)" class="pulse"/>'
+              '<text x="50" y="278" fill="#9d7a82" font-family="monospace" font-size="8">KEEP BUILDING / KEEP LEARNING</text>'
+              '<text x="982" y="278" fill="#6d4f57" font-family="monospace" font-size="8" text-anchor="end">AUTO-GENERATED / GITHUB ACTIONS</text>'
           )
           write_svg("streak.svg", 1020, 325, "Contribution streak for dims154", streak)
 
