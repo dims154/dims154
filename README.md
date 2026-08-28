@@ -1,36 +1,28 @@
 <div align="center">
 
-<img src="./assets/profile-hero.svg"
-  width="100%"
-  alt="Muhammad Ilham Cyberpunk Profile">
+<img src="./assets/profile-hero.svg" width="100%" alt="Muhammad Ilham Cyberpunk Profile">
 
-<br>
+# 👨‍💻 Muhammad Ilham
 
-👨‍💻 Muhammad Ilham
+### Information Systems Student • Backend Developer • System Enthusiast
 
-Information Systems Student • Backend Developer • System Enthusiast
-
-<p>
-  <a href="https://github.com/dims154">
-    <img src="https://img.shields.io/badge/GitHub-dims154-0D1117?style=for-the-badge&logo=github&logoColor=white">
-  </a>
-  <a href="https://wa.me/6287785567289">
-    <img src="https://img.shields.io/badge/WhatsApp-Contact-25D366?style=for-the-badge&logo=whatsapp&logoColor=white">
-  </a>
-</p>
+<a href="https://github.com/dims154"><img src="https://img.shields.io/badge/GitHub-dims154-0D1117?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
+<a href="https://wa.me/6287785567289"><img src="https://img.shields.io/badge/WhatsApp-Contact-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp"></a>
 
 </div>
 
-🌌 About Me
+---
 
-I'm an Information Systems student with a strong interest in backend development, software architecture, automation, and building practical software systems.
+## 🌌 About Me
+
+I'm an **Information Systems student** with a strong interest in backend development, software architecture, automation, and building practical software systems.
 
 I enjoy understanding what happens behind the interface — from business logic and databases to APIs, architecture, integrations, and automation.
 
-My goal is not simply to write code.
+> **My goal is not simply to write code.**  
+> I want to understand the system behind the code.
 
-I want to understand the system behind the code.
-
+```yaml
 name: Muhammad Ilham
 username: dims154
 location: Jambi, Indonesia
@@ -40,181 +32,144 @@ role:
   - Backend Developer
   - System Enthusiast
 
-primary_focus:
+focus:
   - Backend Development
   - System Design
   - Enterprise Architecture
   - Database Design
   - Automation
   - Data Analytics
+```
 
-interests:
-  - Real World Systems
-  - Software Architecture
-  - Business Intelligence
-  - Open Source
-  - Continuous Learning
+---
 
-⚙️ Tech Stack
+## ⚙️ Tech Stack
 
 <div align="center">
 
-💻 Languages
+**Languages**
 
-<img src="https://skillicons.dev/icons?i=python,java,php,javascript" alt="Programming Languages">
+<img src="https://skillicons.dev/icons?i=python,java,php,javascript" alt="Languages">
 
-🧩 Backend
+**Backend**
 
-<img src="https://skillicons.dev/icons?i=laravel,nodejs" alt="Backend Technologies">
+<img src="https://skillicons.dev/icons?i=laravel,nodejs" alt="Backend">
 
-🗄️ Database
+**Database**
 
-<img src="https://skillicons.dev/icons?i=mysql,sqlite" alt="Database Technologies">
+<img src="https://skillicons.dev/icons?i=mysql,sqlite" alt="Database">
 
-🛠️ Tools
+**Tools**
 
-<img src="https://skillicons.dev/icons?i=git,github,vscode,postman" alt="Development Tools">
+<img src="https://skillicons.dev/icons?i=git,github,vscode,postman" alt="Tools">
 
-🌐 Web
+**Web**
 
-<img src="https://skillicons.dev/icons?i=html,css" alt="Web Technologies">
+<img src="https://skillicons.dev/icons?i=html,css" alt="Web">
 
 </div>
 
-📊 GitHub Statistics
+---
+
+## 📊 GitHub Statistics
 
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/dims154/dims154/main/stats/github-stats.svg"
-  width="100%"
-  alt="GitHub Statistics">
+<img src="https://raw.githubusercontent.com/dims154/dims154/main/stats/github-stats.svg" width="100%" alt="GitHub Statistics">
 
-<img src="https://raw.githubusercontent.com/dims154/dims154/main/stats/top-languages.svg"
-  width="100%"
-  alt="Top Languages">
+<img src="https://raw.githubusercontent.com/dims154/dims154/main/stats/top-languages.svg" width="100%" alt="Top Languages">
 
-<img src="https://raw.githubusercontent.com/dims154/dims154/main/stats/streak.svg"
-  width="100%"
-  alt="Contribution Streak">
+<img src="https://raw.githubusercontent.com/dims154/dims154/main/stats/streak.svg" width="100%" alt="Contribution Streak">
 
 </div>
 
-<p align="center">
-  <sub>🔄 Automatically generated and updated with GitHub Actions</sub>
-</p>
+<p align="center"><sub>🔄 Automatically generated and updated with GitHub Actions</sub></p>
 
-📈 Contribution Activity
+---
+
+## 📈 Contribution Activity
 
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/dims154/dims154/main/stats/contribution-activity.svg"
-  width="100%"
-  alt="Contribution Activity">
-
-<br>
+<img src="https://raw.githubusercontent.com/dims154/dims154/main/stats/contribution-activity.svg" width="100%" alt="Contribution Activity">
 
 <sub>Last 31 days · Automatically generated with GitHub Actions</sub>
 
 </div>
 
-🎯 Current Mission
+---
+
+## 🎯 Current Focus
 
 <table>
 <tr>
 <td width="50%" valign="top">
 
-⚙️ Backend
+### ⚙️ Backend
 
-Building practical backend applications with:
-
-API development
-
-Business logic
-
-Authentication
-
-Authorization
-
-Database integration
-
-System integrations
-
-Backend architecture
+- API development
+- Business logic
+- Authentication & authorization
+- Database integration
+- System integrations
+- Backend architecture
 
 </td>
 <td width="50%" valign="top">
 
-🏗️ System Architecture
+### 🏗️ Architecture
 
-Learning how to design systems that are:
-
-Modular
-
-Maintainable
-
-Scalable
-
-Secure
-
-Reliable
-
-Business-oriented
+- Modular systems
+- Maintainability
+- Scalability
+- Security
+- Reliability
+- Business-oriented design
 
 </td>
 </tr>
-
 <tr>
 <td width="50%" valign="top">
 
-🤖 Automation
+### 🤖 Automation
 
-Exploring:
-
-Bots
-
-Workflows
-
-GitHub Actions
-
-Integrations
-
-Scheduled automation
-
-Developer tooling
+- Bots
+- Workflows
+- GitHub Actions
+- Integrations
+- Scheduled automation
+- Developer tooling
 
 </td>
 <td width="50%" valign="top">
 
-📊 Data
+### 📊 Data
 
-Working with:
-
-Database design
-
-Data analytics
-
-Reporting
-
-Business intelligence
-
-Structured data
+- Database design
+- Data analytics
+- Reporting
+- Business intelligence
+- Structured data
 
 </td>
 </tr>
 </table>
 
-🛠️ What I'm Building
+---
 
-🤖 Backend & Automation Systems
+## 🛠️ What I'm Building
+
+### 🤖 Backend & Automation Systems
 
 Building backend systems and automation workflows with a focus on practical architecture.
 
+```text
                          SYSTEM
                            │
                            ▼
-                         ┌─────┐
-                         │ API │
-                         └──┬──┘
+                        ┌───────┐
+                        │  API  │
+                        └───┬───┘
                             │
               ┌─────────────┼─────────────┐
               ▼             ▼             ▼
@@ -226,27 +181,23 @@ Building backend systems and automation workflows with a focus on practical arch
                             │
                             ▼
                         DATABASE
+```
 
 Current areas:
 
-API development
+- API development
+- Command-based architecture
+- Authentication & authorization
+- Permission systems
+- User management
+- Structured output
+- System integrations
 
-Command-based architecture
-
-Authentication & authorization
-
-Permission systems
-
-User management
-
-Structured output
-
-System integrations
-
-🏢 Enterprise Systems
+### 🏢 Enterprise Systems
 
 Exploring enterprise-oriented software architecture through practical projects.
 
+```text
                        APPLICATION
                             │
                             ▼
@@ -262,27 +213,23 @@ Exploring enterprise-oriented software architecture through practical projects.
               └─────────────┼─────────────┘
                             ▼
                          DATABASE
+```
 
 Focus areas:
 
-Modular architecture
+- Modular architecture
+- Multi-tenant systems
+- Tenant isolation
+- Authentication & authorization
+- Database design
+- Scalable backend architecture
+- System integration
 
-Multi-tenant systems
+---
 
-Tenant isolation
+## 🧠 Development Philosophy
 
-Authentication
-
-Authorization
-
-Database design
-
-Scalable backend architecture
-
-System integration
-
-🧠 Development Philosophy
-
+```text
               ┌───────────┐
               │   LEARN   │
               └─────┬─────┘
@@ -313,46 +260,29 @@ System integration
               └─────┬─────┘
                     │
                     └──────────────► REPEAT
+```
 
-I don't aim to write perfect code from the beginning.
+> I don't aim to write perfect code from the beginning.
+>
+> I aim to understand **why it works, why it fails, and how it can be improved.**
 
-I aim to understand why it works, why it fails, and how it can be improved.
+---
 
-📚 Currently Learning
+## 📚 Currently Learning
 
-Technology / Concept
+| Technology / Concept | Focus |
+| :--- | :--- |
+| 🐍 **Python** | Programming & automation |
+| 🐘 **PHP / Laravel** | Backend development |
+| 🟨 **JavaScript / Node.js** | Backend & integrations |
+| 🏗️ **System Design** | Scalable software architecture |
+| 🏢 **Enterprise Architecture** | Business-oriented system design |
+| 🗄️ **Database Design** | Data modeling & optimization |
+| 🤖 **GitHub Actions** | CI/CD & automation |
 
-Focus
+---
 
-🐍 Python
-
-Programming & automation
-
-🐘 PHP / Laravel
-
-Backend development
-
-🟨 JavaScript / Node.js
-
-Backend & integrations
-
-🏗️ System Design
-
-Scalable software architecture
-
-🏢 Enterprise Architecture
-
-Business-oriented system design
-
-🗄️ Database Design
-
-Data modeling & optimization
-
-🤖 GitHub Actions
-
-CI/CD & automation
-
-🔥 Areas of Interest
+## 🔥 Areas of Interest
 
 <div align="center">
 
@@ -360,41 +290,41 @@ CI/CD & automation
 <tr>
 <td width="25%" align="center">
 
-⚙️ BACKEND
+### ⚙️ BACKEND
 
-APIs
-Business Logic
-Databases
+APIs  
+Business Logic  
+Databases  
 Integrations
 
 </td>
 <td width="25%" align="center">
 
-🏢 ENTERPRISE
+### 🏢 ENTERPRISE
 
-Architecture
-Scalability
-Modularity
+Architecture  
+Scalability  
+Modularity  
 Maintainability
 
 </td>
 <td width="25%" align="center">
 
-🤖 AUTOMATION
+### 🤖 AUTOMATION
 
-Bots
-Workflows
-Integrations
+Bots  
+Workflows  
+Integrations  
 CI/CD
 
 </td>
 <td width="25%" align="center">
 
-📊 DATA
+### 📊 DATA
 
-Analytics
-Reporting
-BI
+Analytics  
+Reporting  
+Business Intelligence  
 Data Systems
 
 </td>
@@ -403,85 +333,58 @@ Data Systems
 
 </div>
 
-🔄 Development Workflow
+---
 
-                 ┌───────────┐
-                 │   IDEA    │
-                 └─────┬─────┘
-                       │
-                       ▼
-                 ┌───────────┐
-                 │  DESIGN   │
-                 └─────┬─────┘
-                       │
-                       ▼
-                 ┌───────────┐
-                 │   CODE    │
-                 └─────┬─────┘
-                       │
-                       ▼
-                 ┌───────────┐
-                 │   TEST    │
-                 └─────┬─────┘
-                       │
-                       ▼
-                 ┌───────────┐
-                 │  DEBUG    │
-                 └─────┬─────┘
-                       │
-                       ▼
-                 ┌───────────┐
-                 │  IMPROVE  │
-                 └─────┬─────┘
-                       │
-                       ▼
-                 ┌───────────┐
-                 │  DEPLOY   │
-                 └─────┬─────┘
-                       │
-                       ▼
-                 ┌───────────┐
-                 │   LEARN   │
-                 └─────┬─────┘
-                       │
-                       └──────────────► REPEAT
+## 🔄 Development Workflow
 
-🤖 GitHub Automation
+<div align="center">
 
-This profile uses GitHub Actions to automatically generate and update profile statistics.
+```text
+IDEA → DESIGN → CODE → TEST → DEBUG → IMPROVE → DEPLOY → LEARN → REPEAT
+```
 
+</div>
+
+---
+
+## 🤖 GitHub Automation
+
+This profile uses **GitHub Actions** to automatically generate and update profile statistics.
+
+```text
 GitHub API
-     │
-     ▼
+    │
+    ▼
 GitHub Actions
-     │
-     ├── Contributions
-     ├── Repositories
-     ├── Followers
-     ├── Contribution Streak
-     └── Top Languages
-     │
-     ▼
+    │
+    ├── Contributions
+    ├── Repositories
+    ├── Followers
+    ├── Contribution Streak
+    └── Top Languages
+    │
+    ▼
 Generate SVG
-     │
-     ▼
+    │
+    ▼
 stats/
  ├── github-stats.svg
  ├── top-languages.svg
  ├── streak.svg
  └── contribution-activity.svg
-     │
-     ▼
+    │
+    ▼
 README.md
+```
 
-The statistics and contribution activity are generated from GitHub data and stored directly inside this repository.
+---
 
-🧩 Profile Components
+## 🧩 Profile Components
 
+```text
 dims154/
 │
 ├── README.md
-│
 ├── assets/
 │   ├── cyberpunk.png
 │   └── profile-hero.svg
@@ -495,32 +398,30 @@ dims154/
 └── .github/
     └── workflows/
         └── update-profile.yml
+```
 
-🌐 Connect With Me
+---
+
+## 🌐 Connect With Me
 
 <div align="center">
 
-<a href="https://github.com/dims154">
-<img src="https://img.shields.io/badge/GitHub-dims154-0D1117?style=for-the-badge&logo=github&logoColor=white">
-</a>
-
-<a href="https://wa.me/6287785567289">
-<img src="https://img.shields.io/badge/WhatsApp-Contact-25D366?style=for-the-badge&logo=whatsapp&logoColor=white">
-</a>
+<a href="https://github.com/dims154"><img src="https://img.shields.io/badge/GitHub-dims154-0D1117?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
+<a href="https://wa.me/6287785567289"><img src="https://img.shields.io/badge/WhatsApp-Contact-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp"></a>
 
 <br><br>
 
-<img src="https://komarev.com/ghpvc/?username=dims154&style=for-the-badge&color=58A6FF&label=PROFILE+VIEWS">
+<img src="https://komarev.com/ghpvc/?username=dims154&style=for-the-badge&color=58A6FF&label=PROFILE+VIEWS" alt="Profile Views">
 
 </div>
 
+---
+
 <div align="center">
 
-⚡ CODE • BUILD • LEARN • IMPROVE • REPEAT
+### ⚡ CODE • BUILD • LEARN • IMPROVE • REPEAT
 
-"Every expert was once a beginner."
-
-<br>
+*"Every expert was once a beginner."*
 
 <sub>Thanks for visiting my profile 🚀</sub>
 
