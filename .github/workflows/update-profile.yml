@@ -416,7 +416,7 @@ jobs:
 
           circles = "".join(
               f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3.2" '
-              'fill="#ff1744" filter="url(#glow)" class="pulse"/>'
+              'fill="#ffffff" filter="url(#glow)" class="pulse"/>'
               for x, y in points
           )
 
