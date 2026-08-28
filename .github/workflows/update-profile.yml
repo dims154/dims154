@@ -232,7 +232,7 @@ jobs:
                       title=esc(title),
                   ) + body + "</svg>"
 
-def write(name, width, height, body, title):
+          def write(name, width, height, body, title):
               (OUT / name).write_text(
                   document(width, height, body, title),
                   encoding="utf-8",
