@@ -1,92 +1,293 @@
-<svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="900"
-    height="260"
-    viewBox="0 0 900 260">
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1000"
+     height="330"
+     viewBox="0 0 1000 330">
 
-    <rect
-      width="100%"
-      height="100%"
-      rx="12"
-      fill="#0D1117"/>
+  <defs>
 
-    
+    <linearGradient id="bg"
+                    x1="0" y1="0"
+                    x2="1" y2="1">
+      <stop offset="0%" stop-color="#050000"/>
+      <stop offset="50%" stop-color="#180006"/>
+      <stop offset="100%" stop-color="#020000"/>
+    </linearGradient>
 
-<text
-  x="40"
-  y="50"
-  fill="#58A6FF"
-  font-family="Arial"
-  font-size="28"
-  font-weight="bold">
-  Contribution Streak
-</text>
+    <linearGradient id="redLine"
+                    x1="0" y1="0"
+                    x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff003c"/>
+      <stop offset="50%" stop-color="#ff1744"/>
+      <stop offset="100%" stop-color="#ff003c"/>
+    </linearGradient>
 
-<line
-  x1="40"
-  y1="70"
-  x2="860"
-  y2="70"
-  stroke="#30363D"/>
+    <filter id="glow"
+            x="-50%" y="-50%"
+            width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3"
+                      result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="softGlow"
+            x="-50%" y="-50%"
+            width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8"
+                      result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <pattern id="grid"
+             width="32"
+             height="32"
+             patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32"
+            fill="none"
+            stroke="#ff003c"
+            stroke-opacity="0.10"
+            stroke-width="1"/>
+    </pattern>
+
+    <pattern id="smallGrid"
+             width="8"
+             height="8"
+             patternUnits="userSpaceOnUse">
+      <path d="M 8 0 L 0 0 0 8"
+            fill="none"
+            stroke="#ff003c"
+            stroke-opacity="0.035"
+            stroke-width="1"/>
+    </pattern>
+
+    <style>
+      .title {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+      }
+
+      .mono {
+        font-family: 'Courier New', monospace;
+      }
+
+      .red {
+        fill: #ff1744;
+      }
+
+      .white {
+        fill: #f5f5f5;
+      }
+
+      .muted {
+        fill: #a37b84;
+      }
+
+      .number {
+        fill: #ff1744;
+        font-weight: bold;
+      }
+
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 0.35;
+        }
+
+        50% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes glow {
+        0%, 100% {
+          opacity: 0.55;
+        }
+
+        50% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes scan {
+        0% {
+          transform: translateY(-150px);
+          opacity: 0;
+        }
+
+        15% {
+          opacity: 0.35;
+        }
+
+        50% {
+          opacity: 0.12;
+        }
+
+        100% {
+          transform: translateY(600px);
+          opacity: 0;
+        }
+      }
+
+      @keyframes dash {
+        to {
+          stroke-dashoffset: -100;
+        }
+      }
+
+      @keyframes blink {
+        0%, 45% {
+          opacity: 1;
+        }
+
+        50%, 100% {
+          opacity: 0.25;
+        }
+      }
+
+      .pulse {
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      .glow {
+        animation: glow 2.5s ease-in-out infinite;
+      }
+
+      .scan {
+        animation: scan 5s linear infinite;
+      }
+
+      .dash {
+        stroke-dasharray: 8 8;
+        animation: dash 2s linear infinite;
+      }
+
+      .blink {
+        animation: blink 1.5s step-end infinite;
+      }
+    </style>
+
+  </defs>
+
+  <rect width="100%"
+        height="100%"
+        rx="14"
+        fill="url(#bg)"/>
+
+  <rect width="100%"
+        height="100%"
+        rx="14"
+        fill="url(#smallGrid)"/>
+
+  <rect width="100%"
+        height="100%"
+        rx="14"
+        fill="url(#grid)"/>
+
+  <rect x="4" y="4"
+        width="992"
+        height="322"
+        rx="12"
+        fill="none"
+        stroke="#ff003c"
+        stroke-width="5"
+        opacity="0.15"
+        filter="url(#softGlow)"
+        class="glow"/>
+
+  <rect x="6" y="6"
+        width="988"
+        height="318"
+        rx="12"
+        fill="none"
+        stroke="url(#redLine)"
+        stroke-width="1.5"
+        filter="url(#glow)"/>
+
+  <rect x="10" y="10"
+        width="980"
+        height="2"
+        fill="#ff1744"
+        opacity="0.2"
+        class="scan"/>
+
+  
+  <text x="55" y="55"
+        class="title red"
+        font-size="24"
+        letter-spacing="1">
+    CONTRIBUTION STREAK
+  </text>
+
+  <line x1="55" y1="80"
+        x2="945" y2="80"
+        stroke="#ff1744"
+        stroke-opacity="0.25"/>
+
+  <circle cx="285" cy="145"
+          r="7"
+          fill="#ff1744"
+          filter="url(#glow)"
+          class="pulse"/>
+
+  <text x="305" y="150"
+        class="mono muted"
+        font-size="11">
+    CURRENT STREAK
+  </text>
+
+  <text x="305" y="205"
+        class="number"
+        font-size="50">
+    1
+  </text>
+
+  <text x="305" y="228"
+        class="mono muted"
+        font-size="10">
+    DAYS
+  </text>
+
+  <circle cx="655" cy="145"
+          r="7"
+          fill="#ff1744"
+          filter="url(#glow)"
+          class="pulse"/>
+
+  <text x="675" y="150"
+        class="mono muted"
+        font-size="11">
+    LONGEST STREAK
+  </text>
+
+  <text x="675" y="205"
+        class="number"
+        font-size="50">
+    6
+  </text>
+
+  <text x="675" y="228"
+        class="mono muted"
+        font-size="10">
+    DAYS
+  </text>
+
+  <path d="M 150 270 H 850"
+        stroke="#ff1744"
+        stroke-opacity="0.18"
+        stroke-dasharray="6 8"
+        class="dash"/>
+
+  <text x="500" y="295"
+        class="mono muted"
+        font-size="9"
+        text-anchor="middle">
+    AUTOMATICALLY GENERATED AND UPDATED WITH GITHUB ACTIONS
+  </text>
 
 
-<text
-  x="220"
-  y="125"
-  fill="#8B949E"
-  font-family="Arial"
-  font-size="15">
-  🔥 CURRENT STREAK
-</text>
-
-<text
-  x="220"
-  y="185"
-  fill="#58A6FF"
-  font-family="Arial"
-  font-size="45"
-  font-weight="bold">
-  0
-</text>
-
-<text
-  x="220"
-  y="215"
-  fill="#8B949E"
-  font-family="Arial"
-  font-size="14">
-  DAYS
-</text>
-
-
-<text
-  x="570"
-  y="125"
-  fill="#8B949E"
-  font-family="Arial"
-  font-size="15">
-  🏆 LONGEST STREAK
-</text>
-
-<text
-  x="570"
-  y="185"
-  fill="#58A6FF"
-  font-family="Arial"
-  font-size="45"
-  font-weight="bold">
-  6
-</text>
-
-<text
-  x="570"
-  y="215"
-  fill="#8B949E"
-  font-family="Arial"
-  font-size="14">
-  DAYS
-</text>
-
-
-
-    </svg>
+</svg>

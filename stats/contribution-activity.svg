@@ -1,400 +1,608 @@
-<svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="900"
-    height="380"
-    viewBox="0 0 900 380">
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1100"
+     height="500"
+     viewBox="0 0 1100 500">
 
-    <rect
-      width="100%"
-      height="100%"
-      rx="12"
-      fill="#0D1117"/>
+  <defs>
 
+    <linearGradient id="bg"
+                    x1="0" y1="0"
+                    x2="1" y2="1">
+      <stop offset="0%" stop-color="#050000"/>
+      <stop offset="50%" stop-color="#180006"/>
+      <stop offset="100%" stop-color="#020000"/>
+    </linearGradient>
+
+    <linearGradient id="redLine"
+                    x1="0" y1="0"
+                    x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff003c"/>
+      <stop offset="50%" stop-color="#ff1744"/>
+      <stop offset="100%" stop-color="#ff003c"/>
+    </linearGradient>
+
+    <filter id="glow"
+            x="-50%" y="-50%"
+            width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3"
+                      result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="softGlow"
+            x="-50%" y="-50%"
+            width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8"
+                      result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <pattern id="grid"
+             width="32"
+             height="32"
+             patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32"
+            fill="none"
+            stroke="#ff003c"
+            stroke-opacity="0.10"
+            stroke-width="1"/>
+    </pattern>
+
+    <pattern id="smallGrid"
+             width="8"
+             height="8"
+             patternUnits="userSpaceOnUse">
+      <path d="M 8 0 L 0 0 0 8"
+            fill="none"
+            stroke="#ff003c"
+            stroke-opacity="0.035"
+            stroke-width="1"/>
+    </pattern>
+
+    <style>
+      .title {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+      }
+
+      .mono {
+        font-family: 'Courier New', monospace;
+      }
+
+      .red {
+        fill: #ff1744;
+      }
+
+      .white {
+        fill: #f5f5f5;
+      }
+
+      .muted {
+        fill: #a37b84;
+      }
+
+      .number {
+        fill: #ff1744;
+        font-weight: bold;
+      }
+
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 0.35;
+        }
+
+        50% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes glow {
+        0%, 100% {
+          opacity: 0.55;
+        }
+
+        50% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes scan {
+        0% {
+          transform: translateY(-150px);
+          opacity: 0;
+        }
+
+        15% {
+          opacity: 0.35;
+        }
+
+        50% {
+          opacity: 0.12;
+        }
+
+        100% {
+          transform: translateY(600px);
+          opacity: 0;
+        }
+      }
+
+      @keyframes dash {
+        to {
+          stroke-dashoffset: -100;
+        }
+      }
+
+      @keyframes blink {
+        0%, 45% {
+          opacity: 1;
+        }
+
+        50%, 100% {
+          opacity: 0.25;
+        }
+      }
+
+      .pulse {
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      .glow {
+        animation: glow 2.5s ease-in-out infinite;
+      }
+
+      .scan {
+        animation: scan 5s linear infinite;
+      }
+
+      .dash {
+        stroke-dasharray: 8 8;
+        animation: dash 2s linear infinite;
+      }
+
+      .blink {
+        animation: blink 1.5s step-end infinite;
+      }
+    </style>
+
+  </defs>
+
+  <rect width="100%"
+        height="100%"
+        rx="14"
+        fill="url(#bg)"/>
+
+  <rect width="100%"
+        height="100%"
+        rx="14"
+        fill="url(#smallGrid)"/>
+
+  <rect width="100%"
+        height="100%"
+        rx="14"
+        fill="url(#grid)"/>
+
+  <rect x="4" y="4"
+        width="1092"
+        height="492"
+        rx="12"
+        fill="none"
+        stroke="#ff003c"
+        stroke-width="5"
+        opacity="0.15"
+        filter="url(#softGlow)"
+        class="glow"/>
+
+  <rect x="6" y="6"
+        width="1088"
+        height="488"
+        rx="12"
+        fill="none"
+        stroke="url(#redLine)"
+        stroke-width="1.5"
+        filter="url(#glow)"/>
+
+  <rect x="10" y="10"
+        width="1080"
+        height="2"
+        fill="#ff1744"
+        opacity="0.2"
+        class="scan"/>
+
+  
+  <text x="55" y="55"
+        class="title red"
+        font-size="24"
+        letter-spacing="1">
+    CONTRIBUTION ACTIVITY
+  </text>
+
+  <text x="55" y="80"
+        class="mono muted"
+        font-size="10">
+    LAST 31 DAYS / DAILY CONTRIBUTIONS
+  </text>
+
+  <line x1="55" y1="90"
+        x2="1045" y2="90"
+        stroke="#ff1744"
+        stroke-opacity="0.25"/>
+
+  
+      <line x1="80"
+            y1="390.00"
+            x2="1035"
+            y2="390.00"
+            stroke="#ff1744"
+            stroke-opacity="0.10"/>
+
+      <text x="60"
+            y="394.00"
+            class="mono muted"
+            font-size="9"
+            text-anchor="end">
+        0
+      </text>
     
-<text
-  x="40"
-  y="45"
-  fill="#58A6FF"
-  font-family="Arial"
-  font-size="28"
-  font-weight="bold">
-  Contribution Activity
-</text>
+      <line x1="80"
+            y1="318.75"
+            x2="1035"
+            y2="318.75"
+            stroke="#ff1744"
+            stroke-opacity="0.10"/>
 
-<line
-  x1="40"
-  y1="65"
-  x2="860"
-  y2="65"
-  stroke="#30363D"/>
+      <text x="60"
+            y="322.75"
+            class="mono muted"
+            font-size="9"
+            text-anchor="end">
+        3
+      </text>
+    
+      <line x1="80"
+            y1="247.50"
+            x2="1035"
+            y2="247.50"
+            stroke="#ff1744"
+            stroke-opacity="0.10"/>
 
-        <line
-          x1="65"
-          y1="310.00"
-          x2="845"
-          y2="310.00"
-          stroke="#21262D"
-          stroke-width="1"/>
+      <text x="60"
+            y="251.50"
+            class="mono muted"
+            font-size="9"
+            text-anchor="end">
+        6
+      </text>
+    
+      <line x1="80"
+            y1="176.25"
+            x2="1035"
+            y2="176.25"
+            stroke="#ff1744"
+            stroke-opacity="0.10"/>
 
-        <text
-          x="55"
-          y="314.00"
-          fill="#8B949E"
-          font-family="Arial"
-          font-size="11"
-          text-anchor="end">
-          0
-        </text>
-        
-        <line
-          x1="65"
-          y1="257.50"
-          x2="845"
-          y2="257.50"
-          stroke="#21262D"
-          stroke-width="1"/>
+      <text x="60"
+            y="180.25"
+            class="mono muted"
+            font-size="9"
+            text-anchor="end">
+        8
+      </text>
+    
+      <line x1="80"
+            y1="105.00"
+            x2="1035"
+            y2="105.00"
+            stroke="#ff1744"
+            stroke-opacity="0.10"/>
 
-        <text
-          x="55"
-          y="261.50"
-          fill="#8B949E"
-          font-family="Arial"
-          font-size="11"
-          text-anchor="end">
-          3
-        </text>
-        
-        <line
-          x1="65"
-          y1="205.00"
-          x2="845"
-          y2="205.00"
-          stroke="#21262D"
-          stroke-width="1"/>
-
-        <text
-          x="55"
-          y="209.00"
-          fill="#8B949E"
-          font-family="Arial"
-          font-size="11"
-          text-anchor="end">
-          6
-        </text>
-        
-        <line
-          x1="65"
-          y1="152.50"
-          x2="845"
-          y2="152.50"
-          stroke="#21262D"
-          stroke-width="1"/>
-
-        <text
-          x="55"
-          y="156.50"
-          fill="#8B949E"
-          font-family="Arial"
-          font-size="11"
-          text-anchor="end">
-          8
-        </text>
-        
-        <line
-          x1="65"
-          y1="100.00"
-          x2="845"
-          y2="100.00"
-          stroke="#21262D"
-          stroke-width="1"/>
-
-        <text
-          x="55"
-          y="104.00"
-          fill="#8B949E"
-          font-family="Arial"
-          font-size="11"
-          text-anchor="end">
-          11
-        </text>
-        
-        <circle
-          cx="65.00"
-          cy="233.64"
-          r="4"
-          fill="#58A6FF"/>
-        
-            <text
-              x="65.00"
-              y="342.00"
-              fill="#8B949E"
-              font-family="Arial"
-              font-size="11"
-              text-anchor="middle">
-              07/29
-            </text>
-            
-        <circle
-          cx="91.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="117.00"
-          cy="252.73"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="143.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="169.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="195.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-            <text
-              x="195.00"
-              y="342.00"
-              fill="#8B949E"
-              font-family="Arial"
-              font-size="11"
-              text-anchor="middle">
-              08/03
-            </text>
-            
-        <circle
-          cx="221.00"
-          cy="233.64"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="247.00"
-          cy="290.91"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="273.00"
-          cy="138.18"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="299.00"
-          cy="252.73"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="325.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-            <text
-              x="325.00"
-              y="342.00"
-              fill="#8B949E"
-              font-family="Arial"
-              font-size="11"
-              text-anchor="middle">
-              08/08
-            </text>
-            
-        <circle
-          cx="351.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="377.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="403.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="429.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="455.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-            <text
-              x="455.00"
-              y="342.00"
-              fill="#8B949E"
-              font-family="Arial"
-              font-size="11"
-              text-anchor="middle">
-              08/13
-            </text>
-            
-        <circle
-          cx="481.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="507.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="533.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="559.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="585.00"
-          cy="233.64"
-          r="4"
-          fill="#58A6FF"/>
-        
-            <text
-              x="585.00"
-              y="342.00"
-              fill="#8B949E"
-              font-family="Arial"
-              font-size="11"
-              text-anchor="middle">
-              08/18
-            </text>
-            
-        <circle
-          cx="611.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="637.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="663.00"
-          cy="290.91"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="689.00"
-          cy="290.91"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="715.00"
-          cy="271.82"
-          r="4"
-          fill="#58A6FF"/>
-        
-            <text
-              x="715.00"
-              y="342.00"
-              fill="#8B949E"
-              font-family="Arial"
-              font-size="11"
-              text-anchor="middle">
-              08/23
-            </text>
-            
-        <circle
-          cx="741.00"
-          cy="271.82"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="767.00"
-          cy="100.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="793.00"
-          cy="214.55"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="819.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-        <circle
-          cx="845.00"
-          cy="310.00"
-          r="4"
-          fill="#58A6FF"/>
-        
-            <text
-              x="845.00"
-              y="342.00"
-              fill="#8B949E"
-              font-family="Arial"
-              font-size="11"
-              text-anchor="middle">
-              08/28
-            </text>
-            
-    <polyline
-      points="65.00,233.64 91.00,310.00 117.00,252.73 143.00,310.00 169.00,310.00 195.00,310.00 221.00,233.64 247.00,290.91 273.00,138.18 299.00,252.73 325.00,310.00 351.00,310.00 377.00,310.00 403.00,310.00 429.00,310.00 455.00,310.00 481.00,310.00 507.00,310.00 533.00,310.00 559.00,310.00 585.00,233.64 611.00,310.00 637.00,310.00 663.00,290.91 689.00,290.91 715.00,271.82 741.00,271.82 767.00,100.00 793.00,214.55 819.00,310.00 845.00,310.00"
-      fill="none"
-      stroke="#58A6FF"
-      stroke-width="3"
-      stroke-linejoin="round"
-      stroke-linecap="round"/>
-
-    <line
-      x1="65"
-      y1="100"
-      x2="65"
-      y2="310"
-      stroke="#30363D"/>
-
-    <line
-      x1="65"
-      y1="310"
-      x2="845"
-      y2="310"
-      stroke="#30363D"/>
+      <text x="60"
+            y="109.00"
+            class="mono muted"
+            font-size="9"
+            text-anchor="end">
+        11
+      </text>
     
 
-    </svg>
+  <polyline
+    points="80.00,286.36 111.83,390.00 143.67,312.27 175.50,390.00 207.33,390.00 239.17,390.00 271.00,286.36 302.83,364.09 334.67,156.82 366.50,312.27 398.33,390.00 430.17,390.00 462.00,390.00 493.83,390.00 525.67,390.00 557.50,390.00 589.33,390.00 621.17,390.00 653.00,390.00 684.83,390.00 716.67,286.36 748.50,390.00 780.33,390.00 812.17,364.09 844.00,364.09 875.83,338.18 907.67,338.18 939.50,105.00 971.33,260.45 1003.17,390.00 1035.00,260.45"
+    fill="none"
+    stroke="#ff1744"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    filter="url(#glow)"/>
+
+  
+      <circle cx="80.00"
+              cy="286.36"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="111.83"
+              cy="390.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="143.67"
+              cy="312.27"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="175.50"
+              cy="390.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="207.33"
+              cy="390.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="239.17"
+              cy="390.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="271.00"
+              cy="286.36"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="302.83"
+              cy="364.09"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="334.67"
+              cy="156.82"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="366.50"
+              cy="312.27"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="398.33"
+              cy="390.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="430.17"
+              cy="390.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="462.00"
+              cy="390.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="493.83"
+              cy="390.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="525.67"
+              cy="390.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="557.50"
+              cy="390.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="589.33"
+              cy="390.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="621.17"
+              cy="390.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="653.00"
+              cy="390.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="684.83"
+              cy="390.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="716.67"
+              cy="286.36"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="748.50"
+              cy="390.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="780.33"
+              cy="390.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="812.17"
+              cy="364.09"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="844.00"
+              cy="364.09"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="875.83"
+              cy="338.18"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="907.67"
+              cy="338.18"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="939.50"
+              cy="105.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="971.33"
+              cy="260.45"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="1003.17"
+              cy="390.00"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+      <circle cx="1035.00"
+              cy="260.45"
+              r="3.5"
+              fill="#ff1744"
+              filter="url(#glow)"
+              class="pulse"/>
+    
+
+  
+      <text x="80.00"
+            y="420"
+            class="mono muted"
+            font-size="9"
+            text-anchor="middle">
+        07/29
+      </text>
+    
+      <text x="239.17"
+            y="420"
+            class="mono muted"
+            font-size="9"
+            text-anchor="middle">
+        08/03
+      </text>
+    
+      <text x="398.33"
+            y="420"
+            class="mono muted"
+            font-size="9"
+            text-anchor="middle">
+        08/08
+      </text>
+    
+      <text x="557.50"
+            y="420"
+            class="mono muted"
+            font-size="9"
+            text-anchor="middle">
+        08/13
+      </text>
+    
+      <text x="716.67"
+            y="420"
+            class="mono muted"
+            font-size="9"
+            text-anchor="middle">
+        08/18
+      </text>
+    
+      <text x="875.83"
+            y="420"
+            class="mono muted"
+            font-size="9"
+            text-anchor="middle">
+        08/23
+      </text>
+    
+      <text x="1035.00"
+            y="420"
+            class="mono muted"
+            font-size="9"
+            text-anchor="middle">
+        08/28
+      </text>
+    
+
+  <text x="550" y="455"
+        class="mono muted"
+        font-size="9"
+        text-anchor="middle">
+    LAST 31 DAYS · AUTOMATICALLY GENERATED WITH GITHUB ACTIONS
+  </text>
+
+
+</svg>
