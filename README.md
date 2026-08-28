@@ -6,7 +6,8 @@
 
 <br>
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=18&duration=3000&pause=1000&color=FF1744&center=true&vCenter=true&width=700&lines=SYSTEM+ONLINE;BACKEND+DEVELOPER;BUILDING+REAL+WORLD+SYSTEMS;LEARNING+SYSTEM+DESIGN;AUTOMATING+THE+BORING+STUFF;CODE+%E2%80%A2+BUILD+%E2%80%A2+IMPROVE" alt="System Status">
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=18&duration=3000&pause=1000&color=FF1744&center=true&vCenter=true&width=700&lines=SYSTEM+ONLINE;BACKEND+DEVELOPER;BUILDING+REAL+WORLD+SYSTEMS;LEARNING+SYSTEM+DESIGN;AUTOMATING+THE+BORING+STUFF;CODE+%E2%80%A2+BUILD+%E2%80%A2+IMPROVE"
+     alt="System Status">
 
 </div>
 
@@ -16,6 +17,7 @@
 
 <table>
 <tr>
+
 <td width="55%" valign="top">
 
 ### 👨‍💻 Muhammad Ilham
