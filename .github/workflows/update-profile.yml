@@ -3,7 +3,6 @@ name: Update GitHub Profile Stats
 on:
   workflow_dispatch:
   schedule:
-    # 08:00 WIB = 01:00 UTC
     - cron: "0 1 * * *"
 
 permissions:
@@ -60,7 +59,6 @@ jobs:
 
                   contributionsCollection {
                     totalCommitContributions
-                    restrictedContributionsCount
                     contributionCalendar {
                       totalContributions
                       weeks {
@@ -112,14 +110,14 @@ jobs:
               payload = json.load(f)
 
           user = payload["data"]["user"]
-          repos_data = user["repositories"]
+          repos = user["repositories"]
           collection = user["contributionsCollection"]
           calendar = collection["contributionCalendar"]
 
-          repositories = repos_data["totalCount"]
-          followers = user["followers"]["totalCount"]
-          total_contributions = calendar["totalContributions"]
-          commits = collection["totalCommitContributions"]
+          repositories = int(repos["totalCount"])
+          followers = int(user["followers"]["totalCount"])
+          total_contributions = int(calendar["totalContributions"])
+          commits = int(collection["totalCommitContributions"])
 
           days = []
           for week in calendar["weeks"]:
@@ -149,253 +147,188 @@ jobs:
                   running = 0
 
           language_totals = defaultdict(int)
-          for repo in repos_data["nodes"]:
+          for repo in repos["nodes"]:
               if not repo:
                   continue
               for edge in (repo.get("languages") or {}).get("edges", []):
-                  if not edge or not edge.get("node"):
-                      continue
-                  name = edge["node"].get("name")
-                  if name:
-                      language_totals[name] += int(edge.get("size") or 0)
+                  if edge and edge.get("node") and edge["node"].get("name"):
+                      language_totals[edge["node"]["name"]] += int(edge.get("size") or 0)
 
           top_languages = sorted(
               language_totals.items(),
               key=lambda item: item[1],
               reverse=True,
           )[:6]
+
           total_language_size = sum(language_totals.values())
 
           def esc(value):
               return html.escape(str(value))
 
-          def document(width, height, body, title):
-              header = """<?xml version="1.0" encoding="UTF-8"?>
-              <svg xmlns="http://www.w3.org/2000/svg"
-                   width="{width}" height="{height}"
-                   viewBox="0 0 {width} {height}"
-                   role="img" aria-label="{title}">
-                <defs>
-                  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stop-color="#050005"/>
-                    <stop offset="55%" stop-color="#160008"/>
-                    <stop offset="100%" stop-color="#020002"/>
-                  </linearGradient>
-                  <linearGradient id="red" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stop-color="#ff003c"/>
-                    <stop offset="50%" stop-color="#ff1744"/>
-                    <stop offset="100%" stop-color="#ff003c"/>
-                  </linearGradient>
-                  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="3" result="blur"/>
-                    <feMerge>
-                      <feMergeNode in="blur"/>
-                      <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                  </filter>
-                  <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
-                    <path d="M32 0H0V32" fill="none"
-                          stroke="#ff003c" stroke-opacity=".08"/>
-                  </pattern>
-                  <style>
-                    .mono { font-family: "Courier New", monospace; }
-                    .title { font-family: "Courier New", monospace; font-weight: bold; }
-                    .redText { fill: #ff1744; }
-                    .white { fill: #f4f4f4; }
-                    .muted { fill: #9d7a82; }
-                    .line { stroke: #ff1744; fill: none; }
-                    @keyframes pulse {
-                      0%,100% { opacity: .35; }
-                      50% { opacity: 1; }
-                    }
-                    @keyframes dash {
-                      to { stroke-dashoffset: -80; }
-                    }
-                    .pulse { animation: pulse 2s ease-in-out infinite; }
-                    .dash {
-                      stroke-dasharray: 7 7;
-                      animation: dash 2s linear infinite;
-                    }
-                  </style>
-                </defs>
-                <rect width="100%" height="100%" rx="14" fill="url(#bg)"/>
-                <rect width="100%" height="100%" rx="14" fill="url(#grid)"/>
-                <rect x="7" y="7" width="{inner_width}" height="{inner_height}"
-                      rx="11" fill="none" stroke="url(#red)"
-                      stroke-opacity=".65"/>
-              """
-              return header.format(
-                      width=width,
-                      height=height,
-                      inner_width=width - 14,
-                      inner_height=height - 14,
-                      title=esc(title),
-              ) + body + "</svg>"
-
-          def write(name, width, height, body, title):
-              (OUT / name).write_text(
-                  document(width, height, body, title),
-                  encoding="utf-8",
+          def svg_start(width, height, title):
+              title = esc(title)
+              return (
+                  '<?xml version="1.0" encoding="UTF-8"?>'
+                  f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" '
+                  f'height="{height}" viewBox="0 0 {width} {height}" '
+                  f'role="img" aria-label="{title}">'
+                  '<defs>'
+                  '<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">'
+                  '<stop offset="0%" stop-color="#050005"/>'
+                  '<stop offset="55%" stop-color="#160008"/>'
+                  '<stop offset="100%" stop-color="#020002"/>'
+                  '</linearGradient>'
+                  '<linearGradient id="red" x1="0" y1="0" x2="1" y2="0">'
+                  '<stop offset="0%" stop-color="#ff003c"/>'
+                  '<stop offset="50%" stop-color="#ff1744"/>'
+                  '<stop offset="100%" stop-color="#ff003c"/>'
+                  '</linearGradient>'
+                  '<filter id="glow" x="-50%" y="-50%" width="200%" height="200%">'
+                  '<feGaussianBlur stdDeviation="3" result="blur"/>'
+                  '<feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>'
+                  '</filter>'
+                  '<pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">'
+                  '<path d="M32 0H0V32" fill="none" stroke="#ff003c" stroke-opacity=".08"/>'
+                  '</pattern>'
+                  '</defs>'
+                  '<rect width="100%" height="100%" rx="14" fill="url(#bg)"/>'
+                  '<rect width="100%" height="100%" rx="14" fill="url(#grid)"/>'
+                  f'<rect x="7" y="7" width="{width-14}" height="{height-14}" '
+                  'rx="11" fill="none" stroke="url(#red)" stroke-opacity=".65"/>'
               )
 
-          stats = f"""
-            <text x="38" y="42" class="title redText" font-size="22">GITHUB STATISTICS</text>
-            <text x="38" y="64" class="mono muted" font-size="10">LIVE PROFILE DATA / DIMS154</text>
-            <circle cx="944" cy="36" r="5" fill="#ff1744" filter="url(#glow)" class="pulse"/>
-            <text x="958" y="40" class="mono muted" font-size="10">ONLINE</text>
-            <line x1="38" y1="82" x2="982" y2="82" stroke="#ff1744" stroke-opacity=".22"/>
+          def write_svg(name, width, height, title, body):
+              path = OUT / name
+              path.write_text(
+                  svg_start(width, height, title) + body + "</svg>\n",
+                  encoding="utf-8",
+              )
+              print(f"Generated {path}")
 
-            <g transform="translate(38 112)">
-              <text class="mono muted" font-size="10">REPOSITORIES</text>
-              <text y="48" class="title redText" font-size="38">{repositories}</text>
-            </g>
-            <g transform="translate(260 112)">
-              <text class="mono muted" font-size="10">FOLLOWERS</text>
-              <text y="48" class="title redText" font-size="38">{followers}</text>
-            </g>
-            <g transform="translate(482 112)">
-              <text class="mono muted" font-size="10">CONTRIBUTIONS</text>
-              <text y="48" class="title redText" font-size="38">{total_contributions}</text>
-            </g>
-            <g transform="translate(704 112)">
-              <text class="mono muted" font-size="10">COMMITS</text>
-              <text y="48" class="title redText" font-size="38">{commits}</text>
-            </g>
+          stats = (
+              '<text x="38" y="42" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="22">GITHUB STATISTICS</text>'
+              '<text x="38" y="64" fill="#9d7a82" font-family="monospace" font-size="10">LIVE PROFILE DATA / DIMS154</text>'
+              '<circle cx="944" cy="36" r="5" fill="#ff1744" filter="url(#glow)"/>'
+              '<text x="958" y="40" fill="#9d7a82" font-family="monospace" font-size="10">ONLINE</text>'
+              '<line x1="38" y1="82" x2="982" y2="82" stroke="#ff1744" stroke-opacity=".22"/>'
+              f'<text x="38" y="112" fill="#9d7a82" font-family="monospace" font-size="10">REPOSITORIES</text>'
+              f'<text x="38" y="160" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="38">{repositories}</text>'
+              f'<text x="260" y="112" fill="#9d7a82" font-family="monospace" font-size="10">FOLLOWERS</text>'
+              f'<text x="260" y="160" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="38">{followers}</text>'
+              f'<text x="482" y="112" fill="#9d7a82" font-family="monospace" font-size="10">CONTRIBUTIONS</text>'
+              f'<text x="482" y="160" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="38">{total_contributions}</text>'
+              f'<text x="704" y="112" fill="#9d7a82" font-family="monospace" font-size="10">COMMITS</text>'
+              f'<text x="704" y="160" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="38">{commits}</text>'
+              '<line x1="38" y1="192" x2="982" y2="192" stroke="#ff1744" stroke-opacity=".14"/>'
+              '<text x="38" y="220" fill="#9d7a82" font-family="monospace" font-size="10">CONTRIBUTION RANGE</text>'
+              '<text x="38" y="246" fill="#f4f4f4" font-family="monospace" font-size="12">LAST 365 DAYS</text>'
+              f'<text x="520" y="220" fill="#9d7a82" font-family="monospace" font-size="10">CURRENT STREAK</text>'
+              f'<text x="520" y="246" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="26">{current_streak} DAYS</text>'
+              f'<text x="770" y="220" fill="#9d7a82" font-family="monospace" font-size="10">LONGEST STREAK</text>'
+              f'<text x="770" y="246" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="26">{longest_streak} DAYS</text>'
+              '<line x1="38" y1="278" x2="982" y2="278" stroke="#ff1744" stroke-opacity=".35" stroke-dasharray="7 7"/>'
+              '<text x="38" y="304" fill="#9d7a82" font-family="monospace" font-size="9">AUTOMATICALLY GENERATED / GITHUB ACTIONS</text>'
+          )
+          write_svg("github-stats.svg", 1020, 330, "GitHub statistics for dims154", stats)
 
-            <line x1="38" y1="192" x2="982" y2="192" stroke="#ff1744" stroke-opacity=".14"/>
-            <text x="38" y="220" class="mono muted" font-size="10">CONTRIBUTION RANGE</text>
-            <text x="38" y="246" class="mono white" font-size="12">LAST 365 DAYS</text>
-            <text x="520" y="220" class="mono muted" font-size="10">CURRENT STREAK</text>
-            <text x="520" y="246" class="title redText" font-size="26">{current_streak} DAYS</text>
-            <text x="770" y="220" class="mono muted" font-size="10">LONGEST STREAK</text>
-            <text x="770" y="246" class="title redText" font-size="26">{longest_streak} DAYS</text>
-            <path d="M38 278 H982" class="line dash" stroke-opacity=".45"/>
-            <text x="38" y="304" class="mono muted" font-size="9">AUTOMATICALLY GENERATED / GITHUB ACTIONS</text>
-          """
-          write("github-stats.svg", 1020, 330, stats, "GitHub statistics for dims154")
-
-          language_body = """
-            <text x="38" y="42" class="title redText" font-size="22">TOP LANGUAGES</text>
-            <text x="38" y="64" class="mono muted" font-size="10">PUBLIC REPOSITORIES / LANGUAGE BYTES</text>
-          """
-
-          y = 98
-          bar_start = 205
-          bar_width = 680
+          language_body = (
+              '<text x="38" y="42" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="22">TOP LANGUAGES</text>'
+              '<text x="38" y="64" fill="#9d7a82" font-family="monospace" font-size="10">PUBLIC REPOSITORIES / LANGUAGE BYTES</text>'
+          )
 
           if not top_languages:
-              language_body += """
-                <text x="38" y="120" class="mono muted" font-size="12">
-                  NO PUBLIC LANGUAGE DATA AVAILABLE
-                </text>
-              """
+              language_body += (
+                  '<text x="38" y="120" fill="#9d7a82" font-family="monospace" font-size="12">'
+                  'NO PUBLIC LANGUAGE DATA AVAILABLE</text>'
+              )
           else:
+              y = 98
               for name, size in top_languages:
                   pct = (size / total_language_size * 100) if total_language_size else 0
-                  bar_value = max(3, bar_width * pct / 100)
-                  language_body += f"""
-                    <text x="38" y="{y}" class="mono white" font-size="12">{esc(name)}</text>
-                    <rect x="{bar_start}" y="{y-12}" width="{bar_width}" height="10" rx="5" fill="#220008"/>
-                    <rect x="{bar_start}" y="{y-12}" width="{bar_value:.2f}" height="10" rx="5"
-                          fill="url(#red)" filter="url(#glow)"/>
-                    <text x="900" y="{y}" class="mono redText" font-size="11">{pct:.1f}%</text>
-                  """
+                  bar = max(3, 680 * pct / 100)
+                  language_body += (
+                      f'<text x="38" y="{y}" fill="#f4f4f4" font-family="monospace" font-size="12">{esc(name)}</text>'
+                      f'<rect x="205" y="{y-12}" width="680" height="10" rx="5" fill="#220008"/>'
+                      f'<rect x="205" y="{y-12}" width="{bar:.2f}" height="10" rx="5" fill="url(#red)" filter="url(#glow)"/>'
+                      f'<text x="900" y="{y}" fill="#ff1744" font-family="monospace" font-size="11">{pct:.1f}%</text>'
+                  )
                   y += 38
 
-          language_body += """
-            <line x1="38" y1="330" x2="982" y2="330" stroke="#ff1744" stroke-opacity=".14"/>
-            <text x="38" y="352" class="mono muted" font-size="9">
-              SOURCE: GITHUB REPOSITORY LANGUAGE BREAKDOWN
-            </text>
-          """
-          write("top-languages.svg", 1020, 375, language_body, "Top languages for dims154")
+          language_body += (
+              '<line x1="38" y1="330" x2="982" y2="330" stroke="#ff1744" stroke-opacity=".14"/>'
+              '<text x="38" y="352" fill="#9d7a82" font-family="monospace" font-size="9">'
+              'SOURCE: GITHUB REPOSITORY LANGUAGE BREAKDOWN</text>'
+          )
+          write_svg("top-languages.svg", 1020, 375, "Top languages for dims154", language_body)
 
-          streak = f"""
-            <text x="38" y="42" class="title redText" font-size="22">CONTRIBUTION STREAK</text>
-            <text x="38" y="64" class="mono muted" font-size="10">CONSISTENCY MONITOR / DIMS154</text>
-            <circle cx="944" cy="36" r="5" fill="#ff1744" filter="url(#glow)" class="pulse"/>
-            <text x="958" y="40" class="mono muted" font-size="10">ACTIVE</text>
+          streak = (
+              '<text x="38" y="42" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="22">CONTRIBUTION STREAK</text>'
+              '<text x="38" y="64" fill="#9d7a82" font-family="monospace" font-size="10">CONSISTENCY MONITOR / DIMS154</text>'
+              '<circle cx="944" cy="36" r="5" fill="#ff1744" filter="url(#glow)"/>'
+              '<text x="958" y="40" fill="#9d7a82" font-family="monospace" font-size="10">ACTIVE</text>'
+              '<text x="38" y="108" fill="#9d7a82" font-family="monospace" font-size="11">CURRENT STREAK</text>'
+              f'<text x="38" y="178" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="58">{current_streak}</text>'
+              '<text x="38" y="200" fill="#9d7a82" font-family="monospace" font-size="10">DAYS</text>'
+              '<text x="340" y="108" fill="#9d7a82" font-family="monospace" font-size="11">LONGEST STREAK</text>'
+              f'<text x="340" y="178" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="58">{longest_streak}</text>'
+              '<text x="340" y="200" fill="#9d7a82" font-family="monospace" font-size="10">DAYS</text>'
+              '<text x="650" y="108" fill="#9d7a82" font-family="monospace" font-size="11">TOTAL CONTRIBUTIONS</text>'
+              f'<text x="650" y="178" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="58">{total_contributions}</text>'
+              '<text x="650" y="200" fill="#9d7a82" font-family="monospace" font-size="10">YEAR</text>'
+              '<line x1="38" y1="236" x2="982" y2="236" stroke="#ff1744" stroke-opacity=".35" stroke-dasharray="7 7"/>'
+              '<text x="38" y="268" fill="#f4f4f4" font-family="monospace" font-size="12">KEEP BUILDING. KEEP LEARNING.</text>'
+              '<text x="38" y="292" fill="#9d7a82" font-family="monospace" font-size="10">CONTRIBUTION DATA IS GENERATED AUTOMATICALLY.</text>'
+          )
+          write_svg("streak.svg", 1020, 325, "Contribution streak for dims154", streak)
 
-            <g transform="translate(38 108)">
-              <text class="mono muted" font-size="11">CURRENT STREAK</text>
-              <text y="70" class="title redText" font-size="58">{current_streak}</text>
-              <text y="92" class="mono muted" font-size="10">DAYS</text>
-            </g>
-            <g transform="translate(340 108)">
-              <text class="mono muted" font-size="11">LONGEST STREAK</text>
-              <text y="70" class="title redText" font-size="58">{longest_streak}</text>
-              <text y="92" class="mono muted" font-size="10">DAYS</text>
-            </g>
-            <g transform="translate(650 108)">
-              <text class="mono muted" font-size="11">TOTAL CONTRIBUTIONS</text>
-              <text y="70" class="title redText" font-size="58">{total_contributions}</text>
-              <text y="92" class="mono muted" font-size="10">YEAR</text>
-            </g>
-
-            <path d="M38 236 H982" class="line dash" stroke-opacity=".35"/>
-            <text x="38" y="268" class="mono white" font-size="12">KEEP BUILDING. KEEP LEARNING.</text>
-            <text x="38" y="292" class="mono muted" font-size="10">
-              CONTRIBUTION DATA IS GENERATED AUTOMATICALLY.
-            </text>
-          """
-          write("streak.svg", 1020, 325, streak, "Contribution streak for dims154")
-
-          max_count = max((d["count"] for d in activity), default=1)
-          chart_x, chart_y = 55, 95
-          chart_w, chart_h = 900, 175
+          max_count = max((day["count"] for day in activity), default=1)
+          chart_x = 55
+          chart_y = 95
+          chart_w = 900
+          chart_h = 175
           step = chart_w / max(1, len(activity) - 1)
 
           points = []
-          for i, day in enumerate(activity):
-              x = chart_x + i * step
+          for index, day in enumerate(activity):
+              x = chart_x + index * step
               ratio = day["count"] / max_count if max_count else 0
-              y_point = chart_y + chart_h - ratio * chart_h
-              points.append((x, y_point))
+              y = chart_y + chart_h - ratio * chart_h
+              points.append((x, y))
 
           polyline = " ".join(f"{x:.1f},{y:.1f}" for x, y in points)
           circles = "".join(
-              f'<circle cx="{x:.1f}" cy="{yp:.1f}" r="3.5" fill="#ff1744" filter="url(#glow)"/>'
-              for x, yp in points
+              f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3.5" fill="#ff1744" filter="url(#glow)"/>'
+              for x, y in points
           )
 
           first_date = esc(activity[0]["date"]) if activity else ""
           last_date = esc(activity[-1]["date"]) if activity else ""
-          recent_total = sum(d["count"] for d in activity)
+          recent_total = sum(day["count"] for day in activity)
 
-          activity_body = f"""
-            <text x="38" y="42" class="title redText" font-size="22">CONTRIBUTION ACTIVITY</text>
-            <text x="38" y="64" class="mono muted" font-size="10">LAST 31 DAYS / LIVE ACTIVITY MONITOR</text>
-            <circle cx="944" cy="36" r="5" fill="#ff1744" filter="url(#glow)" class="pulse"/>
-            <text x="958" y="40" class="mono muted" font-size="10">ACTIVE</text>
-
-            <line x1="{chart_x}" y1="{chart_y + chart_h}" x2="{chart_x + chart_w}" y2="{chart_y + chart_h}"
-                  stroke="#ff1744" stroke-opacity=".18"/>
-            <line x1="{chart_x}" y1="{chart_y}" x2="{chart_x}" y2="{chart_y + chart_h}"
-                  stroke="#ff1744" stroke-opacity=".18"/>
-            <line x1="{chart_x}" y1="{chart_y + chart_h/2}" x2="{chart_x + chart_w}" y2="{chart_y + chart_h/2}"
-                  stroke="#ff1744" stroke-opacity=".08" stroke-dasharray="4 6"/>
-
-            <polyline points="{polyline}" fill="none" stroke="#ff1744" stroke-width="2.5" filter="url(#glow)"/>
-            <polyline points="{polyline}" fill="none" stroke="#ff1744" stroke-opacity=".45"
-                      stroke-width="1" class="dash"/>
-            {circles}
-
-            <text x="38" y="300" class="mono muted" font-size="9">{first_date}</text>
-            <text x="920" y="300" class="mono muted" font-size="9">{last_date}</text>
-            <text x="38" y="330" class="mono white" font-size="11">TOTAL / {recent_total} CONTRIBUTIONS</text>
-            <text x="38" y="350" class="mono muted" font-size="9">
-              GENERATED FROM GITHUB CONTRIBUTION CALENDAR
-            </text>
-          """
-          write(
+          activity_body = (
+              '<text x="38" y="42" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="22">CONTRIBUTION ACTIVITY</text>'
+              '<text x="38" y="64" fill="#9d7a82" font-family="monospace" font-size="10">LAST 31 DAYS / LIVE ACTIVITY MONITOR</text>'
+              '<circle cx="944" cy="36" r="5" fill="#ff1744" filter="url(#glow)"/>'
+              '<text x="958" y="40" fill="#9d7a82" font-family="monospace" font-size="10">ACTIVE</text>'
+              f'<line x1="{chart_x}" y1="{chart_y+chart_h}" x2="{chart_x+chart_w}" y2="{chart_y+chart_h}" stroke="#ff1744" stroke-opacity=".18"/>'
+              f'<line x1="{chart_x}" y1="{chart_y}" x2="{chart_x}" y2="{chart_y+chart_h}" stroke="#ff1744" stroke-opacity=".18"/>'
+              f'<line x1="{chart_x}" y1="{chart_y+chart_h/2}" x2="{chart_x+chart_w}" y2="{chart_y+chart_h/2}" stroke="#ff1744" stroke-opacity=".08" stroke-dasharray="4 6"/>'
+              f'<polyline points="{polyline}" fill="none" stroke="#ff1744" stroke-width="2.5" filter="url(#glow)"/>'
+              circles
+              f'<text x="38" y="300" fill="#9d7a82" font-family="monospace" font-size="9">{first_date}</text>'
+              f'<text x="920" y="300" fill="#9d7a82" font-family="monospace" font-size="9">{last_date}</text>'
+              f'<text x="38" y="330" fill="#f4f4f4" font-family="monospace" font-size="11">TOTAL / {recent_total} CONTRIBUTIONS</text>'
+              '<text x="38" y="350" fill="#9d7a82" font-family="monospace" font-size="9">GENERATED FROM GITHUB CONTRIBUTION CALENDAR</text>'
+          )
+          write_svg(
               "contribution-activity.svg",
               1020,
               380,
-              activity_body,
               "GitHub contribution activity for dims154",
+              activity_body,
           )
 
-          print("Generated statistics successfully.")
+          print("Generated all profile statistics successfully.")
           PY
 
       - name: Validate generated files
@@ -421,8 +354,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Do not touch the real stats directory until every
-          # generated file has passed validation.
           cp generated-stats/github-stats.svg stats/github-stats.svg
           cp generated-stats/top-languages.svg stats/top-languages.svg
           cp generated-stats/streak.svg stats/streak.svg
