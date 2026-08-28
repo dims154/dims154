@@ -270,33 +270,62 @@ jobs:
           write_svg("github-stats.svg", 1020, 330, "GitHub statistics for dims154", stats)
 
           language_body = (
+              '<style>'
+              '@keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}'
+              '@keyframes sweep{0%{transform:translateX(0);opacity:0}20%{opacity:.12}50%{opacity:.22}80%{opacity:.12}100%{transform:translateX(700px);opacity:0}}'
+              '@keyframes barPulse{0%,100%{opacity:.65}50%{opacity:1}}'
+              '.pulse{animation:pulse 2s ease-in-out infinite}'
+              '.sweep{animation:sweep 4.5s linear infinite}'
+              '.barPulse{animation:barPulse 2.6s ease-in-out infinite}'
+              '</style>'
+
+              '<rect x="0" y="0" width="1020" height="375" rx="14" fill="#050005" fill-opacity=".72"/>'
               '<text x="38" y="42" fill="#ff1744" font-family="monospace" font-weight="bold" font-size="22">TOP LANGUAGES</text>'
-              '<text x="38" y="64" fill="#9d7a82" font-family="monospace" font-size="10">PUBLIC REPOSITORIES / LANGUAGE BYTES</text>'
+              '<text x="38" y="64" fill="#9d7a82" font-family="monospace" font-size="10">PUBLIC REPOSITORIES / LANGUAGE DISTRIBUTION</text>'
+              '<circle cx="944" cy="36" r="7" fill="#ff1744" filter="url(#glow)" class="pulse"/>'
+              '<text x="958" y="40" fill="#9d7a82" font-family="monospace" font-size="10">LIVE</text>'
+
+              '<line x1="38" y1="82" x2="982" y2="82" stroke="#ff1744" stroke-opacity=".22"/>'
+              '<line x1="38" y1="84" x2="982" y2="84" stroke="#ff1744" stroke-opacity=".06" stroke-dasharray="2 8"/>'
+              '<rect x="205" y="92" width="680" height="2" fill="#ff1744" fill-opacity=".16" class="sweep"/>'
           )
 
           if not top_languages:
               language_body += (
-                  '<text x="38" y="120" fill="#9d7a82" font-family="monospace" font-size="12">'
+                  '<text x="38" y="125" fill="#9d7a82" font-family="monospace" font-size="12">'
                   'NO PUBLIC LANGUAGE DATA AVAILABLE</text>'
               )
           else:
-              y = 98
-              for name, size in top_languages:
+              y = 112
+              for index, (name, size) in enumerate(top_languages):
                   pct = (size / total_language_size * 100) if total_language_size else 0
-                  bar = max(3, 680 * pct / 100)
+                  bar = max(4, 680 * pct / 100)
+
                   language_body += (
-                      f'<text x="38" y="{y}" fill="#f4f4f4" font-family="monospace" font-size="12">{esc(name)}</text>'
-                      f'<rect x="205" y="{y-12}" width="680" height="10" rx="5" fill="#220008"/>'
-                      f'<rect x="205" y="{y-12}" width="{bar:.2f}" height="10" rx="5" fill="url(#red)" filter="url(#glow)"/>'
-                      f'<text x="900" y="{y}" fill="#ff1744" font-family="monospace" font-size="11">{pct:.1f}%</text>'
+                      f'<text x="38" y="{y}" fill="#f4f4f4" font-family="monospace" '
+                      f'font-size="12">{esc(name)}</text>'
+
+                      f'<text x="900" y="{y}" fill="#ff1744" font-family="monospace" '
+                      f'font-size="11" text-anchor="end">{pct:.1f}%</text>'
+
+                      f'<rect x="205" y="{y-13}" width="680" height="11" rx="5.5" '
+                      f'fill="#210007"/>'
+
+                      f'<rect x="205" y="{y-13}" width="{bar:.2f}" height="11" rx="5.5" '
+                      f'fill="url(#red)" filter="url(#glow)" class="barPulse"/>'
+
+                      f'<circle cx="{205 + bar:.2f}" cy="{y-7.5}" r="3.5" '
+                      f'fill="#ff1744" filter="url(#glow)" class="pulse"/>'
                   )
-                  y += 38
+                  y += 40
 
           language_body += (
               '<line x1="38" y1="330" x2="982" y2="330" stroke="#ff1744" stroke-opacity=".14"/>'
-              '<text x="38" y="352" fill="#9d7a82" font-family="monospace" font-size="9">'
-              'SOURCE: GITHUB REPOSITORY LANGUAGE BREAKDOWN</text>'
+              '<circle cx="38" cy="350" r="3.5" fill="#ff1744" filter="url(#glow)" class="pulse"/>'
+              '<text x="50" y="354" fill="#9d7a82" font-family="monospace" font-size="9">LANGUAGE SIGNAL / AUTO-GENERATED</text>'
+              '<text x="982" y="354" fill="#6d4f57" font-family="monospace" font-size="8" text-anchor="end">GITHUB REPOSITORY BREAKDOWN</text>'
           )
+
           write_svg("top-languages.svg", 1020, 375, "Top languages for dims154", language_body)
 
           streak = (
