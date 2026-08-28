@@ -514,9 +514,12 @@ jobs:
           points = []
 
           for index, day in enumerate(activity):
-              x = chart_x + index * chart_w / max(
-                  1,
-                  len(activity) - 1,
+              x = (
+                  chart_x
+                  + index * chart_w / max(
+                      1,
+                      len(activity) - 1,
+                  )
               )
 
               ratio = (
@@ -530,12 +533,6 @@ jobs:
 
           polyline = " ".join(
               f"{x:.1f},{y:.1f}"
-              for x, y in points
-          )
-
-          circles = "".join(
-              f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3.2" '
-              'fill="#ffffff" filter="url(#glow)"/>'
               for x, y in points
           )
 
@@ -555,11 +552,6 @@ jobs:
               date_label(activity[-1]["date"])
               if activity
               else ""
-          )
-
-          recent_total = sum(
-              day["count"]
-              for day in activity
           )
 
           ticks = []
@@ -603,31 +595,32 @@ jobs:
               [
                   '<style>',
                   '@keyframes pulse{0%,100%{opacity:.30}50%{opacity:1}}',
-                  '@keyframes stream{'
-                  '0%{stroke-dashoffset:1120;opacity:.04}'
-                  '20%{opacity:.20}'
-                  '42%{opacity:.75}'
-                  '58%{opacity:1}'
-                  '78%{opacity:.70}'
-                  '100%{stroke-dashoffset:-180;opacity:.04}'
+                  '@keyframes flowLine{'
+                  '0%{stroke-dashoffset:1050;opacity:.02}'
+                  '12%{opacity:.18}'
+                  '30%{opacity:.65}'
+                  '52%{opacity:1}'
+                  '72%{opacity:.70}'
+                  '90%{opacity:.16}'
+                  '100%{stroke-dashoffset:-250;opacity:.02}'
                   '}',
                   '.pulse{animation:pulse 2.8s ease-in-out infinite}',
-                  '.stream{'
-                  'stroke-dasharray:150 970;'
-                  'animation:stream 10s cubic-bezier(.45,0,.25,1) infinite;'
+                  '.flow-line{'
+                  'stroke-dasharray:240 860;'
+                  'animation:flowLine 12s cubic-bezier(.45,0,.25,1) infinite;'
                   'filter:url(#glow)'
                   '}',
                   '</style>',
 
                   '<defs>',
-                  '<linearGradient id="fadeLine" x1="0%" y1="0%" '
-                  'x2="100%" y2="0%">',
+                  '<linearGradient id="flowGradient" '
+                  'x1="0%" y1="0%" x2="100%" y2="0%">',
                   '<stop offset="0%" stop-color="#ff1744" stop-opacity="0"/>',
-                  '<stop offset="38%" stop-color="#ff1744" stop-opacity=".03"/>',
-                  '<stop offset="62%" stop-color="#ff1744" stop-opacity=".14"/>',
-                  '<stop offset="80%" stop-color="#ff1744" stop-opacity=".50"/>',
+                  '<stop offset="35%" stop-color="#ff1744" stop-opacity=".02"/>',
+                  '<stop offset="62%" stop-color="#ff1744" stop-opacity=".08"/>',
+                  '<stop offset="82%" stop-color="#ff1744" stop-opacity=".38"/>',
                   '<stop offset="94%" stop-color="#ff1744" stop-opacity="1"/>',
-                  '<stop offset="100%" stop-color="#ff1744" stop-opacity=".72"/>',
+                  '<stop offset="100%" stop-color="#ff1744" stop-opacity=".78"/>',
                   '</linearGradient>',
                   '</defs>',
 
@@ -651,33 +644,22 @@ jobs:
                   '<line x1="38" y1="82" x2="982" y2="82" '
                   'stroke="#ff1744" stroke-opacity=".22"/>',
 
-                  f'<rect x="{chart_x}" y="{chart_y}" width="{chart_w}" '
-                  f'height="{chart_h}" fill="none" stroke="#ff1744" '
-                  'stroke-opacity=".07"/>',
+                  f'<rect x="{chart_x}" y="{chart_y}" '
+                  f'width="{chart_w}" height="{chart_h}" '
+                  'fill="none" stroke="#ff1744" stroke-opacity=".05"/>',
 
                   f'<line x1="{chart_x}" y1="{chart_y + chart_h}" '
-                  f'x2="{chart_x + chart_w}" y2="{chart_y + chart_h}" '
-                  'stroke="#ff1744" stroke-opacity=".14"/>',
-
-                  f'<line x1="{chart_x}" '
-                  f'y1="{chart_y + chart_h / 2}" '
                   f'x2="{chart_x + chart_w}" '
-                  f'y2="{chart_y + chart_h / 2}" '
-                  'stroke="#ff1744" stroke-opacity=".035"/>',
+                  f'y2="{chart_y + chart_h}" '
+                  'stroke="#ff1744" stroke-opacity=".10"/>',
 
-                  # The original statistical path stays red.
+                  # Only one animated line: no static red graph overlay,
+                  # no decorative dashed flow line.
                   f'<polyline points="{polyline}" fill="none" '
-                  'stroke="#ff1744" stroke-opacity=".38" '
-                  'stroke-width="2.5" stroke-linecap="round" '
-                  'stroke-linejoin="round"/>',
-
-                  # One smooth moving stream.
-                  f'<polyline points="{polyline}" fill="none" '
-                  'stroke="url(#fadeLine)" stroke-width="3" '
+                  'stroke="url(#flowGradient)" stroke-width="3" '
                   'stroke-linecap="round" stroke-linejoin="round" '
-                  'class="stream"/>',
+                  'class="flow-line"/>',
 
-                  circles,
                   tick_nodes,
 
                   '<text x="55" y="304" fill="#ffffff" '
@@ -689,7 +671,7 @@ jobs:
                   f'WINDOW: {esc(first_date)} → {esc(last_date)}</text>',
 
                   '<line x1="38" y1="329" x2="982" y2="329" '
-                  'stroke="#ff1744" stroke-opacity=".12"/>',
+                  'stroke="#ff1744" stroke-opacity=".10"/>',
 
                   f'<text x="38" y="348" fill="#ff6b87" '
                   'font-family="monospace" font-size="11">'
