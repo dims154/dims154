@@ -125,7 +125,6 @@ jobs:
               raise SystemExit(1)
 
           if not data.get("data", {}).get("user"):
-
               raise SystemExit(
                   "GitHub user 'dims154' was not found."
               )
@@ -147,6 +146,7 @@ jobs:
           rm -rf generated-stats
 
           mkdir -p generated-stats
+          mkdir -p stats
 
           python3 - <<'PY'
 
@@ -308,7 +308,6 @@ jobs:
 
                   if not edge:
                       continue
-
 
                   if not edge.get("node"):
                       continue
@@ -1404,7 +1403,41 @@ jobs:
 
           # ============================================================
           # CONTRIBUTION ACTIVITY
+          #
+          # FIXED ANIMATION SYSTEM
+          #
+          # The previous version used:
+          #
+          # stroke-dasharray:170 1150
+          #
+          # This caused the dash pattern to restart before matching
+          # the real length of the graph.
+          #
+          # The new system uses:
+          #
+          # pathLength="1000"
+          #
+          # which normalizes the complete polyline to exactly 1000
+          # animation units.
+          #
+          # The entire graph is then drawn from:
+          #
+          # 1000 -> 0
+          #
+          # This keeps the movement synchronized with the actual
+          # polyline length.
+          #
+          # IMPORTANT:
+          #
+          # - No permanent graph line
+          # - No opacity animation
+          # - No dashed graph
+          # - No fading
+          # - No random dash reset
+          # - Smooth left -> right
+          # - Clean restart
           # ============================================================
+
 
           chart_x = 55
 
@@ -1415,41 +1448,45 @@ jobs:
           chart_h = 165
 
 
-          # ============================================================
+          # ==========================================================
           # MAXIMUM CONTRIBUTION COUNT
-          # ============================================================
+          # ==========================================================
 
           max_count = max(
+
               (
                   day["count"]
+
                   for day in activity
               ),
+
               default=1,
           )
 
 
-          # ============================================================
+          # ==========================================================
           # BUILD COORDINATES
-          # ============================================================
+          # ==========================================================
 
           points = []
 
 
-          for index, day in enumerate(
-              activity
-          ):
+          for index, day in enumerate(activity):
 
-              x = (
+              if len(activity) <= 1:
 
-                  chart_x
+                  x = chart_x
 
-                  + index
-                  * chart_w
-                  / max(
-                      1,
-                      len(activity) - 1
+              else:
+
+                  x = (
+
+                      chart_x
+
+                      + index
+                      * chart_w
+                      / (len(activity) - 1)
                   )
-              )
 
 
               ratio = (
@@ -1465,7 +1502,9 @@ jobs:
               y = (
 
                   chart_y
+
                   + chart_h
+
                   - ratio * chart_h
               )
 
@@ -1475,27 +1514,27 @@ jobs:
               )
 
 
-          # ============================================================
+          # ==========================================================
           # POLYLINE DATA
-          # ============================================================
+          # ==========================================================
 
           polyline = " ".join(
 
-              f"{x:.1f},{y:.1f}"
+              f"{x:.2f},{y:.2f}"
 
               for x, y in points
           )
 
 
-          # ============================================================
+          # ==========================================================
           # WHITE COORDINATE POINTS
-          # ============================================================
+          # ==========================================================
 
           circles = "".join(
 
               f'<circle '
-              f'cx="{x:.1f}" '
-              f'cy="{y:.1f}" '
+              f'cx="{x:.2f}" '
+              f'cy="{y:.2f}" '
               f'r="3.2" '
               f'fill="#ffffff"/>'
 
@@ -1503,15 +1542,16 @@ jobs:
           )
 
 
-          # ============================================================
+          # ==========================================================
           # DATE FORMAT
-          # ============================================================
+          # ==========================================================
 
           def date_label(value):
 
               return datetime.strptime(
 
                   value,
+
                   "%Y-%m-%d"
 
               ).strftime(
@@ -1519,9 +1559,9 @@ jobs:
               )
 
 
-          # ============================================================
+          # ==========================================================
           # FIRST DATE
-          # ============================================================
+          # ==========================================================
 
           first_date = (
 
@@ -1535,9 +1575,9 @@ jobs:
           )
 
 
-          # ============================================================
+          # ==========================================================
           # LAST DATE
-          # ============================================================
+          # ==========================================================
 
           last_date = (
 
@@ -1551,9 +1591,9 @@ jobs:
           )
 
 
-          # ============================================================
+          # ==========================================================
           # RECENT TOTAL
-          # ============================================================
+          # ==========================================================
 
           recent_total = sum(
 
@@ -1563,9 +1603,9 @@ jobs:
           )
 
 
-          # ============================================================
+          # ==========================================================
           # DATE TICKS
-          # ============================================================
+          # ==========================================================
 
           ticks = []
 
@@ -1605,7 +1645,7 @@ jobs:
                   ticks.append(
 
                       f'<text '
-                      f'x="{x:.1f}" '
+                      f'x="{x:.2f}" '
                       f'y="{chart_y + chart_h + 22}" '
                       f'fill="#ffffff" '
                       f'font-family="monospace" '
@@ -1622,23 +1662,9 @@ jobs:
           )
 
 
-          # ============================================================
+          # ==========================================================
           # CONTRIBUTION ACTIVITY SVG
-          #
-          # IMPORTANT:
-          #
-          # The graph uses pathLength="1000".
-          #
-          # This makes the animation independent from the actual
-          # pixel length of the polyline.
-          #
-          # The red segment travels smoothly from LEFT -> RIGHT.
-          #
-          # No opacity animation.
-          # No fading.
-          # No permanent dashed graph.
-          # White coordinate points remain static.
-          # ============================================================
+          # ==========================================================
 
           activity_body = "".join(
 
@@ -1646,8 +1672,9 @@ jobs:
 
                   '<style>',
 
+
                   # --------------------------------------------------
-                  # STATUS PULSE ONLY
+                  # STATUS DOT
                   # --------------------------------------------------
 
                   '@keyframes pulse{'
@@ -1657,23 +1684,57 @@ jobs:
 
 
                   # --------------------------------------------------
-                  # CLEAN GRAPH MOVEMENT
+                  # CLEAN GRAPH DRAW
                   #
-                  # 1000 = entire graph length.
+                  # pathLength=1000
                   #
-                  # The visible red segment is 220 units long.
+                  # The complete polyline is normalized to 1000 units.
                   #
-                  # It travels from the beginning of the graph
-                  # to the end and then restarts.
+                  # stroke-dasharray:
+                  #
+                  # 1000 1000
+                  #
+                  # means:
+                  #
+                  # visible segment = 1000
+                  # invisible segment = 1000
+                  #
+                  # stroke-dashoffset:
+                  #
+                  # 1000 -> 0
+                  #
+                  # progressively reveals the graph from left to right.
+                  #
+                  # At 96% the graph is fully visible.
+                  #
+                  # At 100% it instantly resets to hidden.
+                  #
+                  # This prevents the visible line from jumping back
+                  # to the first point while the animation is active.
                   # --------------------------------------------------
 
-                  '@keyframes cleanLineTravel{'
+                  '@keyframes drawGraph{'
+
                   '0%{'
                   'stroke-dashoffset:1000'
                   '}'
-                  '100%{'
+
+                  '92%{'
                   'stroke-dashoffset:0'
                   '}'
+
+                  '96%{'
+                  'stroke-dashoffset:0'
+                  '}'
+
+                  '96.01%{'
+                  'stroke-dashoffset:1000'
+                  '}'
+
+                  '100%{'
+                  'stroke-dashoffset:1000'
+                  '}'
+
                   '}',
 
 
@@ -1683,15 +1744,20 @@ jobs:
 
 
                   # --------------------------------------------------
-                  # MOVING GRAPH
+                  # GRAPH LINE
                   # --------------------------------------------------
 
                   '.clean-line{'
-                  'stroke-dasharray:220 780;'
+
+                  'stroke-dasharray:1000 1000;'
+
                   'stroke-dashoffset:1000;'
-                  'animation:cleanLineTravel '
-                  '8s linear infinite;'
-                  'filter:url(#glow)'
+
+                  'animation:drawGraph 12s '
+                  'cubic-bezier(.45,0,.55,1) infinite;'
+
+                  'filter:url(#glow);'
+
                   '}',
 
 
@@ -1774,7 +1840,7 @@ jobs:
 
 
                   # ==================================================
-                  # SUBTLE CHART FRAME
+                  # VERY SUBTLE CHART FRAME
                   # ==================================================
 
                   f'<rect '
@@ -1794,14 +1860,7 @@ jobs:
                   #
                   # pathLength="1000"
                   #
-                  # The entire graph is normalized to 1000 units.
-                  #
-                  # stroke-dasharray:
-                  #
-                  # 220 = visible red segment
-                  # 780 = empty space
-                  #
-                  # The segment moves smoothly.
+                  # This is the key fix.
                   # ==================================================
 
                   f'<polyline '
@@ -1816,10 +1875,7 @@ jobs:
 
 
                   # ==================================================
-                  # WHITE COORDINATE POINTS
-                  #
-                  # Static.
-                  # No animation.
+                  # WHITE DATA POINTS
                   # ==================================================
 
                   circles,
@@ -1833,7 +1889,7 @@ jobs:
 
 
                   # ==================================================
-                  # DATE / MONTH
+                  # DATE / MONTH LABEL
                   # ==================================================
 
                   '<text '
@@ -1971,7 +2027,6 @@ jobs:
 
           set -euo pipefail
 
-
           for file in \
             github-stats.svg \
             top-languages.svg \
@@ -1983,16 +2038,13 @@ jobs:
             test -s \
               "generated-stats/$file"
 
-
             grep -q \
               "<svg" \
               "generated-stats/$file"
 
-
             grep -q \
               "</svg>" \
               "generated-stats/$file"
-
 
             echo \
               "Validated: $file"
@@ -2010,24 +2062,17 @@ jobs:
 
           set -euo pipefail
 
-
-          mkdir -p stats
-
-
           cp \
             generated-stats/github-stats.svg \
             stats/github-stats.svg
-
 
           cp \
             generated-stats/top-languages.svg \
             stats/top-languages.svg
 
-
           cp \
             generated-stats/streak.svg \
             stats/streak.svg
-
 
           cp \
             generated-stats/contribution-activity.svg \
@@ -2044,23 +2089,19 @@ jobs:
 
           set -euo pipefail
 
-
           git config \
             user.name \
             "github-actions[bot]"
 
-
           git config \
             user.email \
             "41898282+github-actions[bot]@users.noreply.github.com"
-
 
           git add \
             stats/github-stats.svg \
             stats/top-languages.svg \
             stats/streak.svg \
             stats/contribution-activity.svg
-
 
           if git diff --cached --quiet; then
 
@@ -2071,9 +2112,7 @@ jobs:
 
           fi
 
-
           git commit \
             -m "chore: update profile statistics"
-
 
           git push
