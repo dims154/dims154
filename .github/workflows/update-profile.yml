@@ -139,7 +139,6 @@ jobs:
       # ============================================================
 
       - name: Generate profile statistics
-
         run: |
           set -euo pipefail
 
@@ -153,9 +152,7 @@ jobs:
           import json
 
           from collections import defaultdict
-
           from datetime import datetime
-
           from pathlib import Path
 
 
@@ -233,7 +230,10 @@ jobs:
           )
 
 
-          # Last 31 days
+          # ==========================================================
+          # LAST 31 DAYS
+          # ==========================================================
+
           activity = days[-31:]
 
 
@@ -519,9 +519,9 @@ jobs:
               )
 
 
-          # ============================================================
+          # ==========================================================
           # GITHUB STATISTICS
-          # ============================================================
+          # ==========================================================
 
           stats_body = "".join(
               [
@@ -909,9 +909,9 @@ jobs:
           )
 
 
-          # ============================================================
+          # ==========================================================
           # TOP LANGUAGES
-          # ============================================================
+          # ==========================================================
 
           language_parts = [
 
@@ -1138,9 +1138,9 @@ jobs:
           )
 
 
-          # ============================================================
+          # ==========================================================
           # CONTRIBUTION STREAK
-          # ============================================================
+          # ==========================================================
 
           streak_body = "".join(
 
@@ -1397,30 +1397,25 @@ jobs:
           )
 
 
-          # ============================================================
+          # ==========================================================
           # CONTRIBUTION ACTIVITY
           #
-          # IMPORTANT:
+          # REAL GITHUB DATA
+          # LAST 31 DAYS
           #
-          # - Real GitHub contribution data
-          # - Last 31 days
-          # - Dynamic dates
+          # GRAPH:
           # - White coordinate points
           # - Red animated line
-          # - NO fading
-          # - NO opacity animation on line
-          # - NO dashed line
-          # - NO permanent red graph line
-          # - Smooth left -> right movement
+          # - Left -> right movement
+          # - No fading
+          # - No permanent red line
+          # - No dashed graph line
           # - Clean restart
-          # ============================================================
+          # ==========================================================
 
           chart_x = 55
-
           chart_y = 105
-
           chart_w = 900
-
           chart_h = 165
 
 
@@ -1444,14 +1439,10 @@ jobs:
           points = []
 
 
-          for index, day in enumerate(
-              activity
-          ):
+          for index, day in enumerate(activity):
 
               x = (
-
                   chart_x
-
                   + index
                   * chart_w
                   / max(
@@ -1462,17 +1453,14 @@ jobs:
 
 
               ratio = (
-
                   day["count"]
                   / max_count
-
                   if max_count
                   else 0
               )
 
 
               y = (
-
                   chart_y
                   + chart_h
                   - ratio * chart_h
@@ -1496,20 +1484,22 @@ jobs:
           )
 
 
-# ==========================================================
-# BLACK COORDINATE POINTS
-# ==========================================================
+          # ==========================================================
+          # WHITE COORDINATE POINTS
+          # ==========================================================
 
-circles = "".join(
+          circles = "".join(
 
-    f'<circle '
-    f'cx="{x:.1f}" '
-    f'cy="{y:.1f}" '
-    f'r="3.2" '
-    f'fill="#000000"/>'
-    
-    for x, y in points
-)
+              f'<circle '
+              f'cx="{x:.1f}" '
+              f'cy="{y:.1f}" '
+              f'r="3.2" '
+              f'fill="#ffffff"/>'
+
+              for x, y in points
+          )
+
+
           # ==========================================================
           # DATE FORMAT
           # ==========================================================
@@ -1517,10 +1507,8 @@ circles = "".join(
           def date_label(value):
 
               return datetime.strptime(
-
                   value,
                   "%Y-%m-%d"
-
               ).strftime(
                   "%d/%m"
               )
@@ -1640,9 +1628,7 @@ circles = "".join(
                   '<style>',
 
                   # --------------------------------------------------
-                  # ONLY pulse for status dot.
-                  #
-                  # NO opacity animation for graph line.
+                  # STATUS DOT ONLY
                   # --------------------------------------------------
 
                   '@keyframes pulse{'
@@ -1652,14 +1638,7 @@ circles = "".join(
 
 
                   # --------------------------------------------------
-                  # CLEAN LINE MOVEMENT
-                  #
-                  # The line itself never changes opacity.
-                  #
-                  # It simply moves through the polyline using
-                  # dashoffset.
-                  #
-                  # 20 seconds = deliberately slow movement.
+                  # CLEAN LINE TRAVEL
                   # --------------------------------------------------
 
                   '@keyframes cleanLineTravel{'
@@ -1678,24 +1657,18 @@ circles = "".join(
 
 
                   # --------------------------------------------------
-                  # MOVING LINE
+                  # MOVING GRAPH LINE
                   #
-                  # IMPORTANT:
+                  # The graph itself does NOT fade.
                   #
-                  # No:
-                  # opacity
-                  # stroke-opacity
-                  # fade
-                  # transparent trailing line
-                  #
-                  # Only dash movement.
+                  # Only the visible dash segment travels along
+                  # the real polyline.
                   # --------------------------------------------------
 
                   '.clean-line{'
                   'stroke-dasharray:170 1150;'
                   'stroke-dashoffset:1250;'
-                  'animation:cleanLineTravel '
-                  '20s linear infinite;'
+                  'animation:cleanLineTravel 20s linear infinite;'
                   'filter:url(#glow)'
                   '}',
 
@@ -1780,9 +1753,6 @@ circles = "".join(
 
                   # ==================================================
                   # CHART FRAME
-                  #
-                  # Extremely subtle.
-                  # NOT the graph line.
                   # ==================================================
 
                   f'<rect '
@@ -1797,14 +1767,6 @@ circles = "".join(
 
                   # ==================================================
                   # MOVING GRAPH LINE
-                  #
-                  # THIS IS THE ONLY GRAPH LINE.
-                  #
-                  # Red.
-                  # Solid.
-                  # No fading.
-                  # No dashed appearance.
-                  # No permanent line.
                   # ==================================================
 
                   f'<polyline '
@@ -1818,9 +1780,7 @@ circles = "".join(
 
 
                   # ==================================================
-                  # COORDINATE POINTS
-                  #
-                  # Always white.
+                  # WHITE COORDINATE POINTS
                   # ==================================================
 
                   circles,
@@ -1934,27 +1894,22 @@ circles = "".join(
           )
 
 
-          # ============================================================
+          # ==========================================================
           # WRITE CONTRIBUTION SVG
-          # ============================================================
+          # ==========================================================
 
           write_svg(
-
               "contribution-activity.svg",
-
               1020,
-
               395,
-
               "GitHub contribution activity for dims154",
-
               activity_body,
           )
 
 
-          # ============================================================
+          # ==========================================================
           # COMPLETE
-          # ============================================================
+          # ==========================================================
 
           print(
               "All profile statistics generated successfully."
@@ -1967,11 +1922,8 @@ circles = "".join(
       # ============================================================
 
       - name: Validate generated files
-
         run: |
-
           set -euo pipefail
-
 
           for file in \
             github-stats.svg \
@@ -1984,81 +1936,66 @@ circles = "".join(
             test -s \
               "generated-stats/$file"
 
-
             grep -q \
               "<svg" \
               "generated-stats/$file"
 
-
             grep -q \
               "</svg>" \
               "generated-stats/$file"
-
 
             echo \
               "Validated: $file"
 
           done
 
-
       # ============================================================
       # PUBLISH STATISTICS
       # ============================================================
 
       - name: Publish statistics
-
         run: |
-
           set -euo pipefail
 
+          mkdir -p stats
 
           cp \
             generated-stats/github-stats.svg \
             stats/github-stats.svg
 
-
           cp \
             generated-stats/top-languages.svg \
             stats/top-languages.svg
-
 
           cp \
             generated-stats/streak.svg \
             stats/streak.svg
 
-
           cp \
             generated-stats/contribution-activity.svg \
             stats/contribution-activity.svg
-
 
       # ============================================================
       # COMMIT CHANGES
       # ============================================================
 
       - name: Commit changes
-
         run: |
-
           set -euo pipefail
-
 
           git config \
             user.name \
             "github-actions[bot]"
 
-
           git config \
             user.email \
             "41898282+github-actions[bot]@users.noreply.github.com"
-
 
           git add \
             stats/github-stats.svg \
             stats/top-languages.svg \
             stats/streak.svg \
             stats/contribution-activity.svg
-
 
           if git diff --cached --quiet; then
 
@@ -2069,9 +2006,7 @@ circles = "".join(
 
           fi
 
-
           git commit \
             -m "chore: update profile statistics"
-
 
           git push
