@@ -14,8 +14,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+
   update-profile:
+
     name: Generate Profile Statistics
+
     runs-on: ubuntu-latest
 
     steps:
@@ -25,19 +28,24 @@ jobs:
       # ============================================================
 
       - name: Checkout repository
+
         uses: actions/checkout@v5
+
         with:
           fetch-depth: 1
+
 
       # ============================================================
       # FETCH GITHUB DATA
       # ============================================================
 
       - name: Fetch GitHub data
+
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
         run: |
+
           set -euo pipefail
 
           gh api graphql \
@@ -73,14 +81,19 @@ jobs:
                       ) {
 
                         edges {
+
                           size
 
                           node {
                             name
                           }
+
                         }
+
                       }
+
                     }
+
                   }
 
                   contributionsCollection {
@@ -98,41 +111,61 @@ jobs:
                           date
 
                           contributionCount
+
                         }
+
                       }
+
                     }
+
                   }
+
                 }
 
               }' \
             -f login="dims154" \
             > github-data.json
 
+
           python3 - <<'PY'
+
           import json
+
 
           with open(
               "github-data.json",
               encoding="utf-8"
           ) as file:
+
               data = json.load(file)
+
 
           if data.get("errors"):
 
               for error in data["errors"]:
+
                   print(error)
+
 
               raise SystemExit(1)
 
-          if not data.get("data", {}).get("user"):
+
+          if not data.get(
+              "data",
+              {}
+          ).get("user"):
+
               raise SystemExit(
                   "GitHub user 'dims154' was not found."
               )
 
+
           print(
               "GitHub data fetched successfully."
           )
+
           PY
+
 
       # ============================================================
       # GENERATE PROFILE STATISTICS
@@ -141,16 +174,20 @@ jobs:
       - name: Generate profile statistics
 
         run: |
+
           set -euo pipefail
+
 
           rm -rf generated-stats
 
+
           mkdir -p generated-stats
-          mkdir -p stats
+
 
           python3 - <<'PY'
 
           import html
+
           import json
 
           from collections import defaultdict
@@ -164,7 +201,9 @@ jobs:
           # CONFIGURATION
           # ==========================================================
 
-          OUT = Path("generated-stats")
+          OUT = Path(
+              "generated-stats"
+          )
 
 
           # ==========================================================
@@ -179,13 +218,26 @@ jobs:
               payload = json.load(file)
 
 
-          user = payload["data"]["user"]
+          user = payload[
+              "data"
+          ][
+              "user"
+          ]
 
-          repos = user["repositories"]
 
-          collection = user["contributionsCollection"]
+          repos = user[
+              "repositories"
+          ]
 
-          calendar = collection["contributionCalendar"]
+
+          collection = user[
+              "contributionsCollection"
+          ]
+
+
+          calendar = collection[
+              "contributionCalendar"
+          ]
 
 
           # ==========================================================
@@ -193,19 +245,32 @@ jobs:
           # ==========================================================
 
           repositories = int(
-              repos["totalCount"]
+              repos[
+                  "totalCount"
+              ]
           )
+
 
           followers = int(
-              user["followers"]["totalCount"]
+              user[
+                  "followers"
+              ][
+                  "totalCount"
+              ]
           )
+
 
           total_contributions = int(
-              calendar["totalContributions"]
+              calendar[
+                  "totalContributions"
+              ]
           )
 
+
           commits = int(
-              collection["totalCommitContributions"]
+              collection[
+                  "totalCommitContributions"
+              ]
           )
 
 
@@ -215,22 +280,30 @@ jobs:
 
           days = []
 
-          for week in calendar["weeks"]:
 
-              for day in week["contributionDays"]:
+          for week in calendar[
+              "weeks"
+          ]:
+
+              for day in week[
+                  "contributionDays"
+              ]:
 
                   days.append(
                       {
                           "date": day["date"],
                           "count": int(
-                              day["contributionCount"]
+                              day[
+                                  "contributionCount"
+                              ]
                           ),
                       }
                   )
 
 
           days.sort(
-              key=lambda item: item["date"]
+              key=lambda item:
+                  item["date"]
           )
 
 
@@ -238,7 +311,9 @@ jobs:
           # LAST 31 DAYS
           # ==========================================================
 
-          activity = days[-31:]
+          activity = days[
+              -31:
+          ]
 
 
           # ==========================================================
@@ -247,9 +322,12 @@ jobs:
 
           current_streak = 0
 
+
           for day in reversed(days):
 
-              if day["count"] > 0:
+              if day[
+                  "count"
+              ] > 0:
 
                   current_streak += 1
 
@@ -266,11 +344,15 @@ jobs:
 
           running = 0
 
+
           for day in days:
 
-              if day["count"] > 0:
+              if day[
+                  "count"
+              ] > 0:
 
                   running += 1
+
 
                   longest_streak = max(
                       longest_streak,
@@ -286,17 +368,24 @@ jobs:
           # LANGUAGE STATISTICS
           # ==========================================================
 
-          language_totals = defaultdict(int)
+          language_totals = defaultdict(
+              int
+          )
 
 
-          for repo in repos["nodes"]:
+          for repo in repos[
+              "nodes"
+          ]:
 
               if not repo:
+
                   continue
 
 
               language_data = (
-                  repo.get("languages")
+                  repo.get(
+                      "languages"
+                  )
                   or {}
               )
 
@@ -307,29 +396,44 @@ jobs:
               ):
 
                   if not edge:
+
                       continue
 
-                  if not edge.get("node"):
+
+                  if not edge.get(
+                      "node"
+                  ):
+
                       continue
 
 
-                  name = edge["node"].get(
+                  name = edge[
+                      "node"
+                  ].get(
                       "name"
                   )
 
 
                   if name:
 
-                      language_totals[name] += int(
-                          edge.get("size") or 0
+                      language_totals[
+                          name
+                      ] += int(
+                          edge.get(
+                              "size"
+                          )
+                          or 0
                       )
 
 
           top_languages = sorted(
               language_totals.items(),
-              key=lambda item: item[1],
+              key=lambda item:
+                  item[1],
               reverse=True,
-          )[:6]
+          )[
+              :6
+          ]
 
 
           total_language_size = sum(
@@ -356,7 +460,8 @@ jobs:
 
               return (
 
-                  '<?xml version="1.0" encoding="UTF-8"?>'
+                  '<?xml version="1.0" '
+                  'encoding="UTF-8"?>'
 
                   f'<svg '
                   f'xmlns="http://www.w3.org/2000/svg" '
@@ -368,9 +473,9 @@ jobs:
 
                   '<defs>'
 
-                  # --------------------------------------------------
+                  # =================================================
                   # BACKGROUND
-                  # --------------------------------------------------
+                  # =================================================
 
                   '<linearGradient '
                   'id="bg" '
@@ -394,9 +499,9 @@ jobs:
                   '</linearGradient>'
 
 
-                  # --------------------------------------------------
+                  # =================================================
                   # RED GRADIENT
-                  # --------------------------------------------------
+                  # =================================================
 
                   '<linearGradient '
                   'id="red" '
@@ -420,9 +525,9 @@ jobs:
                   '</linearGradient>'
 
 
-                  # --------------------------------------------------
+                  # =================================================
                   # GLOW
-                  # --------------------------------------------------
+                  # =================================================
 
                   '<filter '
                   'id="glow" '
@@ -448,9 +553,9 @@ jobs:
                   '</filter>'
 
 
-                  # --------------------------------------------------
+                  # =================================================
                   # GRID
-                  # --------------------------------------------------
+                  # =================================================
 
                   '<pattern '
                   'id="grid" '
@@ -469,9 +574,9 @@ jobs:
                   '</defs>'
 
 
-                  # --------------------------------------------------
+                  # =================================================
                   # BACKGROUND
-                  # --------------------------------------------------
+                  # =================================================
 
                   '<rect '
                   'width="100%" '
@@ -494,6 +599,7 @@ jobs:
                   'fill="none" '
                   'stroke="url(#red)" '
                   'stroke-opacity=".65"/>'
+
               )
 
 
@@ -507,7 +613,9 @@ jobs:
 
               path = OUT / name
 
+
               path.write_text(
+
                   svg_start(
                       width,
                       height,
@@ -515,8 +623,10 @@ jobs:
                   )
                   + body
                   + "</svg>\n",
+
                   encoding="utf-8"
               )
+
 
               print(
                   f"Generated: {path}"
@@ -556,16 +666,19 @@ jobs:
                   '}',
 
                   '.pulse{'
-                  'animation:pulse 2.2s ease-in-out infinite'
+                  'animation:pulse 2.2s '
+                  'ease-in-out infinite'
                   '}',
 
                   '.scan{'
-                  'animation:scan 5s linear infinite'
+                  'animation:scan 5s '
+                  'linear infinite'
                   '}',
 
                   '.dash{'
                   'stroke-dasharray:8 8;'
-                  'animation:dash 2s linear infinite'
+                  'animation:dash 2s '
+                  'linear infinite'
                   '}',
 
                   '</style>',
@@ -900,6 +1013,7 @@ jobs:
                   'text-anchor="end">'
                   'GITHUB ACTIONS / PROFILE STATS'
                   '</text>',
+
               ]
           )
 
@@ -941,11 +1055,13 @@ jobs:
               '}',
 
               '.pulse{'
-              'animation:pulse 2.2s ease-in-out infinite'
+              'animation:pulse 2.2s '
+              'ease-in-out infinite'
               '}',
 
               '.sweep{'
-              'animation:sweep 4.5s linear infinite'
+              'animation:sweep 4.5s '
+              'linear infinite'
               '}',
 
               '</style>',
@@ -1018,6 +1134,7 @@ jobs:
               'fill="#ff1744" '
               'fill-opacity=".16" '
               'class="sweep"/>',
+
           ]
 
 
@@ -1036,6 +1153,7 @@ jobs:
                   'font-size="12">'
                   'NO PUBLIC LANGUAGE DATA AVAILABLE'
                   '</text>'
+
               )
 
           else:
@@ -1050,6 +1168,7 @@ jobs:
 
                       if total_language_size
                       else 0
+
                   )
 
 
@@ -1101,7 +1220,9 @@ jobs:
                           f'text-anchor="end">'
                           f'{pct:.1f}%'
                           f'</text>',
+
                       ]
+
                   )
 
 
@@ -1129,7 +1250,9 @@ jobs:
                   'font-size="9">'
                   'SOURCE: GITHUB REPOSITORY LANGUAGE BREAKDOWN'
                   '</text>',
+
               ]
+
           )
 
 
@@ -1138,7 +1261,9 @@ jobs:
               1020,
               375,
               "Top languages for dims154",
-              "".join(language_parts),
+              "".join(
+                  language_parts
+              ),
           )
 
 
@@ -1172,11 +1297,13 @@ jobs:
                   '}',
 
                   '.pulse{'
-                  'animation:pulse 2.4s ease-in-out infinite'
+                  'animation:pulse 2.4s '
+                  'ease-in-out infinite'
                   '}',
 
                   '.sweep{'
-                  'animation:sweep 5s linear infinite'
+                  'animation:sweep 5s '
+                  'linear infinite'
                   '}',
 
                   '</style>',
@@ -1388,7 +1515,9 @@ jobs:
                   'text-anchor="end">'
                   'AUTO-GENERATED / GITHUB ACTIONS'
                   '</text>',
+
               ]
+
           )
 
 
@@ -1403,41 +1532,7 @@ jobs:
 
           # ============================================================
           # CONTRIBUTION ACTIVITY
-          #
-          # FIXED ANIMATION SYSTEM
-          #
-          # The previous version used:
-          #
-          # stroke-dasharray:170 1150
-          #
-          # This caused the dash pattern to restart before matching
-          # the real length of the graph.
-          #
-          # The new system uses:
-          #
-          # pathLength="1000"
-          #
-          # which normalizes the complete polyline to exactly 1000
-          # animation units.
-          #
-          # The entire graph is then drawn from:
-          #
-          # 1000 -> 0
-          #
-          # This keeps the movement synchronized with the actual
-          # polyline length.
-          #
-          # IMPORTANT:
-          #
-          # - No permanent graph line
-          # - No opacity animation
-          # - No dashed graph
-          # - No fading
-          # - No random dash reset
-          # - Smooth left -> right
-          # - Clean restart
           # ============================================================
-
 
           chart_x = 55
 
@@ -1448,9 +1543,9 @@ jobs:
           chart_h = 165
 
 
-          # ==========================================================
-          # MAXIMUM CONTRIBUTION COUNT
-          # ==========================================================
+          # ============================================================
+          # MAXIMUM CONTRIBUTION
+          # ============================================================
 
           max_count = max(
 
@@ -1461,32 +1556,33 @@ jobs:
               ),
 
               default=1,
+
           )
 
 
-          # ==========================================================
+          # ============================================================
           # BUILD COORDINATES
-          # ==========================================================
+          # ============================================================
 
           points = []
 
 
-          for index, day in enumerate(activity):
+          for index, day in enumerate(
+              activity
+          ):
 
-              if len(activity) <= 1:
+              x = (
 
-                  x = chart_x
+                  chart_x
 
-              else:
-
-                  x = (
-
-                      chart_x
-
-                      + index
-                      * chart_w
-                      / (len(activity) - 1)
+                  + index
+                  * chart_w
+                  / max(
+                      1,
+                      len(activity) - 1
                   )
+
+              )
 
 
               ratio = (
@@ -1496,16 +1592,16 @@ jobs:
 
                   if max_count
                   else 0
+
               )
 
 
               y = (
 
                   chart_y
-
                   + chart_h
-
                   - ratio * chart_h
+
               )
 
 
@@ -1514,21 +1610,22 @@ jobs:
               )
 
 
-          # ==========================================================
-          # POLYLINE DATA
-          # ==========================================================
+          # ============================================================
+          # POLYLINE
+          # ============================================================
 
           polyline = " ".join(
 
               f"{x:.2f},{y:.2f}"
 
               for x, y in points
+
           )
 
 
-          # ==========================================================
+          # ============================================================
           # WHITE COORDINATE POINTS
-          # ==========================================================
+          # ============================================================
 
           circles = "".join(
 
@@ -1539,19 +1636,19 @@ jobs:
               f'fill="#ffffff"/>'
 
               for x, y in points
+
           )
 
 
-          # ==========================================================
+          # ============================================================
           # DATE FORMAT
-          # ==========================================================
+          # ============================================================
 
           def date_label(value):
 
               return datetime.strptime(
 
                   value,
-
                   "%Y-%m-%d"
 
               ).strftime(
@@ -1559,9 +1656,9 @@ jobs:
               )
 
 
-          # ==========================================================
+          # ============================================================
           # FIRST DATE
-          # ==========================================================
+          # ============================================================
 
           first_date = (
 
@@ -1572,12 +1669,13 @@ jobs:
               if activity
 
               else ""
+
           )
 
 
-          # ==========================================================
+          # ============================================================
           # LAST DATE
-          # ==========================================================
+          # ============================================================
 
           last_date = (
 
@@ -1588,24 +1686,26 @@ jobs:
               if activity
 
               else ""
+
           )
 
 
-          # ==========================================================
+          # ============================================================
           # RECENT TOTAL
-          # ==========================================================
+          # ============================================================
 
           recent_total = sum(
 
               day["count"]
 
               for day in activity
+
           )
 
 
-          # ==========================================================
+          # ============================================================
           # DATE TICKS
-          # ==========================================================
+          # ============================================================
 
           ticks = []
 
@@ -1617,13 +1717,19 @@ jobs:
                   set(
 
                       round(
+
                           i
-                          * (len(activity) - 1)
+                          * (
+                              len(activity) - 1
+                          )
                           / 4
+
                       )
 
                       for i in range(5)
+
                   )
+
               )
 
 
@@ -1639,6 +1745,7 @@ jobs:
                           1,
                           len(activity) - 1
                       )
+
                   )
 
 
@@ -1654,6 +1761,7 @@ jobs:
                       f'text-anchor="middle">'
                       f'{date_label(activity[index]["date"])}'
                       f'</text>'
+
                   )
 
 
@@ -1662,19 +1770,131 @@ jobs:
           )
 
 
-          # ==========================================================
+          # ============================================================
           # CONTRIBUTION ACTIVITY SVG
-          # ==========================================================
+          #
+          # IMPORTANT:
+          #
+          # The graph itself is a COMPLETE SOLID POLYLINE.
+          #
+          # There is NO:
+          #
+          # stroke-dasharray
+          # stroke-dashoffset
+          # dashed animation
+          # opacity animation
+          #
+          # Animation is performed using a MASK.
+          #
+          # Therefore:
+          #
+          # LEFT -> RIGHT
+          # smooth reveal
+          # no broken beginning
+          # no duplicated segment
+          # no dash pattern
+          # ============================================================
 
           activity_body = "".join(
 
               [
 
+                  '<defs>',
+
+
+                  # ==================================================
+                  # LINE REVEAL MASK
+                  # ==================================================
+
+                  '<mask '
+                  'id="lineRevealMask" '
+                  'maskUnits="userSpaceOnUse" '
+                  'x="0" '
+                  'y="0" '
+                  'width="1020" '
+                  'height="395">',
+
+
+                  # ==================================================
+                  # MASK RECTANGLE
+                  #
+                  # Starts at the graph's left edge.
+                  #
+                  # x = 55
+                  # width = 0
+                  #
+                  # Then expands to:
+                  #
+                  # x = 55
+                  # width = 900
+                  #
+                  # which exactly matches:
+                  #
+                  # chart_x = 55
+                  # chart_w = 900
+                  # ==================================================
+
+                  '<rect '
+                  'x="55" '
+                  'y="0" '
+                  'width="0" '
+                  'height="395" '
+                  'fill="white">',
+
+
+                  # ==================================================
+                  # SMOOTH REVEAL
+                  #
+                  # 0%
+                  # Nothing visible.
+                  #
+                  # 72%
+                  # Line reaches the right side.
+                  #
+                  # 88%
+                  # Hold completely visible.
+                  #
+                  # 100%
+                  # Reset.
+                  #
+                  # The important part:
+                  #
+                  # There is no dash movement.
+                  #
+                  # The mask reveals the actual line.
+                  # ==================================================
+
+                  '<animate '
+                  'attributeName="width" '
+                  'values="0;900;900;0" '
+                  'keyTimes="0;0.72;0.90;1" '
+                  'dur="14s" '
+                  'calcMode="spline" '
+                  'keySplines="'
+                  '.42 0 1 1;'
+                  '0 0 1 1;'
+                  '.42 0 1 1" '
+                  'repeatCount="indefinite"/>',
+
+
+                  '</rect>',
+
+
+                  '</mask>',
+
+
+                  '</defs>',
+
+
+                  # ==================================================
+                  # STYLE
+                  # ==================================================
+
                   '<style>',
 
 
                   # --------------------------------------------------
-                  # STATUS DOT
+                  # STATUS PULSE ONLY
                   # --------------------------------------------------
 
                   '@keyframes pulse{'
@@ -1683,81 +1903,9 @@ jobs:
                   '}',
 
 
-                  # --------------------------------------------------
-                  # CLEAN GRAPH DRAW
-                  #
-                  # pathLength=1000
-                  #
-                  # The complete polyline is normalized to 1000 units.
-                  #
-                  # stroke-dasharray:
-                  #
-                  # 1000 1000
-                  #
-                  # means:
-                  #
-                  # visible segment = 1000
-                  # invisible segment = 1000
-                  #
-                  # stroke-dashoffset:
-                  #
-                  # 1000 -> 0
-                  #
-                  # progressively reveals the graph from left to right.
-                  #
-                  # At 96% the graph is fully visible.
-                  #
-                  # At 100% it instantly resets to hidden.
-                  #
-                  # This prevents the visible line from jumping back
-                  # to the first point while the animation is active.
-                  # --------------------------------------------------
-
-                  '@keyframes drawGraph{'
-
-                  '0%{'
-                  'stroke-dashoffset:1000'
-                  '}'
-
-                  '92%{'
-                  'stroke-dashoffset:0'
-                  '}'
-
-                  '96%{'
-                  'stroke-dashoffset:0'
-                  '}'
-
-                  '96.01%{'
-                  'stroke-dashoffset:1000'
-                  '}'
-
-                  '100%{'
-                  'stroke-dashoffset:1000'
-                  '}'
-
-                  '}',
-
-
                   '.pulse{'
-                  'animation:pulse 2.8s ease-in-out infinite'
-                  '}',
-
-
-                  # --------------------------------------------------
-                  # GRAPH LINE
-                  # --------------------------------------------------
-
-                  '.clean-line{'
-
-                  'stroke-dasharray:1000 1000;'
-
-                  'stroke-dashoffset:1000;'
-
-                  'animation:drawGraph 12s '
-                  'cubic-bezier(.45,0,.55,1) infinite;'
-
-                  'filter:url(#glow);'
-
+                  'animation:pulse 2.8s '
+                  'ease-in-out infinite'
                   '}',
 
 
@@ -1840,7 +1988,7 @@ jobs:
 
 
                   # ==================================================
-                  # VERY SUBTLE CHART FRAME
+                  # CHART FRAME
                   # ==================================================
 
                   f'<rect '
@@ -1854,28 +2002,38 @@ jobs:
 
 
                   # ==================================================
-                  # MOVING GRAPH LINE
+                  # GRAPH LINE
                   #
-                  # IMPORTANT:
+                  # SOLID.
                   #
-                  # pathLength="1000"
+                  # NO DASH.
                   #
-                  # This is the key fix.
+                  # NO DASHOFFSET.
+                  #
+                  # NO REPEATING SEGMENT.
+                  #
+                  # MASK ONLY.
                   # ==================================================
+
+                  f'<g '
+                  f'mask="url(#lineRevealMask)">',
+
 
                   f'<polyline '
                   f'points="{polyline}" '
-                  f'pathLength="1000" '
                   f'fill="none" '
                   f'stroke="#ff1744" '
                   f'stroke-width="3" '
                   f'stroke-linecap="round" '
                   f'stroke-linejoin="round" '
-                  f'class="clean-line"/>',
+                  f'filter="url(#glow)"/>',
+
+
+                  '</g>',
 
 
                   # ==================================================
-                  # WHITE DATA POINTS
+                  # WHITE POINTS
                   # ==================================================
 
                   circles,
@@ -1889,7 +2047,7 @@ jobs:
 
 
                   # ==================================================
-                  # DATE / MONTH LABEL
+                  # DATE / MONTH
                   # ==================================================
 
                   '<text '
@@ -1921,7 +2079,7 @@ jobs:
 
 
                   # ==================================================
-                  # LOWER SEPARATOR
+                  # SEPARATOR
                   # ==================================================
 
                   '<line '
@@ -1985,7 +2143,9 @@ jobs:
                   'text-anchor="end">'
                   'FLOW: LEFT → RIGHT / CLEAN'
                   '</text>',
+
               ]
+
           )
 
 
@@ -2004,6 +2164,7 @@ jobs:
               "GitHub contribution activity for dims154",
 
               activity_body,
+
           )
 
 
@@ -2017,6 +2178,7 @@ jobs:
 
           PY
 
+
       # ============================================================
       # VALIDATE GENERATED FILES
       # ============================================================
@@ -2026,6 +2188,7 @@ jobs:
         run: |
 
           set -euo pipefail
+
 
           for file in \
             github-stats.svg \
@@ -2038,13 +2201,16 @@ jobs:
             test -s \
               "generated-stats/$file"
 
+
             grep -q \
               "<svg" \
               "generated-stats/$file"
 
+
             grep -q \
               "</svg>" \
               "generated-stats/$file"
+
 
             echo \
               "Validated: $file"
@@ -2062,17 +2228,24 @@ jobs:
 
           set -euo pipefail
 
+
+          mkdir -p stats
+
+
           cp \
             generated-stats/github-stats.svg \
             stats/github-stats.svg
+
 
           cp \
             generated-stats/top-languages.svg \
             stats/top-languages.svg
 
+
           cp \
             generated-stats/streak.svg \
             stats/streak.svg
+
 
           cp \
             generated-stats/contribution-activity.svg \
@@ -2089,19 +2262,23 @@ jobs:
 
           set -euo pipefail
 
+
           git config \
             user.name \
             "github-actions[bot]"
 
+
           git config \
             user.email \
             "41898282+github-actions[bot]@users.noreply.github.com"
+
 
           git add \
             stats/github-stats.svg \
             stats/top-languages.svg \
             stats/streak.svg \
             stats/contribution-activity.svg
+
 
           if git diff --cached --quiet; then
 
@@ -2112,7 +2289,9 @@ jobs:
 
           fi
 
+
           git commit \
             -m "chore: update profile statistics"
+
 
           git push
