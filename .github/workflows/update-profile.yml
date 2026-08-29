@@ -497,9 +497,8 @@ jobs:
 
           # ============================================================
           # CONTRIBUTION ACTIVITY
-          # One smooth moving stream; no dashed overlay.
-          # The newest part is bright and the trailing area fades into dark.
-          # Date labels use dd/mm.
+          # One moving red line from the first coordinate to the last.
+          # No static red line. White coordinates and dd/mm labels only.
           # ============================================================
           chart_x = 55
           chart_y = 105
@@ -536,6 +535,12 @@ jobs:
               for x, y in points
           )
 
+          circles = "".join(
+              f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3.2" '
+              'fill="#ffffff" filter="url(#glow)"/>'
+              for x, y in points
+          )
+
           def date_label(value):
               return datetime.strptime(
                   value,
@@ -554,10 +559,15 @@ jobs:
               else ""
           )
 
+          recent_total = sum(
+              day["count"]
+              for day in activity
+          )
+
           ticks = []
 
           if activity:
-              tick_indexes = sorted(
+              indexes = sorted(
                   set(
                       round(
                           i * (len(activity) - 1) / 4
@@ -566,7 +576,7 @@ jobs:
                   )
               )
 
-              for index in tick_indexes:
+              for index in indexes:
                   x = (
                       chart_x
                       + index * chart_w / max(
@@ -576,15 +586,12 @@ jobs:
                   )
 
                   ticks.append(
-                      f'<line x1="{x:.1f}" '
-                      f'y1="{chart_y + chart_h}" '
-                      f'x2="{x:.1f}" '
-                      f'y2="{chart_y + chart_h + 8}" '
-                      'stroke="#ffffff" stroke-opacity=".45"/>'
                       f'<text x="{x:.1f}" '
                       f'y="{chart_y + chart_h + 22}" '
-                      'fill="#ffffff" font-family="monospace" '
-                      'font-size="10" font-weight="bold" '
+                      'fill="#ffffff" '
+                      'font-family="monospace" '
+                      'font-size="10" '
+                      'font-weight="bold" '
                       'text-anchor="middle">'
                       f'{date_label(activity[index]["date"])}</text>'
                   )
@@ -595,41 +602,30 @@ jobs:
               [
                   '<style>',
                   '@keyframes pulse{0%,100%{opacity:.30}50%{opacity:1}}',
-                  '@keyframes flowLine{'
-                  '0%{stroke-dashoffset:1050;opacity:.02}'
-                  '12%{opacity:.18}'
-                  '30%{opacity:.65}'
-                  '52%{opacity:1}'
-                  '72%{opacity:.70}'
-                  '90%{opacity:.16}'
-                  '100%{stroke-dashoffset:-250;opacity:.02}'
+                  '@keyframes streamTravel{'
+                  '0%{stroke-dashoffset:1230;opacity:.02}'
+                  '10%{opacity:.08}'
+                  '28%{opacity:.42}'
+                  '48%{opacity:1}'
+                  '70%{opacity:.72}'
+                  '88%{opacity:.22}'
+                  '100%{stroke-dashoffset:-180;opacity:.02}'
                   '}',
                   '.pulse{animation:pulse 2.8s ease-in-out infinite}',
-                  '.flow-line{'
-                  'stroke-dasharray:240 860;'
-                  'animation:flowLine 12s cubic-bezier(.45,0,.25,1) infinite;'
+                  '.stream-line{'
+                  'stroke-dasharray:150 1080;'
+                  'stroke-dashoffset:1230;'
+                  'animation:streamTravel 14s cubic-bezier(.45,0,.25,1) infinite;'
                   'filter:url(#glow)'
                   '}',
                   '</style>',
 
-                  '<defs>',
-                  '<linearGradient id="flowGradient" '
-                  'x1="0%" y1="0%" x2="100%" y2="0%">',
-                  '<stop offset="0%" stop-color="#ff1744" stop-opacity="0"/>',
-                  '<stop offset="35%" stop-color="#ff1744" stop-opacity=".02"/>',
-                  '<stop offset="62%" stop-color="#ff1744" stop-opacity=".08"/>',
-                  '<stop offset="82%" stop-color="#ff1744" stop-opacity=".38"/>',
-                  '<stop offset="94%" stop-color="#ff1744" stop-opacity="1"/>',
-                  '<stop offset="100%" stop-color="#ff1744" stop-opacity=".78"/>',
-                  '</linearGradient>',
-                  '</defs>',
-
-                  '<rect x="0" y="0" width="1020" height="395" rx="14" '
-                  'fill="#050005" fill-opacity=".72"/>',
+                  '<rect x="0" y="0" width="1020" height="395" '
+                  'rx="14" fill="#050005" fill-opacity=".72"/>',
 
                   '<text x="38" y="42" fill="#ff1744" '
-                  'font-family="monospace" font-weight="bold" font-size="22">'
-                  'CONTRIBUTION ACTIVITY</text>',
+                  'font-family="monospace" font-weight="bold" '
+                  'font-size="22">CONTRIBUTION ACTIVITY</text>',
 
                   '<text x="38" y="64" fill="#9d7a82" '
                   'font-family="monospace" font-size="10">'
@@ -646,20 +642,17 @@ jobs:
 
                   f'<rect x="{chart_x}" y="{chart_y}" '
                   f'width="{chart_w}" height="{chart_h}" '
-                  'fill="none" stroke="#ff1744" stroke-opacity=".05"/>',
+                  'fill="none" stroke="#ff1744" stroke-opacity=".035"/>',
 
-                  f'<line x1="{chart_x}" y1="{chart_y + chart_h}" '
-                  f'x2="{chart_x + chart_w}" '
-                  f'y2="{chart_y + chart_h}" '
-                  'stroke="#ff1744" stroke-opacity=".10"/>',
-
-                  # Only one animated line: no static red graph overlay,
-                  # no decorative dashed flow line.
+                  # Only the moving line. No static red graph line.
                   f'<polyline points="{polyline}" fill="none" '
-                  'stroke="url(#flowGradient)" stroke-width="3" '
-                  'stroke-linecap="round" stroke-linejoin="round" '
-                  'class="flow-line"/>',
+                  'stroke="#ff1744" stroke-width="3" '
+                  'stroke-linecap="round" '
+                  'stroke-linejoin="round" '
+                  'class="stream-line"/>',
 
+                  # Coordinate markers only.
+                  circles,
                   tick_nodes,
 
                   '<text x="55" y="304" fill="#ffffff" '
@@ -686,7 +679,7 @@ jobs:
 
                   '<text x="982" y="369" fill="#6d4f57" '
                   'font-family="monospace" font-size="8" '
-                  'text-anchor="end">FLOW: SMOOTH / SYNCED</text>',
+                  'text-anchor="end">FLOW: LEFT → RIGHT / SMOOTH</text>',
               ]
           )
 
