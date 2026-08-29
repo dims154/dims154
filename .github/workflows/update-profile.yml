@@ -2,6 +2,7 @@ name: Update GitHub Profile Stats
 
 on:
   workflow_dispatch:
+
   schedule:
     - cron: "0 1 * * *"
 
@@ -18,57 +19,91 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+      # ============================================================
+      # CHECKOUT
+      # ============================================================
+
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
+      # ============================================================
+      # FETCH GITHUB DATA
+      # ============================================================
+
       - name: Fetch GitHub data
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
         run: |
           set -euo pipefail
 
           gh api graphql \
             -f query='
               query($login: String!) {
+
                 user(login: $login) {
+
                   login
-                  followers { totalCount }
+
+                  followers {
+                    totalCount
+                  }
 
                   repositories(
                     ownerAffiliations: OWNER
                     first: 100
                     privacy: PUBLIC
                   ) {
+
                     totalCount
+
                     nodes {
+
                       name
+
                       languages(
                         first: 20
-                        orderBy: { field: SIZE, direction: DESC }
+                        orderBy: {
+                          field: SIZE
+                          direction: DESC
+                        }
                       ) {
+
                         edges {
                           size
-                          node { name }
+
+                          node {
+                            name
+                          }
                         }
                       }
                     }
                   }
 
                   contributionsCollection {
+
                     totalCommitContributions
+
                     contributionCalendar {
+
                       totalContributions
+
                       weeks {
+
                         contributionDays {
+
                           date
+
                           contributionCount
                         }
                       }
                     }
                   }
                 }
+
               }' \
             -f login="dims154" \
             > github-data.json
@@ -76,96 +111,215 @@ jobs:
           python3 - <<'PY'
           import json
 
-          with open("github-data.json", encoding="utf-8") as file:
+          with open(
+              "github-data.json",
+              encoding="utf-8"
+          ) as file:
               data = json.load(file)
 
           if data.get("errors"):
+
               for error in data["errors"]:
                   print(error)
+
               raise SystemExit(1)
 
           if not data.get("data", {}).get("user"):
-              raise SystemExit("GitHub user 'dims154' was not found.")
+              raise SystemExit(
+                  "GitHub user 'dims154' was not found."
+              )
 
-          print("GitHub data fetched successfully.")
+          print(
+              "GitHub data fetched successfully."
+          )
           PY
 
+      # ============================================================
+      # GENERATE PROFILE STATISTICS
+      # ============================================================
+
       - name: Generate profile statistics
+
         run: |
           set -euo pipefail
 
           rm -rf generated-stats
+
           mkdir -p generated-stats
 
           python3 - <<'PY'
+
           import html
           import json
+
           from collections import defaultdict
+
           from datetime import datetime
+
           from pathlib import Path
+
+
+          # ==========================================================
+          # CONFIGURATION
+          # ==========================================================
 
           OUT = Path("generated-stats")
 
-          with open("github-data.json", encoding="utf-8") as file:
+
+          # ==========================================================
+          # LOAD DATA
+          # ==========================================================
+
+          with open(
+              "github-data.json",
+              encoding="utf-8"
+          ) as file:
+
               payload = json.load(file)
 
+
           user = payload["data"]["user"]
+
           repos = user["repositories"]
+
           collection = user["contributionsCollection"]
+
           calendar = collection["contributionCalendar"]
 
-          repositories = int(repos["totalCount"])
-          followers = int(user["followers"]["totalCount"])
-          total_contributions = int(calendar["totalContributions"])
-          commits = int(collection["totalCommitContributions"])
+
+          # ==========================================================
+          # BASIC STATISTICS
+          # ==========================================================
+
+          repositories = int(
+              repos["totalCount"]
+          )
+
+          followers = int(
+              user["followers"]["totalCount"]
+          )
+
+          total_contributions = int(
+              calendar["totalContributions"]
+          )
+
+          commits = int(
+              collection["totalCommitContributions"]
+          )
+
+
+          # ==========================================================
+          # CONTRIBUTION DAYS
+          # ==========================================================
 
           days = []
 
           for week in calendar["weeks"]:
+
               for day in week["contributionDays"]:
+
                   days.append(
                       {
                           "date": day["date"],
-                          "count": int(day["contributionCount"]),
+                          "count": int(
+                              day["contributionCount"]
+                          ),
                       }
                   )
 
-          days.sort(key=lambda item: item["date"])
+
+          days.sort(
+              key=lambda item: item["date"]
+          )
+
+
+          # Last 31 days
           activity = days[-31:]
 
+
+          # ==========================================================
+          # CURRENT STREAK
+          # ==========================================================
+
           current_streak = 0
+
           for day in reversed(days):
+
               if day["count"] > 0:
+
                   current_streak += 1
+
               else:
+
                   break
 
+
+          # ==========================================================
+          # LONGEST STREAK
+          # ==========================================================
+
           longest_streak = 0
+
           running = 0
 
           for day in days:
+
               if day["count"] > 0:
+
                   running += 1
-                  longest_streak = max(longest_streak, running)
+
+                  longest_streak = max(
+                      longest_streak,
+                      running
+                  )
+
               else:
+
                   running = 0
+
+
+          # ==========================================================
+          # LANGUAGE STATISTICS
+          # ==========================================================
 
           language_totals = defaultdict(int)
 
+
           for repo in repos["nodes"]:
+
               if not repo:
                   continue
 
-              language_data = repo.get("languages") or {}
 
-              for edge in language_data.get("edges", []):
-                  if not edge or not edge.get("node"):
+              language_data = (
+                  repo.get("languages")
+                  or {}
+              )
+
+
+              for edge in language_data.get(
+                  "edges",
+                  []
+              ):
+
+                  if not edge:
                       continue
 
-                  name = edge["node"].get("name")
+                  if not edge.get("node"):
+                      continue
+
+
+                  name = edge["node"].get(
+                      "name"
+                  )
+
 
                   if name:
-                      language_totals[name] += int(edge.get("size") or 0)
+
+                      language_totals[name] += int(
+                          edge.get("size") or 0
+                      )
+
 
           top_languages = sorted(
               language_totals.items(),
@@ -173,157 +327,578 @@ jobs:
               reverse=True,
           )[:6]
 
-          total_language_size = sum(language_totals.values())
+
+          total_language_size = sum(
+              language_totals.values()
+          )
+
+
+          # ==========================================================
+          # HELPERS
+          # ==========================================================
 
           def esc(value):
-              return html.escape(str(value))
 
-          def svg_start(width, height, title):
+              return html.escape(
+                  str(value)
+              )
+
+
+          def svg_start(
+              width,
+              height,
+              title
+          ):
+
               return (
+
                   '<?xml version="1.0" encoding="UTF-8"?>'
-                  f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" '
-                  f'height="{height}" viewBox="0 0 {width} {height}" '
-                  f'role="img" aria-label="{esc(title)}">'
+
+                  f'<svg '
+                  f'xmlns="http://www.w3.org/2000/svg" '
+                  f'width="{width}" '
+                  f'height="{height}" '
+                  f'viewBox="0 0 {width} {height}" '
+                  f'role="img" '
+                  f'aria-label="{esc(title)}">'
+
                   '<defs>'
-                  '<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">'
-                  '<stop offset="0%" stop-color="#050005"/>'
-                  '<stop offset="55%" stop-color="#160008"/>'
-                  '<stop offset="100%" stop-color="#020002"/>'
+
+                  # --------------------------------------------------
+                  # BACKGROUND
+                  # --------------------------------------------------
+
+                  '<linearGradient '
+                  'id="bg" '
+                  'x1="0" '
+                  'y1="0" '
+                  'x2="1" '
+                  'y2="1">'
+
+                  '<stop '
+                  'offset="0%" '
+                  'stop-color="#050005"/>'
+
+                  '<stop '
+                  'offset="55%" '
+                  'stop-color="#160008"/>'
+
+                  '<stop '
+                  'offset="100%" '
+                  'stop-color="#020002"/>'
+
                   '</linearGradient>'
-                  '<linearGradient id="red" x1="0" y1="0" x2="1" y2="0">'
-                  '<stop offset="0%" stop-color="#ff003c"/>'
-                  '<stop offset="50%" stop-color="#ff1744"/>'
-                  '<stop offset="100%" stop-color="#ff003c"/>'
+
+
+                  # --------------------------------------------------
+                  # RED GRADIENT
+                  # --------------------------------------------------
+
+                  '<linearGradient '
+                  'id="red" '
+                  'x1="0" '
+                  'y1="0" '
+                  'x2="1" '
+                  'y2="0">'
+
+                  '<stop '
+                  'offset="0%" '
+                  'stop-color="#ff003c"/>'
+
+                  '<stop '
+                  'offset="50%" '
+                  'stop-color="#ff1744"/>'
+
+                  '<stop '
+                  'offset="100%" '
+                  'stop-color="#ff003c"/>'
+
                   '</linearGradient>'
-                  '<filter id="glow" x="-50%" y="-50%" width="200%" height="200%">'
-                  '<feGaussianBlur stdDeviation="3" result="blur"/>'
+
+
+                  # --------------------------------------------------
+                  # GLOW
+                  # --------------------------------------------------
+
+                  '<filter '
+                  'id="glow" '
+                  'x="-50%" '
+                  'y="-50%" '
+                  'width="200%" '
+                  'height="200%">'
+
+                  '<feGaussianBlur '
+                  'stdDeviation="3" '
+                  'result="blur"/>'
+
                   '<feMerge>'
-                  '<feMergeNode in="blur"/>'
-                  '<feMergeNode in="SourceGraphic"/>'
+
+                  '<feMergeNode '
+                  'in="blur"/>'
+
+                  '<feMergeNode '
+                  'in="SourceGraphic"/>'
+
                   '</feMerge>'
+
                   '</filter>'
-                  '<pattern id="grid" width="32" height="32" '
+
+
+                  # --------------------------------------------------
+                  # GRID
+                  # --------------------------------------------------
+
+                  '<pattern '
+                  'id="grid" '
+                  'width="32" '
+                  'height="32" '
                   'patternUnits="userSpaceOnUse">'
-                  '<path d="M32 0H0V32" fill="none" '
-                  'stroke="#ff003c" stroke-opacity=".08"/>'
+
+                  '<path '
+                  'd="M32 0H0V32" '
+                  'fill="none" '
+                  'stroke="#ff003c" '
+                  'stroke-opacity=".08"/>'
+
                   '</pattern>'
+
                   '</defs>'
-                  '<rect width="100%" height="100%" rx="14" '
+
+
+                  # --------------------------------------------------
+                  # BACKGROUND
+                  # --------------------------------------------------
+
+                  '<rect '
+                  'width="100%" '
+                  'height="100%" '
+                  'rx="14" '
                   'fill="url(#bg)"/>'
-                  '<rect width="100%" height="100%" rx="14" '
+
+                  '<rect '
+                  'width="100%" '
+                  'height="100%" '
+                  'rx="14" '
                   'fill="url(#grid)"/>'
-                  f'<rect x="7" y="7" width="{width - 14}" '
-                  f'height="{height - 14}" rx="11" fill="none" '
-                  'stroke="url(#red)" stroke-opacity=".65"/>'
+
+                  '<rect '
+                  f'x="7" '
+                  f'y="7" '
+                  f'width="{width - 14}" '
+                  f'height="{height - 14}" '
+                  'rx="11" '
+                  'fill="none" '
+                  'stroke="url(#red)" '
+                  'stroke-opacity=".65"/>'
               )
 
-          def write_svg(name, width, height, title, body):
+
+          def write_svg(
+              name,
+              width,
+              height,
+              title,
+              body
+          ):
+
               path = OUT / name
+
               path.write_text(
-                  svg_start(width, height, title) + body + "</svg>\n",
-                  encoding="utf-8",
+                  svg_start(
+                      width,
+                      height,
+                      title
+                  )
+                  + body
+                  + "</svg>\n",
+                  encoding="utf-8"
               )
-              print(f"Generated: {path}")
+
+              print(
+                  f"Generated: {path}"
+              )
+
 
           # ============================================================
           # GITHUB STATISTICS
           # ============================================================
+
           stats_body = "".join(
               [
+
                   '<style>',
-                  '@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}',
-                  '@keyframes scan{0%{transform:translateY(0);opacity:0}'
-                  '20%{opacity:.18}50%{opacity:.08}80%{opacity:.18}'
-                  '100%{transform:translateY(185px);opacity:0}}',
-                  '@keyframes dash{to{stroke-dashoffset:-120}}',
-                  '.pulse{animation:pulse 2.2s ease-in-out infinite}',
-                  '.scan{animation:scan 5s linear infinite}',
-                  '.dash{stroke-dasharray:8 8;animation:dash 2s linear infinite}',
+
+                  '@keyframes pulse{'
+                  '0%,100%{opacity:.35}'
+                  '50%{opacity:1}'
+                  '}',
+
+                  '@keyframes scan{'
+                  '0%{'
+                  'transform:translateY(0);'
+                  'opacity:0'
+                  '}'
+                  '20%{opacity:.18}'
+                  '50%{opacity:.08}'
+                  '80%{opacity:.18}'
+                  '100%{'
+                  'transform:translateY(185px);'
+                  'opacity:0'
+                  '}'
+                  '}',
+
+                  '@keyframes dash{'
+                  'to{stroke-dashoffset:-120}'
+                  '}',
+
+                  '.pulse{'
+                  'animation:pulse 2.2s ease-in-out infinite'
+                  '}',
+
+                  '.scan{'
+                  'animation:scan 5s linear infinite'
+                  '}',
+
+                  '.dash{'
+                  'stroke-dasharray:8 8;'
+                  'animation:dash 2s linear infinite'
+                  '}',
+
                   '</style>',
-                  '<rect x="0" y="0" width="1020" height="330" rx="14" '
-                  'fill="#050005" fill-opacity=".72"/>',
-                  '<text x="38" y="42" fill="#ff1744" '
-                  'font-family="monospace" font-weight="bold" font-size="22">'
-                  'GITHUB STATISTICS</text>',
-                  '<text x="38" y="64" fill="#9d7a82" '
-                  'font-family="monospace" font-size="10">'
-                  'LATEST PROFILE SNAPSHOT / DIMS154</text>',
-                  '<circle cx="944" cy="36" r="7" fill="#ff1744" '
-                  'filter="url(#glow)" class="pulse"/>',
-                  '<text x="958" y="40" fill="#9d7a82" '
-                  'font-family="monospace" font-size="10">SYNCED</text>',
-                  '<line x1="38" y1="82" x2="982" y2="82" '
-                  'stroke="#ff1744" stroke-opacity=".22"/>',
-                  '<rect x="38" y="88" width="944" height="2" '
-                  'fill="#ff1744" fill-opacity=".14" class="scan"/>',
-                  '<line x1="245" y1="105" x2="245" y2="180" '
-                  'stroke="#ff1744" stroke-opacity=".10"/>',
-                  '<line x1="470" y1="105" x2="470" y2="180" '
-                  'stroke="#ff1744" stroke-opacity=".10"/>',
-                  '<line x1="695" y1="105" x2="695" y2="180" '
-                  'stroke="#ff1744" stroke-opacity=".10"/>',
-                  f'<text x="38" y="112" fill="#9d7a82" '
-                  f'font-family="monospace" font-size="9">REPOSITORIES</text>',
-                  f'<text x="38" y="162" fill="#ff1744" '
-                  f'font-family="monospace" font-weight="bold" font-size="40">'
-                  f'{repositories}</text>',
-                  '<text x="38" y="178" fill="#6d4f57" '
-                  'font-family="monospace" font-size="8">'
-                  'PUBLIC OWNER PROJECTS</text>',
-                  '<text x="278" y="112" fill="#9d7a82" '
-                  'font-family="monospace" font-size="9">FOLLOWERS</text>',
-                  f'<text x="278" y="162" fill="#ff1744" '
-                  f'font-family="monospace" font-weight="bold" font-size="40">'
-                  f'{followers}</text>',
-                  '<text x="278" y="178" fill="#6d4f57" '
-                  'font-family="monospace" font-size="8">'
-                  'PROFILE FOLLOWERS</text>',
-                  '<text x="503" y="112" fill="#9d7a82" '
-                  'font-family="monospace" font-size="9">CONTRIBUTIONS</text>',
-                  f'<text x="503" y="162" fill="#ff1744" '
-                  f'font-family="monospace" font-weight="bold" font-size="40">'
-                  f'{total_contributions}</text>',
-                  '<text x="503" y="178" fill="#6d4f57" '
-                  'font-family="monospace" font-size="8">'
-                  'CONTRIBUTION COUNT</text>',
-                  '<text x="728" y="112" fill="#9d7a82" '
-                  'font-family="monospace" font-size="9">COMMITS</text>',
-                  f'<text x="728" y="162" fill="#ff1744" '
-                  f'font-family="monospace" font-weight="bold" font-size="40">'
-                  f'{commits}</text>',
-                  '<text x="728" y="178" fill="#6d4f57" '
-                  'font-family="monospace" font-size="8">'
-                  'COMMIT CONTRIBUTIONS</text>',
-                  '<line x1="38" y1="198" x2="982" y2="198" '
-                  'stroke="#ff1744" stroke-opacity=".14"/>',
-                  '<text x="38" y="224" fill="#9d7a82" '
-                  'font-family="monospace" font-size="9">'
-                  'CONTRIBUTION WINDOW</text>',
-                  '<text x="38" y="250" fill="#f4f4f4" '
-                  'font-family="monospace" font-size="12">LAST 365 DAYS</text>',
-                  '<text x="390" y="224" fill="#9d7a82" '
-                  'font-family="monospace" font-size="9">CURRENT STREAK</text>',
-                  f'<text x="390" y="250" fill="#ff1744" '
-                  f'font-family="monospace" font-weight="bold" font-size="26">'
-                  f'{current_streak} {"DAY" if current_streak == 1 else "DAYS"}'
-                  f'</text>',
-                  '<text x="660" y="224" fill="#9d7a82" '
-                  'font-family="monospace" font-size="9">LONGEST STREAK</text>',
-                  f'<text x="660" y="250" fill="#ff1744" '
-                  f'font-family="monospace" font-weight="bold" font-size="26">'
-                  f'{longest_streak} {"DAY" if longest_streak == 1 else "DAYS"}'
-                  f'</text>',
-                  '<path d="M38 280 H982" stroke="#ff1744" '
-                  'stroke-opacity=".35" fill="none" class="dash"/>',
-                  '<circle cx="38" cy="303" r="3.5" fill="#ff1744" '
-                  'filter="url(#glow)" class="pulse"/>',
-                  '<text x="50" y="307" fill="#9d7a82" '
-                  'font-family="monospace" font-size="8">AUTO-GENERATED</text>',
-                  '<text x="982" y="307" fill="#6d4f57" '
-                  'font-family="monospace" font-size="8" '
-                  'text-anchor="end">GITHUB ACTIONS / PROFILE STATS</text>',
+
+
+                  '<rect '
+                  'x="0" '
+                  'y="0" '
+                  'width="1020" '
+                  'height="330" '
+                  'rx="14" '
+                  'fill="#050005" '
+                  'fill-opacity=".72"/>',
+
+
+                  '<text '
+                  'x="38" '
+                  'y="42" '
+                  'fill="#ff1744" '
+                  'font-family="monospace" '
+                  'font-weight="bold" '
+                  'font-size="22">'
+                  'GITHUB STATISTICS'
+                  '</text>',
+
+
+                  '<text '
+                  'x="38" '
+                  'y="64" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="10">'
+                  'LATEST PROFILE SNAPSHOT / DIMS154'
+                  '</text>',
+
+
+                  '<circle '
+                  'cx="944" '
+                  'cy="36" '
+                  'r="7" '
+                  'fill="#ff1744" '
+                  'filter="url(#glow)" '
+                  'class="pulse"/>',
+
+
+                  '<text '
+                  'x="958" '
+                  'y="40" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="10">'
+                  'SYNCED'
+                  '</text>',
+
+
+                  '<line '
+                  'x1="38" '
+                  'y1="82" '
+                  'x2="982" '
+                  'y2="82" '
+                  'stroke="#ff1744" '
+                  'stroke-opacity=".22"/>',
+
+
+                  '<rect '
+                  'x="38" '
+                  'y="88" '
+                  'width="944" '
+                  'height="2" '
+                  'fill="#ff1744" '
+                  'fill-opacity=".14" '
+                  'class="scan"/>',
+
+
+                  '<line '
+                  'x1="245" '
+                  'y1="105" '
+                  'x2="245" '
+                  'y2="180" '
+                  'stroke="#ff1744" '
+                  'stroke-opacity=".10"/>',
+
+
+                  '<line '
+                  'x1="470" '
+                  'y1="105" '
+                  'x2="470" '
+                  'y2="180" '
+                  'stroke="#ff1744" '
+                  'stroke-opacity=".10"/>',
+
+
+                  '<line '
+                  'x1="695" '
+                  'y1="105" '
+                  'x2="695" '
+                  'y2="180" '
+                  'stroke="#ff1744" '
+                  'stroke-opacity=".10"/>',
+
+
+                  '<text '
+                  'x="38" '
+                  'y="112" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="9">'
+                  'REPOSITORIES'
+                  '</text>',
+
+
+                  f'<text '
+                  'x="38" '
+                  'y="162" '
+                  'fill="#ff1744" '
+                  'font-family="monospace" '
+                  'font-weight="bold" '
+                  'font-size="40">'
+                  f'{repositories}'
+                  '</text>',
+
+
+                  '<text '
+                  'x="38" '
+                  'y="178" '
+                  'fill="#6d4f57" '
+                  'font-family="monospace" '
+                  'font-size="8">'
+                  'PUBLIC OWNER PROJECTS'
+                  '</text>',
+
+
+                  '<text '
+                  'x="278" '
+                  'y="112" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="9">'
+                  'FOLLOWERS'
+                  '</text>',
+
+
+                  f'<text '
+                  'x="278" '
+                  'y="162" '
+                  'fill="#ff1744" '
+                  'font-family="monospace" '
+                  'font-weight="bold" '
+                  'font-size="40">'
+                  f'{followers}'
+                  '</text>',
+
+
+                  '<text '
+                  'x="278" '
+                  'y="178" '
+                  'fill="#6d4f57" '
+                  'font-family="monospace" '
+                  'font-size="8">'
+                  'PROFILE FOLLOWERS'
+                  '</text>',
+
+
+                  '<text '
+                  'x="503" '
+                  'y="112" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="9">'
+                  'CONTRIBUTIONS'
+                  '</text>',
+
+
+                  f'<text '
+                  'x="503" '
+                  'y="162" '
+                  'fill="#ff1744" '
+                  'font-family="monospace" '
+                  'font-weight="bold" '
+                  'font-size="40">'
+                  f'{total_contributions}'
+                  '</text>',
+
+
+                  '<text '
+                  'x="503" '
+                  'y="178" '
+                  'fill="#6d4f57" '
+                  'font-family="monospace" '
+                  'font-size="8">'
+                  'CONTRIBUTION COUNT'
+                  '</text>',
+
+
+                  '<text '
+                  'x="728" '
+                  'y="112" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="9">'
+                  'COMMITS'
+                  '</text>',
+
+
+                  f'<text '
+                  'x="728" '
+                  'y="162" '
+                  'fill="#ff1744" '
+                  'font-family="monospace" '
+                  'font-weight="bold" '
+                  'font-size="40">'
+                  f'{commits}'
+                  '</text>',
+
+
+                  '<text '
+                  'x="728" '
+                  'y="178" '
+                  'fill="#6d4f57" '
+                  'font-family="monospace" '
+                  'font-size="8">'
+                  'COMMIT CONTRIBUTIONS'
+                  '</text>',
+
+
+                  '<line '
+                  'x1="38" '
+                  'y1="198" '
+                  'x2="982" '
+                  'y2="198" '
+                  'stroke="#ff1744" '
+                  'stroke-opacity=".14"/>',
+
+
+                  '<text '
+                  'x="38" '
+                  'y="224" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="9">'
+                  'CONTRIBUTION WINDOW'
+                  '</text>',
+
+
+                  '<text '
+                  'x="38" '
+                  'y="250" '
+                  'fill="#f4f4f4" '
+                  'font-family="monospace" '
+                  'font-size="12">'
+                  'LAST 365 DAYS'
+                  '</text>',
+
+
+                  '<text '
+                  'x="390" '
+                  'y="224" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="9">'
+                  'CURRENT STREAK'
+                  '</text>',
+
+
+                  f'<text '
+                  'x="390" '
+                  'y="250" '
+                  'fill="#ff1744" '
+                  'font-family="monospace" '
+                  'font-weight="bold" '
+                  'font-size="26">'
+                  f'{current_streak} '
+                  f'{"DAY" if current_streak == 1 else "DAYS"}'
+                  '</text>',
+
+
+                  '<text '
+                  'x="660" '
+                  'y="224" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="9">'
+                  'LONGEST STREAK'
+                  '</text>',
+
+
+                  f'<text '
+                  'x="660" '
+                  'y="250" '
+                  'fill="#ff1744" '
+                  'font-family="monospace" '
+                  'font-weight="bold" '
+                  'font-size="26">'
+                  f'{longest_streak} '
+                  f'{"DAY" if longest_streak == 1 else "DAYS"}'
+                  '</text>',
+
+
+                  '<path '
+                  'd="M38 280 H982" '
+                  'stroke="#ff1744" '
+                  'stroke-opacity=".35" '
+                  'fill="none" '
+                  'class="dash"/>',
+
+
+                  '<circle '
+                  'cx="38" '
+                  'cy="303" '
+                  'r="3.5" '
+                  'fill="#ff1744" '
+                  'filter="url(#glow)" '
+                  'class="pulse"/>',
+
+
+                  '<text '
+                  'x="50" '
+                  'y="307" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="8">'
+                  'AUTO-GENERATED'
+                  '</text>',
+
+
+                  '<text '
+                  'x="982" '
+                  'y="307" '
+                  'fill="#6d4f57" '
+                  'font-family="monospace" '
+                  'font-size="8" '
+                  'text-anchor="end">'
+                  'GITHUB ACTIONS / PROFILE STATS'
+                  '</text>',
               ]
           )
+
 
           write_svg(
               "github-stats.svg",
@@ -333,83 +908,226 @@ jobs:
               stats_body,
           )
 
+
           # ============================================================
           # TOP LANGUAGES
           # ============================================================
+
           language_parts = [
+
               '<style>',
-              '@keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}',
-              '@keyframes sweep{0%{transform:translateX(0);opacity:0}'
-              '20%{opacity:.10}50%{opacity:.20}80%{opacity:.10}'
-              '100%{transform:translateX(680px);opacity:0}}',
-              '.pulse{animation:pulse 2.2s ease-in-out infinite}',
-              '.sweep{animation:sweep 4.5s linear infinite}',
+
+              '@keyframes pulse{'
+              '0%,100%{opacity:.45}'
+              '50%{opacity:1}'
+              '}',
+
+              '@keyframes sweep{'
+              '0%{'
+              'transform:translateX(0);'
+              'opacity:0'
+              '}'
+              '20%{opacity:.10}'
+              '50%{opacity:.20}'
+              '80%{opacity:.10}'
+              '100%{'
+              'transform:translateX(680px);'
+              'opacity:0'
+              '}'
+              '}',
+
+              '.pulse{'
+              'animation:pulse 2.2s ease-in-out infinite'
+              '}',
+
+              '.sweep{'
+              'animation:sweep 4.5s linear infinite'
+              '}',
+
               '</style>',
-              '<rect x="0" y="0" width="1020" height="375" rx="14" '
-              'fill="#050005" fill-opacity=".72"/>',
-              '<text x="38" y="42" fill="#ff1744" '
-              'font-family="monospace" font-weight="bold" font-size="22">'
-              'TOP LANGUAGES</text>',
-              '<text x="38" y="64" fill="#9d7a82" '
-              'font-family="monospace" font-size="10">'
-              'PUBLIC REPOSITORIES / LANGUAGE DISTRIBUTION</text>',
-              '<circle cx="944" cy="36" r="7" fill="#ff1744" '
-              'filter="url(#glow)" class="pulse"/>',
-              '<text x="958" y="40" fill="#9d7a82" '
-              'font-family="monospace" font-size="10">SYNCED</text>',
-              '<line x1="38" y1="82" x2="982" y2="82" '
-              'stroke="#ff1744" stroke-opacity=".22"/>',
-              '<rect x="205" y="92" width="680" height="2" '
-              'fill="#ff1744" fill-opacity=".16" class="sweep"/>',
+
+
+              '<rect '
+              'x="0" '
+              'y="0" '
+              'width="1020" '
+              'height="375" '
+              'rx="14" '
+              'fill="#050005" '
+              'fill-opacity=".72"/>',
+
+
+              '<text '
+              'x="38" '
+              'y="42" '
+              'fill="#ff1744" '
+              'font-family="monospace" '
+              'font-weight="bold" '
+              'font-size="22">'
+              'TOP LANGUAGES'
+              '</text>',
+
+
+              '<text '
+              'x="38" '
+              'y="64" '
+              'fill="#9d7a82" '
+              'font-family="monospace" '
+              'font-size="10">'
+              'PUBLIC REPOSITORIES / LANGUAGE DISTRIBUTION'
+              '</text>',
+
+
+              '<circle '
+              'cx="944" '
+              'cy="36" '
+              'r="7" '
+              'fill="#ff1744" '
+              'filter="url(#glow)" '
+              'class="pulse"/>',
+
+
+              '<text '
+              'x="958" '
+              'y="40" '
+              'fill="#9d7a82" '
+              'font-family="monospace" '
+              'font-size="10">'
+              'SYNCED'
+              '</text>',
+
+
+              '<line '
+              'x1="38" '
+              'y1="82" '
+              'x2="982" '
+              'y2="82" '
+              'stroke="#ff1744" '
+              'stroke-opacity=".22"/>',
+
+
+              '<rect '
+              'x="205" '
+              'y="92" '
+              'width="680" '
+              'height="2" '
+              'fill="#ff1744" '
+              'fill-opacity=".16" '
+              'class="sweep"/>',
           ]
+
 
           y = 112
 
+
           if not top_languages:
+
               language_parts.append(
-                  '<text x="38" y="125" fill="#9d7a82" '
-                  'font-family="monospace" font-size="12">'
-                  'NO PUBLIC LANGUAGE DATA AVAILABLE</text>'
+
+                  '<text '
+                  'x="38" '
+                  'y="125" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="12">'
+                  'NO PUBLIC LANGUAGE DATA AVAILABLE'
+                  '</text>'
               )
+
           else:
+
               for name, size in top_languages:
+
                   pct = (
-                      size / total_language_size * 100
+
+                      size
+                      / total_language_size
+                      * 100
+
                       if total_language_size
                       else 0
                   )
+
+
                   bar_width = max(
                       4,
                       680 * pct / 100,
                   )
 
+
                   language_parts.extend(
+
                       [
-                          f'<text x="38" y="{y}" fill="#f4f4f4" '
-                          f'font-family="monospace" font-size="12">'
-                          f'{esc(name)}</text>',
-                          f'<rect x="205" y="{y-12}" width="680" height="10" '
-                          'rx="5" fill="#220008"/>',
-                          f'<rect x="205" y="{y-12}" '
-                          f'width="{bar_width:.2f}" height="10" rx="5" '
-                          'fill="url(#red)" filter="url(#glow)"/>',
-                          f'<text x="900" y="{y}" fill="#ff1744" '
-                          'font-family="monospace" font-size="11" '
-                          'text-anchor="end">'
-                          f'{pct:.1f}%</text>',
+
+                          f'<text '
+                          f'x="38" '
+                          f'y="{y}" '
+                          f'fill="#f4f4f4" '
+                          f'font-family="monospace" '
+                          f'font-size="12">'
+                          f'{esc(name)}'
+                          f'</text>',
+
+
+                          f'<rect '
+                          f'x="205" '
+                          f'y="{y-12}" '
+                          f'width="680" '
+                          f'height="10" '
+                          f'rx="5" '
+                          f'fill="#220008"/>',
+
+
+                          f'<rect '
+                          f'x="205" '
+                          f'y="{y-12}" '
+                          f'width="{bar_width:.2f}" '
+                          f'height="10" '
+                          f'rx="5" '
+                          f'fill="url(#red)" '
+                          f'filter="url(#glow)"/>',
+
+
+                          f'<text '
+                          f'x="900" '
+                          f'y="{y}" '
+                          f'fill="#ff1744" '
+                          f'font-family="monospace" '
+                          f'font-size="11" '
+                          f'text-anchor="end">'
+                          f'{pct:.1f}%'
+                          f'</text>',
                       ]
                   )
+
+
                   y += 38
 
+
           language_parts.extend(
+
               [
-                  '<line x1="38" y1="330" x2="982" y2="330" '
-                  'stroke="#ff1744" stroke-opacity=".14"/>',
-                  '<text x="38" y="352" fill="#9d7a82" '
-                  'font-family="monospace" font-size="9">'
-                  'SOURCE: GITHUB REPOSITORY LANGUAGE BREAKDOWN</text>',
+
+                  '<line '
+                  'x1="38" '
+                  'y1="330" '
+                  'x2="982" '
+                  'y2="330" '
+                  'stroke="#ff1744" '
+                  'stroke-opacity=".14"/>',
+
+
+                  '<text '
+                  'x="38" '
+                  'y="352" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="9">'
+                  'SOURCE: GITHUB REPOSITORY LANGUAGE BREAKDOWN'
+                  '</text>',
               ]
           )
+
 
           write_svg(
               "top-languages.svg",
@@ -419,73 +1137,256 @@ jobs:
               "".join(language_parts),
           )
 
+
           # ============================================================
           # CONTRIBUTION STREAK
           # ============================================================
+
           streak_body = "".join(
+
               [
+
                   '<style>',
-                  '@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}',
-                  '@keyframes sweep{0%{transform:translateX(0);opacity:0}'
-                  '20%{opacity:.10}50%{opacity:.20}80%{opacity:.10}'
-                  '100%{transform:translateX(700px);opacity:0}}',
-                  '.pulse{animation:pulse 2.4s ease-in-out infinite}',
-                  '.sweep{animation:sweep 5s linear infinite}',
+
+                  '@keyframes pulse{'
+                  '0%,100%{opacity:.35}'
+                  '50%{opacity:1}'
+                  '}',
+
+                  '@keyframes sweep{'
+                  '0%{'
+                  'transform:translateX(0);'
+                  'opacity:0'
+                  '}'
+                  '20%{opacity:.10}'
+                  '50%{opacity:.20}'
+                  '80%{opacity:.10}'
+                  '100%{'
+                  'transform:translateX(700px);'
+                  'opacity:0'
+                  '}'
+                  '}',
+
+                  '.pulse{'
+                  'animation:pulse 2.4s ease-in-out infinite'
+                  '}',
+
+                  '.sweep{'
+                  'animation:sweep 5s linear infinite'
+                  '}',
+
                   '</style>',
-                  '<rect x="0" y="0" width="1020" height="325" rx="14" '
-                  'fill="#050005" fill-opacity=".72"/>',
-                  '<text x="38" y="42" fill="#ff1744" '
-                  'font-family="monospace" font-weight="bold" font-size="22">'
-                  'CONTRIBUTION STREAK</text>',
-                  '<text x="38" y="64" fill="#9d7a82" '
-                  'font-family="monospace" font-size="10">'
-                  'CONSISTENCY MONITOR / DIMS154</text>',
-                  '<circle cx="944" cy="36" r="7" fill="#ff1744" '
-                  'filter="url(#glow)" class="pulse"/>',
-                  '<text x="958" y="40" fill="#9d7a82" '
-                  'font-family="monospace" font-size="10">SYNCED</text>',
-                  '<line x1="38" y1="82" x2="982" y2="82" '
-                  'stroke="#ff1744" stroke-opacity=".22"/>',
-                  '<rect x="38" y="89" width="944" height="2" '
-                  'fill="#ff1744" fill-opacity=".14" class="sweep"/>',
-                  '<text x="38" y="116" fill="#9d7a82" '
-                  'font-family="monospace" font-size="9">CURRENT STREAK</text>',
-                  f'<text x="38" y="175" fill="#ff1744" '
-                  f'font-family="monospace" font-weight="bold" font-size="52">'
-                  f'{current_streak}</text>',
-                  '<text x="38" y="195" fill="#9d7a82" '
-                  'font-family="monospace" font-size="8">'
-                  'CONSECUTIVE DAYS</text>',
-                  '<text x="390" y="116" fill="#9d7a82" '
-                  'font-family="monospace" font-size="9">LONGEST STREAK</text>',
-                  f'<text x="390" y="175" fill="#ff1744" '
-                  f'font-family="monospace" font-weight="bold" font-size="52">'
-                  f'{longest_streak}</text>',
-                  '<text x="390" y="195" fill="#9d7a82" '
-                  'font-family="monospace" font-size="8">BEST RUN</text>',
-                  '<text x="700" y="116" fill="#9d7a82" '
-                  'font-family="monospace" font-size="9">'
-                  'TOTAL CONTRIBUTIONS</text>',
-                  f'<text x="700" y="175" fill="#ff1744" '
-                  f'font-family="monospace" font-weight="bold" font-size="52">'
-                  f'{total_contributions}</text>',
-                  '<text x="700" y="195" fill="#9d7a82" '
-                  'font-family="monospace" font-size="8">'
-                  'LAST 365 DAYS</text>',
-                  '<line x1="38" y1="218" x2="982" y2="218" '
-                  'stroke="#ff1744" stroke-opacity=".14"/>',
-                  '<path d="M38 245 H982" stroke="#ff1744" '
-                  'stroke-opacity=".35" fill="none"/>',
-                  '<circle cx="38" cy="274" r="3.5" fill="#ff1744" '
-                  'filter="url(#glow)" class="pulse"/>',
-                  '<text x="50" y="278" fill="#9d7a82" '
-                  'font-family="monospace" font-size="8">'
-                  'KEEP BUILDING / KEEP LEARNING</text>',
-                  '<text x="982" y="278" fill="#6d4f57" '
-                  'font-family="monospace" font-size="8" '
-                  'text-anchor="end">AUTO-GENERATED / GITHUB ACTIONS</text>',
+
+
+                  '<rect '
+                  'x="0" '
+                  'y="0" '
+                  'width="1020" '
+                  'height="325" '
+                  'rx="14" '
+                  'fill="#050005" '
+                  'fill-opacity=".72"/>',
+
+
+                  '<text '
+                  'x="38" '
+                  'y="42" '
+                  'fill="#ff1744" '
+                  'font-family="monospace" '
+                  'font-weight="bold" '
+                  'font-size="22">'
+                  'CONTRIBUTION STREAK'
+                  '</text>',
+
+
+                  '<text '
+                  'x="38" '
+                  'y="64" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="10">'
+                  'CONSISTENCY MONITOR / DIMS154'
+                  '</text>',
+
+
+                  '<circle '
+                  'cx="944" '
+                  'cy="36" '
+                  'r="7" '
+                  'fill="#ff1744" '
+                  'filter="url(#glow)" '
+                  'class="pulse"/>',
+
+
+                  '<text '
+                  'x="958" '
+                  'y="40" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="10">'
+                  'SYNCED'
+                  '</text>',
+
+
+                  '<line '
+                  'x1="38" '
+                  'y1="82" '
+                  'x2="982" '
+                  'y2="82" '
+                  'stroke="#ff1744" '
+                  'stroke-opacity=".22"/>',
+
+
+                  '<rect '
+                  'x="38" '
+                  'y="89" '
+                  'width="944" '
+                  'height="2" '
+                  'fill="#ff1744" '
+                  'fill-opacity=".14" '
+                  'class="sweep"/>',
+
+
+                  '<text '
+                  'x="38" '
+                  'y="116" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="9">'
+                  'CURRENT STREAK'
+                  '</text>',
+
+
+                  f'<text '
+                  'x="38" '
+                  'y="175" '
+                  'fill="#ff1744" '
+                  'font-family="monospace" '
+                  'font-weight="bold" '
+                  'font-size="52">'
+                  f'{current_streak}'
+                  '</text>',
+
+
+                  '<text '
+                  'x="38" '
+                  'y="195" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="8">'
+                  'CONSECUTIVE DAYS'
+                  '</text>',
+
+
+                  '<text '
+                  'x="390" '
+                  'y="116" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="9">'
+                  'LONGEST STREAK'
+                  '</text>',
+
+
+                  f'<text '
+                  'x="390" '
+                  'y="175" '
+                  'fill="#ff1744" '
+                  'font-family="monospace" '
+                  'font-weight="bold" '
+                  'font-size="52">'
+                  f'{longest_streak}'
+                  '</text>',
+
+
+                  '<text '
+                  'x="390" '
+                  'y="195" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="8">'
+                  'BEST RUN'
+                  '</text>',
+
+
+                  '<text '
+                  'x="700" '
+                  'y="116" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="9">'
+                  'TOTAL CONTRIBUTIONS'
+                  '</text>',
+
+
+                  f'<text '
+                  'x="700" '
+                  'y="175" '
+                  'fill="#ff1744" '
+                  'font-family="monospace" '
+                  'font-weight="bold" '
+                  'font-size="52">'
+                  f'{total_contributions}'
+                  '</text>',
+
+
+                  '<text '
+                  'x="700" '
+                  'y="195" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="8">'
+                  'LAST 365 DAYS'
+                  '</text>',
+
+
+                  '<line '
+                  'x1="38" '
+                  'y1="218" '
+                  'x2="982" '
+                  'y2="218" '
+                  'stroke="#ff1744" '
+                  'stroke-opacity=".14"/>',
+
+
+                  '<path '
+                  'd="M38 245 H982" '
+                  'stroke="#ff1744" '
+                  'stroke-opacity=".35" '
+                  'fill="none"/>',
+
+
+                  '<circle '
+                  'cx="38" '
+                  'cy="274" '
+                  'r="3.5" '
+                  'fill="#ff1744" '
+                  'filter="url(#glow)" '
+                  'class="pulse"/>',
+
+
+                  '<text '
+                  'x="50" '
+                  'y="278" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="8">'
+                  'KEEP BUILDING / KEEP LEARNING'
+                  '</text>',
+
+
+                  '<text '
+                  'x="982" '
+                  'y="278" '
+                  'fill="#6d4f57" '
+                  'font-family="monospace" '
+                  'font-size="8" '
+                  'text-anchor="end">'
+                  'AUTO-GENERATED / GITHUB ACTIONS'
+                  '</text>',
               ]
           )
+
 
           write_svg(
               "streak.svg",
@@ -495,232 +1396,665 @@ jobs:
               streak_body,
           )
 
+
           # ============================================================
           # CONTRIBUTION ACTIVITY
-          # One clean solid line travels from the first point to the last.
-          # No fade, no dashed overlay, no static graph line.
-          # The moving line stays neon red at constant opacity.
-          # White coordinate points and dd/mm dates remain visible.
+          #
+          # IMPORTANT:
+          #
+          # - Real GitHub contribution data
+          # - Last 31 days
+          # - Dynamic dates
+          # - White coordinate points
+          # - Red animated line
+          # - NO fading
+          # - NO opacity animation on line
+          # - NO dashed line
+          # - NO permanent red graph line
+          # - Smooth left -> right movement
+          # - Clean restart
           # ============================================================
+
           chart_x = 55
+
           chart_y = 105
+
           chart_w = 900
+
           chart_h = 165
 
+
+          # ==========================================================
+          # MAXIMUM CONTRIBUTION COUNT
+          # ==========================================================
+
           max_count = max(
-              (day["count"] for day in activity),
+              (
+                  day["count"]
+                  for day in activity
+              ),
               default=1,
           )
 
+
+          # ==========================================================
+          # BUILD COORDINATES
+          # ==========================================================
+
           points = []
 
-          for index, day in enumerate(activity):
+
+          for index, day in enumerate(
+              activity
+          ):
+
               x = (
+
                   chart_x
-                  + index * chart_w / max(
+
+                  + index
+                  * chart_w
+                  / max(
                       1,
-                      len(activity) - 1,
+                      len(activity) - 1
                   )
               )
 
+
               ratio = (
-                  day["count"] / max_count
+
+                  day["count"]
+                  / max_count
+
                   if max_count
                   else 0
               )
 
-              y = chart_y + chart_h - ratio * chart_h
-              points.append((x, y))
+
+              y = (
+
+                  chart_y
+                  + chart_h
+                  - ratio * chart_h
+              )
+
+
+              points.append(
+                  (x, y)
+              )
+
+
+          # ==========================================================
+          # POLYLINE DATA
+          # ==========================================================
 
           polyline = " ".join(
+
               f"{x:.1f},{y:.1f}"
+
               for x, y in points
           )
+
+
+          # ==========================================================
+          # WHITE COORDINATE POINTS
+          # ==========================================================
 
           circles = "".join(
-              f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3.2" '
-              'fill="#ffffff" filter="url(#glow)"/>'
+
+              f'<circle '
+              f'cx="{x:.1f}" '
+              f'cy="{y:.1f}" '
+              f'r="3.2" '
+              f'fill="#ffffff" '
+              f'filter="url(#glow)"/>'
+
               for x, y in points
           )
 
+
+          # ==========================================================
+          # DATE FORMAT
+          # ==========================================================
+
           def date_label(value):
+
               return datetime.strptime(
+
                   value,
-                  "%Y-%m-%d",
-              ).strftime("%d/%m")
+                  "%Y-%m-%d"
+
+              ).strftime(
+                  "%d/%m"
+              )
+
+
+          # ==========================================================
+          # FIRST DATE
+          # ==========================================================
 
           first_date = (
-              date_label(activity[0]["date"])
+
+              date_label(
+                  activity[0]["date"]
+              )
+
               if activity
+
               else ""
           )
+
+
+          # ==========================================================
+          # LAST DATE
+          # ==========================================================
 
           last_date = (
-              date_label(activity[-1]["date"])
+
+              date_label(
+                  activity[-1]["date"]
+              )
+
               if activity
+
               else ""
           )
 
+
+          # ==========================================================
+          # RECENT TOTAL
+          # ==========================================================
+
           recent_total = sum(
+
               day["count"]
+
               for day in activity
           )
 
+
+          # ==========================================================
+          # DATE TICKS
+          # ==========================================================
+
           ticks = []
 
+
           if activity:
-              tick_indexes = sorted(
+
+              indexes = sorted(
+
                   set(
+
                       round(
-                          i * (len(activity) - 1) / 4
+                          i
+                          * (len(activity) - 1)
+                          / 4
                       )
+
                       for i in range(5)
                   )
               )
 
-              for index in tick_indexes:
+
+              for index in indexes:
+
                   x = (
+
                       chart_x
-                      + index * chart_w / max(
+
+                      + index
+                      * chart_w
+                      / max(
                           1,
-                          len(activity) - 1,
+                          len(activity) - 1
                       )
                   )
 
+
                   ticks.append(
-                      f'<text x="{x:.1f}" '
+
+                      f'<text '
+                      f'x="{x:.1f}" '
                       f'y="{chart_y + chart_h + 22}" '
-                      'fill="#ffffff" '
-                      'font-family="monospace" '
-                      'font-size="10" '
-                      'font-weight="bold" '
-                      'text-anchor="middle">'
-                      f'{date_label(activity[index]["date"])}</text>'
+                      f'fill="#ffffff" '
+                      f'font-family="monospace" '
+                      f'font-size="10" '
+                      f'font-weight="bold" '
+                      f'text-anchor="middle">'
+                      f'{date_label(activity[index]["date"])}'
+                      f'</text>'
                   )
 
-          tick_nodes = "".join(ticks)
+
+          tick_nodes = "".join(
+              ticks
+          )
+
+
+          # ==========================================================
+          # CONTRIBUTION ACTIVITY SVG
+          # ==========================================================
 
           activity_body = "".join(
+
               [
+
                   '<style>',
-                  '@keyframes cleanTravel{'
-                  '0%{stroke-dashoffset:1230}'
-                  '100%{stroke-dashoffset:0}'
+
+                  # --------------------------------------------------
+                  # ONLY pulse for status dot.
+                  #
+                  # NO opacity animation for graph line.
+                  # --------------------------------------------------
+
+                  '@keyframes pulse{'
+                  '0%,100%{opacity:.30}'
+                  '50%{opacity:1}'
                   '}',
+
+
+                  # --------------------------------------------------
+                  # CLEAN LINE MOVEMENT
+                  #
+                  # The line itself never changes opacity.
+                  #
+                  # It simply moves through the polyline using
+                  # dashoffset.
+                  #
+                  # 20 seconds = deliberately slow movement.
+                  # --------------------------------------------------
+
+                  '@keyframes cleanLineTravel{'
+                  '0%{'
+                  'stroke-dashoffset:1250'
+                  '}'
+                  '100%{'
+                  'stroke-dashoffset:-250'
+                  '}'
+                  '}',
+
+
+                  '.pulse{'
+                  'animation:pulse 2.8s ease-in-out infinite'
+                  '}',
+
+
+                  # --------------------------------------------------
+                  # MOVING LINE
+                  #
+                  # IMPORTANT:
+                  #
+                  # No:
+                  # opacity
+                  # stroke-opacity
+                  # fade
+                  # transparent trailing line
+                  #
+                  # Only dash movement.
+                  # --------------------------------------------------
+
                   '.clean-line{'
-                  'stroke-dasharray:150 1080;'
-                  'stroke-dashoffset:1230;'
-                  'stroke-opacity:1;'
-                  'animation:cleanTravel 14s linear infinite;'
+                  'stroke-dasharray:170 1150;'
+                  'stroke-dashoffset:1250;'
+                  'animation:cleanLineTravel '
+                  '20s linear infinite;'
                   'filter:url(#glow)'
                   '}',
+
+
                   '</style>',
 
-                  '<rect x="0" y="0" width="1020" height="395" '
-                  'rx="14" fill="#050005" fill-opacity=".72"/>',
 
-                  '<text x="38" y="42" fill="#ff1744" '
-                  'font-family="monospace" font-weight="bold" '
-                  'font-size="22">CONTRIBUTION ACTIVITY</text>',
+                  # ==================================================
+                  # BACKGROUND
+                  # ==================================================
 
-                  '<text x="38" y="64" fill="#9d7a82" '
-                  'font-family="monospace" font-size="10">'
-                  'LAST 31 DAYS / DATA STREAM</text>',
+                  '<rect '
+                  'x="0" '
+                  'y="0" '
+                  'width="1020" '
+                  'height="395" '
+                  'rx="14" '
+                  'fill="#050005" '
+                  'fill-opacity=".72"/>',
 
-                  '<circle cx="944" cy="36" r="7" fill="#ff1744" '
-                  'filter="url(#glow)"/>',
 
-                  '<text x="958" y="40" fill="#9d7a82" '
-                  'font-family="monospace" font-size="10">SYNCED</text>',
+                  # ==================================================
+                  # TITLE
+                  # ==================================================
 
-                  '<line x1="38" y1="82" x2="982" y2="82" '
-                  'stroke="#ff1744" stroke-opacity=".22"/>',
+                  '<text '
+                  'x="38" '
+                  'y="42" '
+                  'fill="#ff1744" '
+                  'font-family="monospace" '
+                  'font-weight="bold" '
+                  'font-size="22">'
+                  'CONTRIBUTION ACTIVITY'
+                  '</text>',
 
-                  f'<rect x="{chart_x}" y="{chart_y}" '
-                  f'width="{chart_w}" height="{chart_h}" '
-                  'fill="none" stroke="#ff1744" stroke-opacity=".025"/>',
 
-                  # Only one animated solid segment.
-                  # Constant red opacity: no fade at all.
-                  f'<polyline points="{polyline}" fill="none" '
-                  'stroke="#ff1744" stroke-width="3" '
-                  'stroke-opacity="1" stroke-linecap="round" '
-                  'stroke-linejoin="round" class="clean-line"/>',
+                  '<text '
+                  'x="38" '
+                  'y="64" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="10">'
+                  'LAST 31 DAYS / DATA STREAM'
+                  '</text>',
 
-                  # Coordinate markers only.
+
+                  # ==================================================
+                  # STATUS
+                  # ==================================================
+
+                  '<circle '
+                  'cx="944" '
+                  'cy="36" '
+                  'r="7" '
+                  'fill="#ff1744" '
+                  'filter="url(#glow)" '
+                  'class="pulse"/>',
+
+
+                  '<text '
+                  'x="958" '
+                  'y="40" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="10">'
+                  'SYNCED'
+                  '</text>',
+
+
+                  # ==================================================
+                  # HEADER LINE
+                  # ==================================================
+
+                  '<line '
+                  'x1="38" '
+                  'y1="82" '
+                  'x2="982" '
+                  'y2="82" '
+                  'stroke="#ff1744" '
+                  'stroke-opacity=".22"/>',
+
+
+                  # ==================================================
+                  # CHART FRAME
+                  #
+                  # Extremely subtle.
+                  # NOT the graph line.
+                  # ==================================================
+
+                  f'<rect '
+                  f'x="{chart_x}" '
+                  f'y="{chart_y}" '
+                  f'width="{chart_w}" '
+                  f'height="{chart_h}" '
+                  f'fill="none" '
+                  f'stroke="#ff1744" '
+                  f'stroke-opacity=".035"/>',
+
+
+                  # ==================================================
+                  # MOVING GRAPH LINE
+                  #
+                  # THIS IS THE ONLY GRAPH LINE.
+                  #
+                  # Red.
+                  # Solid.
+                  # No fading.
+                  # No dashed appearance.
+                  # No permanent line.
+                  # ==================================================
+
+                  f'<polyline '
+                  f'points="{polyline}" '
+                  f'fill="none" '
+                  f'stroke="#ff1744" '
+                  f'stroke-width="3" '
+                  f'stroke-linecap="round" '
+                  f'stroke-linejoin="round" '
+                  f'class="clean-line"/>',
+
+
+                  # ==================================================
+                  # COORDINATE POINTS
+                  #
+                  # Always white.
+                  # ==================================================
+
                   circles,
+
+
+                  # ==================================================
+                  # DATE LABELS
+                  # ==================================================
+
                   tick_nodes,
 
-                  '<text x="55" y="304" fill="#ffffff" '
-                  'font-family="monospace" font-size="9" '
-                  'font-weight="bold">DATE / MONTH</text>',
 
-                  f'<text x="55" y="318" fill="#ffffff" '
-                  'font-family="monospace" font-size="9">'
-                  f'WINDOW: {esc(first_date)} → {esc(last_date)}</text>',
+                  # ==================================================
+                  # DATE / MONTH LABEL
+                  # ==================================================
 
-                  '<line x1="38" y1="329" x2="982" y2="329" '
-                  'stroke="#ff1744" stroke-opacity=".10"/>',
+                  '<text '
+                  'x="55" '
+                  'y="304" '
+                  'fill="#ffffff" '
+                  'font-family="monospace" '
+                  'font-size="9" '
+                  'font-weight="bold">'
+                  'DATE / MONTH'
+                  '</text>',
 
-                  f'<text x="38" y="348" fill="#ff6b87" '
-                  'font-family="monospace" font-size="11">'
-                  f'TOTAL / {recent_total} CONTRIBUTIONS</text>',
 
-                  '<circle cx="38" cy="365" r="3.5" fill="#ff1744" '
-                  'filter="url(#glow)" class="pulse"/>',
+                  # ==================================================
+                  # WINDOW
+                  # ==================================================
 
-                  '<text x="50" y="369" fill="#9d7a82" '
-                  'font-family="monospace" font-size="8">'
-                  'GITHUB CONTRIBUTION CALENDAR / AUTO-GENERATED</text>',
+                  f'<text '
+                  f'x="55" '
+                  f'y="318" '
+                  f'fill="#ffffff" '
+                  f'font-family="monospace" '
+                  f'font-size="9">'
+                  f'WINDOW: '
+                  f'{esc(first_date)}'
+                  f' → '
+                  f'{esc(last_date)}'
+                  f'</text>',
 
-                  '<text x="982" y="369" fill="#6d4f57" '
-                  'font-family="monospace" font-size="8" '
-                  'text-anchor="end">FLOW: CLEAN / SMOOTH</text>',
+
+                  # ==================================================
+                  # LOWER SEPARATOR
+                  # ==================================================
+
+                  '<line '
+                  'x1="38" '
+                  'y1="329" '
+                  'x2="982" '
+                  'y2="329" '
+                  'stroke="#ff1744" '
+                  'stroke-opacity=".10"/>',
+
+
+                  # ==================================================
+                  # TOTAL
+                  # ==================================================
+
+                  f'<text '
+                  f'x="38" '
+                  f'y="348" '
+                  f'fill="#ff6b87" '
+                  f'font-family="monospace" '
+                  f'font-size="11">'
+                  f'TOTAL / '
+                  f'{recent_total}'
+                  f' CONTRIBUTIONS'
+                  f'</text>',
+
+
+                  # ==================================================
+                  # FOOTER DOT
+                  # ==================================================
+
+                  '<circle '
+                  'cx="38" '
+                  'cy="365" '
+                  'r="3.5" '
+                  'fill="#ff1744" '
+                  'filter="url(#glow)" '
+                  'class="pulse"/>',
+
+
+                  # ==================================================
+                  # FOOTER
+                  # ==================================================
+
+                  '<text '
+                  'x="50" '
+                  'y="369" '
+                  'fill="#9d7a82" '
+                  'font-family="monospace" '
+                  'font-size="8">'
+                  'GITHUB CONTRIBUTION CALENDAR / AUTO-GENERATED'
+                  '</text>',
+
+
+                  '<text '
+                  'x="982" '
+                  'y="369" '
+                  'fill="#6d4f57" '
+                  'font-family="monospace" '
+                  'font-size="8" '
+                  'text-anchor="end">'
+                  'FLOW: LEFT → RIGHT / CLEAN'
+                  '</text>',
               ]
           )
 
+
+          # ============================================================
+          # WRITE CONTRIBUTION SVG
+          # ============================================================
+
           write_svg(
+
               "contribution-activity.svg",
+
               1020,
+
               395,
+
               "GitHub contribution activity for dims154",
+
               activity_body,
           )
 
-          print("All profile statistics generated successfully.")
+
+          # ============================================================
+          # COMPLETE
+          # ============================================================
+
+          print(
+              "All profile statistics generated successfully."
+          )
+
           PY
 
+      # ============================================================
+      # VALIDATE GENERATED FILES
+      # ============================================================
+
       - name: Validate generated files
+
         run: |
+
           set -euo pipefail
+
 
           for file in \
             github-stats.svg \
             top-languages.svg \
             streak.svg \
             contribution-activity.svg
+
           do
-            test -s "generated-stats/$file"
-            grep -q "<svg" "generated-stats/$file"
-            grep -q "</svg>" "generated-stats/$file"
-            echo "Validated: $file"
+
+            test -s \
+              "generated-stats/$file"
+
+
+            grep -q \
+              "<svg" \
+              "generated-stats/$file"
+
+
+            grep -q \
+              "</svg>" \
+              "generated-stats/$file"
+
+
+            echo \
+              "Validated: $file"
+
           done
 
+
+      # ============================================================
+      # PUBLISH STATISTICS
+      # ============================================================
+
       - name: Publish statistics
+
         run: |
+
           set -euo pipefail
 
-          cp generated-stats/github-stats.svg stats/github-stats.svg
-          cp generated-stats/top-languages.svg stats/top-languages.svg
-          cp generated-stats/streak.svg stats/streak.svg
-          cp generated-stats/contribution-activity.svg stats/contribution-activity.svg
+
+          cp \
+            generated-stats/github-stats.svg \
+            stats/github-stats.svg
+
+
+          cp \
+            generated-stats/top-languages.svg \
+            stats/top-languages.svg
+
+
+          cp \
+            generated-stats/streak.svg \
+            stats/streak.svg
+
+
+          cp \
+            generated-stats/contribution-activity.svg \
+            stats/contribution-activity.svg
+
+
+      # ============================================================
+      # COMMIT CHANGES
+      # ============================================================
 
       - name: Commit changes
+
         run: |
+
           set -euo pipefail
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git config \
+            user.name \
+            "github-actions[bot]"
+
+
+          git config \
+            user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
 
           git add \
             stats/github-stats.svg \
@@ -728,10 +2062,19 @@ jobs:
             stats/streak.svg \
             stats/contribution-activity.svg
 
+
           if git diff --cached --quiet; then
-            echo "No statistics changes detected."
+
+            echo \
+              "No statistics changes detected."
+
             exit 0
+
           fi
 
-          git commit -m "chore: update profile statistics"
+
+          git commit \
+            -m "chore: update profile statistics"
+
+
           git push
