@@ -497,8 +497,10 @@ jobs:
 
           # ============================================================
           # CONTRIBUTION ACTIVITY
-          # One moving red line from the first coordinate to the last.
-          # No static red line. White coordinates and dd/mm labels only.
+          # One clean solid line travels from the first point to the last.
+          # No fade, no dashed overlay, no static graph line.
+          # The moving line stays neon red at constant opacity.
+          # White coordinate points and dd/mm dates remain visible.
           # ============================================================
           chart_x = 55
           chart_y = 105
@@ -567,7 +569,7 @@ jobs:
           ticks = []
 
           if activity:
-              indexes = sorted(
+              tick_indexes = sorted(
                   set(
                       round(
                           i * (len(activity) - 1) / 4
@@ -576,7 +578,7 @@ jobs:
                   )
               )
 
-              for index in indexes:
+              for index in tick_indexes:
                   x = (
                       chart_x
                       + index * chart_w / max(
@@ -601,21 +603,15 @@ jobs:
           activity_body = "".join(
               [
                   '<style>',
-                  '@keyframes pulse{0%,100%{opacity:.30}50%{opacity:1}}',
-                  '@keyframes streamTravel{'
-                  '0%{stroke-dashoffset:1230;opacity:.02}'
-                  '10%{opacity:.08}'
-                  '28%{opacity:.42}'
-                  '48%{opacity:1}'
-                  '70%{opacity:.72}'
-                  '88%{opacity:.22}'
-                  '100%{stroke-dashoffset:-180;opacity:.02}'
+                  '@keyframes cleanTravel{'
+                  '0%{stroke-dashoffset:1230}'
+                  '100%{stroke-dashoffset:0}'
                   '}',
-                  '.pulse{animation:pulse 2.8s ease-in-out infinite}',
-                  '.stream-line{'
+                  '.clean-line{'
                   'stroke-dasharray:150 1080;'
                   'stroke-dashoffset:1230;'
-                  'animation:streamTravel 14s cubic-bezier(.45,0,.25,1) infinite;'
+                  'stroke-opacity:1;'
+                  'animation:cleanTravel 14s linear infinite;'
                   'filter:url(#glow)'
                   '}',
                   '</style>',
@@ -632,7 +628,7 @@ jobs:
                   'LAST 31 DAYS / DATA STREAM</text>',
 
                   '<circle cx="944" cy="36" r="7" fill="#ff1744" '
-                  'filter="url(#glow)" class="pulse"/>',
+                  'filter="url(#glow)"/>',
 
                   '<text x="958" y="40" fill="#9d7a82" '
                   'font-family="monospace" font-size="10">SYNCED</text>',
@@ -642,14 +638,14 @@ jobs:
 
                   f'<rect x="{chart_x}" y="{chart_y}" '
                   f'width="{chart_w}" height="{chart_h}" '
-                  'fill="none" stroke="#ff1744" stroke-opacity=".035"/>',
+                  'fill="none" stroke="#ff1744" stroke-opacity=".025"/>',
 
-                  # Only the moving line. No static red graph line.
+                  # Only one animated solid segment.
+                  # Constant red opacity: no fade at all.
                   f'<polyline points="{polyline}" fill="none" '
                   'stroke="#ff1744" stroke-width="3" '
-                  'stroke-linecap="round" '
-                  'stroke-linejoin="round" '
-                  'class="stream-line"/>',
+                  'stroke-opacity="1" stroke-linecap="round" '
+                  'stroke-linejoin="round" class="clean-line"/>',
 
                   # Coordinate markers only.
                   circles,
@@ -679,7 +675,7 @@ jobs:
 
                   '<text x="982" y="369" fill="#6d4f57" '
                   'font-family="monospace" font-size="8" '
-                  'text-anchor="end">FLOW: LEFT → RIGHT / SMOOTH</text>',
+                  'text-anchor="end">FLOW: CLEAN / SMOOTH</text>',
               ]
           )
 
