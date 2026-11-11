@@ -23,160 +23,62 @@ jobs:
 
     steps:
 
-      # ============================================================
-      # CHECKOUT
-      # ============================================================
-
       - name: Checkout repository
-
         uses: actions/checkout@v5
-
         with:
           fetch-depth: 1
 
-
-      # ============================================================
-      # FETCH GITHUB DATA
-      # ============================================================
-
       - name: Fetch GitHub data
-
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
         run: |
-
           set -euo pipefail
 
           gh api graphql \
             -f query='
               query($login: String!) {
-
                 user(login: $login) {
-
                   login
-
-                  followers {
+                  followers { totalCount }
+                  repositories(ownerAffiliations: OWNER first: 100 privacy: PUBLIC) {
                     totalCount
-                  }
-
-                  repositories(
-                    ownerAffiliations: OWNER
-                    first: 100
-                    privacy: PUBLIC
-                  ) {
-
-                    totalCount
-
                     nodes {
-
                       name
-
-                      languages(
-                        first: 20
-                        orderBy: {
-                          field: SIZE
-                          direction: DESC
-                        }
-                      ) {
-
-                        edges {
-
-                          size
-
-                          node {
-                            name
-                          }
-
-                        }
-
+                      languages(first: 20 orderBy: { field: SIZE direction: DESC }) {
+                        edges { size node { name } }
                       }
-
                     }
-
                   }
-
                   contributionsCollection {
-
                     totalCommitContributions
-
                     contributionCalendar {
-
                       totalContributions
-
                       weeks {
-
-                        contributionDays {
-
-                          date
-
-                          contributionCount
-
-                        }
-
+                        contributionDays { date contributionCount }
                       }
-
                     }
-
                   }
-
                 }
-
               }' \
             -f login="dims154" \
             > github-data.json
 
-
           python3 - <<'PY'
-
           import json
-
-
-          with open(
-              "github-data.json",
-              encoding="utf-8"
-          ) as file:
-
-              data = json.load(file)
-
-
+          with open("github-data.json", encoding="utf-8") as f:
+              data = json.load(f)
           if data.get("errors"):
-
-              for error in data["errors"]:
-
-                  print(error)
-
-
+              for e in data["errors"]:
+                  print(e)
               raise SystemExit(1)
-
-
-          if not data.get(
-              "data",
-              {}
-          ).get("user"):
-
-              raise SystemExit(
-                  "GitHub user 'dims154' was not found."
-              )
-
-
-          print(
-              "GitHub data fetched successfully."
-          )
-
+          if not data.get("data", {}).get("user"):
+              raise SystemExit("GitHub user 'dims154' was not found.")
+          print("GitHub data fetched successfully.")
           PY
 
-
-      # ============================================================
-      # GENERATE PROFILE STATISTICS (simplified restore)
-      # ============================================================
-
       - name: Generate profile statistics
-
         run: |
-
           set -euo pipefail
-
           rm -rf generated-stats
           mkdir -p generated-stats stats
 
@@ -238,7 +140,6 @@ jobs:
           def esc(v):
               return html.escape(str(v))
 
-          # ---- Simple dark theme SVGs ----
           def card(title, lines, w=480, h=180):
               body = f'<rect width="{w}" height="{h}" rx="12" fill="#0d1117" stroke="#30363d"/>'
               body += f'<text x="20" y="32" fill="#ff1744" font-family="monospace" font-size="14" font-weight="bold">{esc(title)}</text>'
@@ -269,35 +170,90 @@ jobs:
               ("Longest streak", f"{longest_streak} days"),
           ], h=140), encoding="utf-8")
 
-          # Contribution activity (last 31 days as dots)
+          # ========== LINE CHART: Contribution activity (last 31 days) ==========
+          n = len(activity)
+          total_act = sum(d["count"] for d in activity)
           max_c = max((d["count"] for d in activity), default=1) or 1
-          w, h = 720, 160
-          body = f'<rect width="{w}" height="{h}" rx="12" fill="#0d1117" stroke="#30363d"/>'
-          body += f'<text x="20" y="28" fill="#ff1744" font-family="monospace" font-size="13" font-weight="bold">CONTRIBUTION ACTIVITY</text>'
-          body += f'<text x="20" y="48" fill="#8b949e" font-family="monospace" font-size="10">LAST 31 DAYS · TOTAL {sum(d["count"] for d in activity)}</text>'
-          gap = 20
-          start_x = 30
-          for i, d in enumerate(activity):
-              x = start_x + i * gap
-              level = d["count"] / max_c
-              if d["count"] == 0:
-                  color = "#21262d"
-              elif level < 0.25:
-                  color = "#0e4429"
-              elif level < 0.5:
-                  color = "#006d32"
-              elif level < 0.75:
-                  color = "#26a641"
-              else:
-                  color = "#39d353"
-              body += f'<circle cx="{x}" cy="100" r="6" fill="{color}"/>'
-          body += f'<text x="20" y="140" fill="#8b949e" font-family="monospace" font-size="10">Auto-updated · {datetime.utcnow().strftime("%Y-%m-%d %H:%M")} UTC</text>'
-          (OUT / "contribution-activity.svg").write_text(
-              f'<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">{body}</svg>\n',
-              encoding="utf-8"
+
+          W, H = 900, 280
+          PAD_L, PAD_R, PAD_T, PAD_B = 48, 24, 56, 44
+          chart_w = W - PAD_L - PAD_R
+          chart_h = H - PAD_T - PAD_B
+
+          def x_at(i):
+              if n <= 1:
+                  return PAD_L + chart_w / 2
+              return PAD_L + (i / (n - 1)) * chart_w
+
+          def y_at(count):
+              # 0 at bottom, max at top
+              return PAD_T + chart_h - (count / max_c) * chart_h
+
+          points = [(x_at(i), y_at(d["count"])) for i, d in enumerate(activity)]
+
+          # Polyline path
+          line_pts = " ".join(f"{x:.1f},{y:.1f}" for x, y in points)
+
+          # Area fill path (close to baseline)
+          area_pts = (
+              f"{points[0][0]:.1f},{PAD_T + chart_h:.1f} "
+              + line_pts
+              + f" {points[-1][0]:.1f},{PAD_T + chart_h:.1f}"
           )
 
-          print("Generated all stats SVGs")
+          body = []
+          body.append(f'<rect width="{W}" height="{H}" rx="14" fill="#0d1117" stroke="#30363d"/>')
+
+          # Title
+          body.append('<text x="24" y="28" fill="#ff1744" font-family="monospace" font-size="14" font-weight="bold">CONTRIBUTION ACTIVITY</text>')
+          body.append(f'<text x="24" y="46" fill="#8b949e" font-family="monospace" font-size="10">LAST 31 DAYS · TOTAL {total_act} CONTRIBUTIONS</text>')
+
+          # Horizontal grid lines
+          for frac in (0.0, 0.25, 0.5, 0.75, 1.0):
+              gy = PAD_T + chart_h * (1 - frac)
+              body.append(f'<line x1="{PAD_L}" y1="{gy:.1f}" x2="{W - PAD_R}" y2="{gy:.1f}" stroke="#21262d" stroke-width="1"/>')
+              val = int(round(max_c * frac))
+              body.append(f'<text x="{PAD_L - 8}" y="{gy + 3:.1f}" fill="#6e7681" font-family="monospace" font-size="9" text-anchor="end">{val}</text>')
+
+          # Area under line
+          body.append(
+              f'<polygon points="{area_pts}" fill="#ff1744" fill-opacity="0.12"/>'
+          )
+
+          # Line
+          body.append(
+              f'<polyline points="{line_pts}" fill="none" stroke="#ff1744" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'
+          )
+
+          # Dots on each day
+          for i, (x, y) in enumerate(points):
+              c = activity[i]["count"]
+              r = 3.5 if c > 0 else 2.5
+              fill = "#ff1744" if c > 0 else "#30363d"
+              body.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r}" fill="{fill}"/>')
+
+          # X-axis labels (every ~5 days)
+          step = max(1, n // 6)
+          for i in range(0, n, step):
+              d = activity[i]["date"]  # YYYY-MM-DD
+              label = d[5:]  # MM-DD
+              x = x_at(i)
+              body.append(f'<text x="{x:.1f}" y="{H - 16}" fill="#6e7681" font-family="monospace" font-size="9" text-anchor="middle">{label}</text>')
+
+          # Footer
+          body.append(
+              f'<text x="24" y="{H - 6}" fill="#484f58" font-family="monospace" font-size="8">Auto-updated · {datetime.utcnow().strftime("%Y-%m-%d %H:%M")} UTC</text>'
+          )
+
+          svg = (
+              '<?xml version="1.0" encoding="UTF-8"?>'
+              f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">'
+              + "".join(body)
+              + "</svg>\n"
+          )
+          (OUT / "contribution-activity.svg").write_text(svg, encoding="utf-8")
+
+          print("Generated all stats SVGs (line chart)")
           PY
 
       - name: Publish statistics
