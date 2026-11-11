@@ -2,8 +2,8 @@ name: Daily Contribution Heartbeat
 
 on:
   schedule:
-    # Setiap hari pukul 02:00 UTC (sekitar 09:00 WIB)
-    - cron: "0 2 * * *"
+    # Setiap hari pukul 01:30 UTC ≈ 08:30 WIB
+    - cron: "30 1 * * *"
   workflow_dispatch:
 
 permissions:
@@ -24,35 +24,69 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Update heartbeat log
+      - name: Generate daily contribution
         run: |
           set -euo pipefail
 
           mkdir -p .github
-          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
-          echo "$TIMESTAMP — daily contribution heartbeat" >> .github/contribution-log.txt
 
-          # Batasi ukuran log (simpan 200 baris terakhir)
-          if [ -f .github/contribution-log.txt ]; then
-            tail -n 200 .github/contribution-log.txt > .github/contribution-log.tmp
-            mv .github/contribution-log.tmp .github/contribution-log.txt
+          DATE_UTC=$(date -u +"%Y-%m-%d")
+          TIME_UTC=$(date -u +"%H:%M:%S")
+          DAY_NAME=$(date -u +"%A")
+
+          # Jumlah commit random 1–3 biar terlihat natural
+          COMMITS=$(( (RANDOM % 3) + 1 ))
+
+          LOG_FILE=".github/contribution-log.md"
+
+          # Buat header log jika belum ada
+          if [ ! -f "$LOG_FILE" ]; then
+            cat > "$LOG_FILE" << 'EOF'
+          # Contribution Heartbeat Log
+
+          Log otomatis untuk menjaga GitHub contribution graph tetap aktif.
+
+          | Date (UTC) | Day | Time | Commits | Note |
+          |------------|-----|------|---------|------|
+          EOF
           fi
 
-      - name: Commit as user
-        run: |
-          set -euo pipefail
+          # Hapus indentasi yang tidak diinginkan dari heredoc di atas jika ada
+          # (dibersihkan di langkah berikutnya)
 
-          # Commit harus memakai email yang terhubung ke akun GitHub
-          # agar masuk ke contribution graph
-          git config user.name "dims154"
-          git config user.email "dims154@users.noreply.github.com"
+          for i in $(seq 1 $COMMITS); do
+            # Tambah baris log
+            echo "| $DATE_UTC | $DAY_NAME | $TIME_UTC | $i/$COMMITS | heartbeat |" >> "$LOG_FILE"
 
-          git add .github/contribution-log.txt
+            # Touch file kecil supaya selalu ada perubahan
+            echo "$DATE_UTC $TIME_UTC commit-$i" >> .github/.heartbeat
 
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-            exit 0
+            git config user.name "dims154"
+            git config user.email "dims154@users.noreply.github.com"
+
+            git add .github/contribution-log.md .github/.heartbeat
+
+            git commit -m "chore: daily heartbeat ($DATE_UTC) [$i/$COMMITS]"
+
+            # Sedikit jeda antar commit (opsional, biar timestamp beda)
+            if [ "$i" -lt "$COMMITS" ]; then
+              sleep 2
+            fi
+          done
+
+          # Batasi ukuran log (simpan ~150 baris terakhir + header)
+          if [ -f "$LOG_FILE" ]; then
+            {
+              head -n 6 "$LOG_FILE"
+              tail -n 150 "$LOG_FILE" | grep -E '^\|' || true
+            } > "$LOG_FILE.tmp"
+            mv "$LOG_FILE.tmp" "$LOG_FILE"
           fi
 
-          git commit -m "chore: daily contribution heartbeat $(date -u +%Y-%m-%d)"
+          # Commit pembersihan log jika ada perubahan
+          git add .github/contribution-log.md
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: trim contribution log"
+          fi
+
           git push
