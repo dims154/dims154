@@ -23,44 +23,300 @@ jobs:
 
     steps:
 
+      # ============================================================
+      # CHECKOUT
+      # ============================================================
+
       - name: Checkout repository
+
         uses: actions/checkout@v5
+
         with:
           fetch-depth: 1
 
+
+      # ============================================================
+      # FETCH GITHUB DATA
+      # ============================================================
+
       - name: Fetch GitHub data
+
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
         run: |
+
           set -euo pipefail
-          gh api graphql -f query='query($login: String!) { user(login: $login) { login followers { totalCount } repositories(ownerAffiliations: OWNER first: 100 privacy: PUBLIC) { totalCount nodes { name languages(first: 20 orderBy: {field: SIZE direction: DESC}) { edges { size node { name } } } } } contributionsCollection { totalCommitContributions contributionCalendar { totalContributions weeks { contributionDays { date contributionCount } } } } } }' -f login="dims154" > github-data.json
-          python3 -c "import json; d=json.load(open('github-data.json')); assert d.get('data',{}).get('user'), 'user not found'; print('ok')"
+
+          gh api graphql \
+            -f query='
+              query($login: String!) {
+
+                user(login: $login) {
+
+                  login
+
+                  followers {
+                    totalCount
+                  }
+
+                  repositories(
+                    ownerAffiliations: OWNER
+                    first: 100
+                    privacy: PUBLIC
+                  ) {
+
+                    totalCount
+
+                    nodes {
+
+                      name
+
+                      languages(
+                        first: 20
+                        orderBy: {
+                          field: SIZE
+                          direction: DESC
+                        }
+                      ) {
+
+                        edges {
+
+                          size
+
+                          node {
+                            name
+                          }
+
+                        }
+
+                      }
+
+                    }
+
+                  }
+
+                  contributionsCollection {
+
+                    totalCommitContributions
+
+                    contributionCalendar {
+
+                      totalContributions
+
+                      weeks {
+
+                        contributionDays {
+
+                          date
+
+                          contributionCount
+
+                        }
+
+                      }
+
+                    }
+
+                  }
+
+                }
+
+              }' \
+            -f login="dims154" \
+            > github-data.json
+
+
+          python3 - <<'PY'
+
+          import json
+
+
+          with open(
+              "github-data.json",
+              encoding="utf-8"
+          ) as file:
+
+              data = json.load(file)
+
+
+          if data.get("errors"):
+
+              for error in data["errors"]:
+
+                  print(error)
+
+
+              raise SystemExit(1)
+
+
+          if not data.get(
+              "data",
+              {}
+          ).get("user"):
+
+              raise SystemExit(
+                  "GitHub user 'dims154' was not found."
+              )
+
+
+          print(
+              "GitHub data fetched successfully."
+          )
+
+          PY
+
+
+      # ============================================================
+      # GENERATE PROFILE STATISTICS (simplified restore)
+      # ============================================================
 
       - name: Generate profile statistics
+
         run: |
+
           set -euo pipefail
+
           rm -rf generated-stats
-          mkdir -p generated-stats
-          # Full generation script is large; for restore we keep structure.
-          # The complete SVG generation will be re-added on next successful run or can be restored from history.
-          echo "Placeholder - full generator restored via history if needed" > generated-stats/github-stats.svg
-          echo "Placeholder" > generated-stats/top-languages.svg
-          echo "Placeholder" > generated-stats/streak.svg
-          echo "Placeholder" > generated-stats/contribution-activity.svg
+          mkdir -p generated-stats stats
+
+          python3 - <<'PY'
+          import json, html
+          from collections import defaultdict
+          from pathlib import Path
+          from datetime import datetime
+
+          OUT = Path("generated-stats")
+
+          with open("github-data.json", encoding="utf-8") as f:
+              payload = json.load(f)
+
+          user = payload["data"]["user"]
+          repos = user["repositories"]
+          collection = user["contributionsCollection"]
+          calendar = collection["contributionCalendar"]
+
+          repositories = int(repos["totalCount"])
+          followers = int(user["followers"]["totalCount"])
+          total_contributions = int(calendar["totalContributions"])
+          commits = int(collection["totalCommitContributions"])
+
+          days = []
+          for week in calendar["weeks"]:
+              for day in week["contributionDays"]:
+                  days.append({"date": day["date"], "count": int(day["contributionCount"])})
+          days.sort(key=lambda x: x["date"])
+          activity = days[-31:]
+
+          current_streak = 0
+          for day in reversed(days):
+              if day["count"] > 0:
+                  current_streak += 1
+              else:
+                  break
+
+          longest_streak = 0
+          running = 0
+          for day in days:
+              if day["count"] > 0:
+                  running += 1
+                  longest_streak = max(longest_streak, running)
+              else:
+                  running = 0
+
+          language_totals = defaultdict(int)
+          for repo in repos["nodes"]:
+              if not repo:
+                  continue
+              for edge in (repo.get("languages") or {}).get("edges", []):
+                  if edge and edge.get("node") and edge["node"].get("name"):
+                      language_totals[edge["node"]["name"]] += int(edge.get("size") or 0)
+
+          top_languages = sorted(language_totals.items(), key=lambda x: x[1], reverse=True)[:6]
+          total_language_size = sum(language_totals.values()) or 1
+
+          def esc(v):
+              return html.escape(str(v))
+
+          # ---- Simple dark theme SVGs ----
+          def card(title, lines, w=480, h=180):
+              body = f'<rect width="{w}" height="{h}" rx="12" fill="#0d1117" stroke="#30363d"/>'
+              body += f'<text x="20" y="32" fill="#ff1744" font-family="monospace" font-size="14" font-weight="bold">{esc(title)}</text>'
+              y = 60
+              for label, value in lines:
+                  body += f'<text x="20" y="{y}" fill="#8b949e" font-family="monospace" font-size="12">{esc(label)}</text>'
+                  body += f'<text x="{w-20}" y="{y}" fill="#c9d1d9" font-family="monospace" font-size="12" text-anchor="end">{esc(value)}</text>'
+                  y += 28
+              return f'<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">{body}</svg>\n'
+
+          (OUT / "github-stats.svg").write_text(card("GITHUB STATS", [
+              ("Repositories", repositories),
+              ("Followers", followers),
+              ("Total contributions", total_contributions),
+              ("Commit contributions", commits),
+          ]), encoding="utf-8")
+
+          lang_lines = []
+          for name, size in top_languages:
+              pct = round(size / total_language_size * 100, 1)
+              lang_lines.append((name, f"{pct}%"))
+          if not lang_lines:
+              lang_lines = [("No data", "-")]
+          (OUT / "top-languages.svg").write_text(card("TOP LANGUAGES", lang_lines), encoding="utf-8")
+
+          (OUT / "streak.svg").write_text(card("STREAK", [
+              ("Current streak", f"{current_streak} days"),
+              ("Longest streak", f"{longest_streak} days"),
+          ], h=140), encoding="utf-8")
+
+          # Contribution activity (last 31 days as dots)
+          max_c = max((d["count"] for d in activity), default=1) or 1
+          w, h = 720, 160
+          body = f'<rect width="{w}" height="{h}" rx="12" fill="#0d1117" stroke="#30363d"/>'
+          body += f'<text x="20" y="28" fill="#ff1744" font-family="monospace" font-size="13" font-weight="bold">CONTRIBUTION ACTIVITY</text>'
+          body += f'<text x="20" y="48" fill="#8b949e" font-family="monospace" font-size="10">LAST 31 DAYS · TOTAL {sum(d["count"] for d in activity)}</text>'
+          gap = 20
+          start_x = 30
+          for i, d in enumerate(activity):
+              x = start_x + i * gap
+              level = d["count"] / max_c
+              if d["count"] == 0:
+                  color = "#21262d"
+              elif level < 0.25:
+                  color = "#0e4429"
+              elif level < 0.5:
+                  color = "#006d32"
+              elif level < 0.75:
+                  color = "#26a641"
+              else:
+                  color = "#39d353"
+              body += f'<circle cx="{x}" cy="100" r="6" fill="{color}"/>'
+          body += f'<text x="20" y="140" fill="#8b949e" font-family="monospace" font-size="10">Auto-updated · {datetime.utcnow().strftime("%Y-%m-%d %H:%M")} UTC</text>'
+          (OUT / "contribution-activity.svg").write_text(
+              f'<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">{body}</svg>\n',
+              encoding="utf-8"
+          )
+
+          print("Generated all stats SVGs")
+          PY
 
       - name: Publish statistics
         run: |
+          set -euo pipefail
           mkdir -p stats
-          cp generated-stats/*.svg stats/ || true
+          cp generated-stats/github-stats.svg stats/
+          cp generated-stats/top-languages.svg stats/
+          cp generated-stats/streak.svg stats/
+          cp generated-stats/contribution-activity.svg stats/
 
       - name: Commit changes
         run: |
           set -euo pipefail
           git config user.name "dims154"
           git config user.email "dims154@users.noreply.github.com"
-          git add stats/ || true
+          git add stats/github-stats.svg stats/top-languages.svg stats/streak.svg stats/contribution-activity.svg
           if git diff --cached --quiet; then
-            echo "No changes"
+            echo "No statistics changes detected."
             exit 0
           fi
           git commit -m "chore: update profile statistics"
