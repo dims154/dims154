@@ -1,0 +1,58 @@
+name: Daily Contribution Heartbeat
+
+on:
+  schedule:
+    # Setiap hari pukul 02:00 UTC (sekitar 09:00 WIB)
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-contribution
+  cancel-in-progress: false
+
+jobs:
+  heartbeat:
+    name: Keep contribution graph active
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Update heartbeat log
+        run: |
+          set -euo pipefail
+
+          mkdir -p .github
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          echo "$TIMESTAMP — daily contribution heartbeat" >> .github/contribution-log.txt
+
+          # Batasi ukuran log (simpan 200 baris terakhir)
+          if [ -f .github/contribution-log.txt ]; then
+            tail -n 200 .github/contribution-log.txt > .github/contribution-log.tmp
+            mv .github/contribution-log.tmp .github/contribution-log.txt
+          fi
+
+      - name: Commit as user
+        run: |
+          set -euo pipefail
+
+          # Commit harus memakai email yang terhubung ke akun GitHub
+          # agar masuk ke contribution graph
+          git config user.name "dims154"
+          git config user.email "dims154@users.noreply.github.com"
+
+          git add .github/contribution-log.txt
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "chore: daily contribution heartbeat $(date -u +%Y-%m-%d)"
+          git push
