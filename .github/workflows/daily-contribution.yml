@@ -41,49 +41,42 @@ jobs:
 
           # Buat header log jika belum ada
           if [ ! -f "$LOG_FILE" ]; then
-            cat > "$LOG_FILE" << 'EOF'
+            cat > "$LOG_FILE" << 'HEADER'
           # Contribution Heartbeat Log
 
           Log otomatis untuk menjaga GitHub contribution graph tetap aktif.
 
           | Date (UTC) | Day | Time | Commits | Note |
           |------------|-----|------|---------|------|
-          EOF
+          HEADER
+            # Bersihkan indentasi dari heredoc
+            sed -i 's/^          //' "$LOG_FILE"
           fi
 
-          # Hapus indentasi yang tidak diinginkan dari heredoc di atas jika ada
-          # (dibersihkan di langkah berikutnya)
-
           for i in $(seq 1 $COMMITS); do
-            # Tambah baris log
             echo "| $DATE_UTC | $DAY_NAME | $TIME_UTC | $i/$COMMITS | heartbeat |" >> "$LOG_FILE"
 
-            # Touch file kecil supaya selalu ada perubahan
+            # File kecil supaya selalu ada perubahan
             echo "$DATE_UTC $TIME_UTC commit-$i" >> .github/.heartbeat
 
             git config user.name "dims154"
             git config user.email "dims154@users.noreply.github.com"
 
             git add .github/contribution-log.md .github/.heartbeat
-
             git commit -m "chore: daily heartbeat ($DATE_UTC) [$i/$COMMITS]"
 
-            # Sedikit jeda antar commit (opsional, biar timestamp beda)
             if [ "$i" -lt "$COMMITS" ]; then
               sleep 2
             fi
           done
 
-          # Batasi ukuran log (simpan ~150 baris terakhir + header)
-          if [ -f "$LOG_FILE" ]; then
-            {
-              head -n 6 "$LOG_FILE"
-              tail -n 150 "$LOG_FILE" | grep -E '^\|' || true
-            } > "$LOG_FILE.tmp"
-            mv "$LOG_FILE.tmp" "$LOG_FILE"
-          fi
+          # Batasi ukuran log (header + ~150 baris terakhir)
+          {
+            head -n 6 "$LOG_FILE"
+            tail -n 150 "$LOG_FILE" | grep -E '^\|' || true
+          } > "$LOG_FILE.tmp"
+          mv "$LOG_FILE.tmp" "$LOG_FILE"
 
-          # Commit pembersihan log jika ada perubahan
           git add .github/contribution-log.md
           if ! git diff --cached --quiet; then
             git commit -m "chore: trim contribution log"
