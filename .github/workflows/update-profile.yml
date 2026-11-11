@@ -1,0 +1,167 @@
+name: Update GitHub Profile Stats
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "0 1 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: profile-stats
+  cancel-in-progress: false
+
+jobs:
+
+  update-profile:
+
+    name: Generate Profile Statistics
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ============================================================
+      # CHECKOUT
+      # ============================================================
+
+      - name: Checkout repository
+
+        uses: actions/checkout@v5
+
+        with:
+          fetch-depth: 1
+
+
+      # ============================================================
+      # FETCH GITHUB DATA
+      # ============================================================
+
+      - name: Fetch GitHub data
+
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        run: |
+
+          set -euo pipefail
+
+          gh api graphql \
+            -f query='
+              query($login: String!) {
+
+                user(login: $login) {
+
+                  login
+
+                  followers {
+                    totalCount
+                  }
+
+                  repositories(
+                    ownerAffiliations: OWNER
+                    first: 100
+                    privacy: PUBLIC
+                  ) {
+
+                    totalCount
+
+                    nodes {
+
+                      name
+
+                      languages(
+                        first: 20
+                        orderBy: {
+                          field: SIZE
+                          direction: DESC
+                        }
+                      ) {
+
+                        edges {
+
+                          size
+
+                          node {
+                            name
+                          }
+
+                        }
+
+                      }
+
+                    }
+
+                  }
+
+                  contributionsCollection {
+
+                    totalCommitContributions
+
+                    contributionCalendar {
+
+                      totalContributions
+
+                      weeks {
+
+                        contributionDays {
+
+                          date
+
+                          contributionCount
+
+                        }
+
+                      }
+
+                    }
+
+                  }
+
+                }
+
+              }' \
+            -f login="dims154" \
+            > github-data.json
+
+
+          python3 - <<'PY'
+
+          import json
+
+
+          with open(
+              "github-data.json",
+              encoding="utf-8"
+          ) as file:
+
+              data = json.load(file)
+
+
+          if data.get("errors"):
+
+              for error in data["errors"]:
+
+                  print(error)
+
+
+              raise SystemExit(1)
+
+
+          if not data.get(
+              "data",
+              {}
+          ).get("user"):
+
+              raise SystemExit(
+                  "GitHub user 'dims154' was not found."
+              )
+
+
+          print(
+              "GitHub data fetched successfully."
+          )
+
+          PY
