@@ -501,4 +501,4 @@ My long-term direction is to become a developer who can understand not only **ho
 
 <sub>Thanks for visiting my profile 🚀</sub>
 
-</div>
+</div>.
